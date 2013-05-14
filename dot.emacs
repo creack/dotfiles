@@ -1,5 +1,6 @@
 ;; Setup "path"
 (setq load-path (cons "~/.emacs.files" load-path))
+(setq load-path (cons "~/.emacs.files/autocomplete" load-path))
 
 ;;; Golang config ;;;
 
