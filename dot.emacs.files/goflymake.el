@@ -9,7 +9,7 @@
 (defun goflymake-create-temp-inplace (file-name prefix)
   (unless (stringp file-name)
     (error "Invalid file-name"))
-  (setq prefix ".flymake")
+  (setq prefix "flymake")
   (let* ((temp-name (concat (file-name-directory file-name)
 			      prefix "_" (file-name-nondirectory file-name))))
     (flymake-log 3 "create-temp-inplace: file=%s temp=%s" file-name temp-name)

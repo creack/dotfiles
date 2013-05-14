@@ -1,10 +1,10 @@
 #!/bin/zsh
 ulimit -c 0
 
-if [ $TERM != "screen" ] && [[ -z "$TMUX" ]]; then
-   export TERM=xterm-256color
-   exec tmux a
-fi
+#if [ $TERM != "screen" ] && [[ -z "$TMUX" ]]; then
+#   export TERM=xterm-256color
+#   exec tmux a
+#fi
 
 export HOSTTYPE=`uname -s`
 export HOST=`uname -n`
@@ -139,3 +139,7 @@ bindkey ± insert-key-tilde
 
 zle -N insert-key-magicquote
 bindkey § insert-key-magicquote
+export GOPATH=~/go
+export GOROOT=~/goroot
+export GOBIN=$GOROOT/bin
+export PATH=$GOBIN:$PATH
