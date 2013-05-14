@@ -48,7 +48,7 @@ Vagrant::Config.run do |config|
   pkg_cmd << "cd /home/vagrant/docker; git checkout master; "
 
   # Make sure we have the correct permissions
-  pkg_cmd << "chown -R vagrant /home/vagrant; "
+  pkg_cmd << "chown -R vagrant:vagrant /home/vagrant; "
 
   pkg_cmd << "); "
 
