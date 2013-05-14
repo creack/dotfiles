@@ -26,10 +26,15 @@
 
 ;;; Flymake config ;;;
 ;; Better highlight colors
-(custom-set-faces
- '(flymake-errline ((((class color)) (:foreground "black" :background "red"))))
- '(flymake-warnline ((((class color)) (:foreground "black" :background "yellow"))))
- '(font-lock-function-name-face ((t (:foreground "lightblue3"))))) ;; better functions name color
+;;(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+;; '(flymake-errline ((((class color) (min-colors 89)) (:foreground "#990A1B" :background "#FF6E64" :weight bold :underline t))))
+;; '(flymake-warnline ((((class color) (min-colors 89)) (:foreground "#7B6000" :background "#DEB542" :weight bold :underline t))))
+;; '(font-lock-function-name-face ((t (:foreground "lightblue3")))))
+ ;; better functions name color
 
 ;; Conveniant bindings
 (global-set-key (kbd "C-c <up>") 'flymake-goto-next-error)
@@ -58,10 +63,10 @@
 
 ;; Hightline current line
 (global-hl-line-mode t)
-(set-face-background hl-line-face "gray13")
+;;(set-face-background hl-line-face "gray13")
 
 ;; Change the region background color
-(set-face-background 'region "#770")
+;;(set-face-background 'region "#770")
 
 
 ;; Show trailing whitespaces
@@ -119,7 +124,5 @@
 ;(put 'erase-buffer 'disabled nil)        ; ... useful things
 ;(when (fboundp file-name-shadow-mode)    ; emacs22+
 ;  (file-name-shadow-mode t))             ; be smart about filenames in mbuf
-
-;(setq custom-theme-load-path (cons "~/.emacs.files/themes" custom-theme-load-path))
-;(require 'color-theme-solarized)
-;(load-theme 'solarized-dark t)
+(setq custom-theme-load-path (cons "~/.emacs.files/themes/emacs-color-theme-solarized" custom-theme-load-path))
+(load-theme 'solarized-dark t)
