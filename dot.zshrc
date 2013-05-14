@@ -1,3 +1,4 @@
+#!/bin/zsh
 ulimit -c 0
 
 if [ $TERM != "screen" ] && [[ -z "$TMUX" ]]; then
@@ -86,6 +87,7 @@ alias lsh="ls -h"
 alias lh="ls -lh"
 alias llh="ls -lh"
 alias lah="ls -lAh"
+alias ls="ls --color=auto"
 alias rm="rm -v"
 alias grep="grep --color=auto -n"
 # Other aliases
