@@ -9,7 +9,7 @@ SRCS	=	dot.emacs	\
 OBJS	=	$(subst dot, ${HOME}/, $(SRCS))
 
 all	: $(OBJS)
-	mkdir ${HOME}/.emacs.files/tmp
+	mkdir -p ${HOME}/.emacs.files/tmp
 
 $(OBJS) :
 	 $(LN) $(subst ${HOME}/, ${PWD}/dot, $@) $@
