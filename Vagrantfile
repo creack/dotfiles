@@ -15,7 +15,7 @@ Vagrant::Config.run do |config|
   pkg_cmd = "[ -f /usr/bin/git ] || ("
 
   # Install basic env, git/mercurial, docker dependencies, emacs, zsh, etc
-  pkg_cmd << "apt-get update -qq; export DEBIAN_FRONTEND=noninteractive; apt-get install -q -y build-essential mercurial git lxc bsdtar htop most emacs24 zsh tmux; "
+  pkg_cmd << "apt-get update -qq; export DEBIAN_FRONTEND=noninteractive; apt-get install -q -y linux-image-extra-3.8.0-19-generic build-essential mercurial git lxc bsdtar htop most emacs24 zsh tmux; "
 
   # Change default shell
   pkg_cmd << "chsh -s /bin/zsh vagrant; "
