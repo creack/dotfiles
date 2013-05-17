@@ -27,6 +27,3 @@
     prompt = false
 [merge]
     tool = ediff
-[user]
-	email = charmes.guillaume@gmail.com
-	name = Guillaume J. Charmes
