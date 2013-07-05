@@ -1,7 +1,7 @@
 [branch]
     # When creating a new branch off a remote branch, always set it up to
     # track the remote branch so that we can pull from there.
-    autoseupmerge = always
+    autosetupmerge = always
     mergeoptions = --no-commit --no-ff
 
 [alias]
