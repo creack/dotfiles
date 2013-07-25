@@ -3,6 +3,7 @@ SRCS	=	dot.emacs	\
 		dot.emacs.files	\
 		dot.zshrc	\
 		dot.zsh_go	\
+		dot.zsh_git_prompt \
 		dot.gitconfig	\
 		dot.tmux.conf
 

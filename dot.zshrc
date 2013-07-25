@@ -78,10 +78,9 @@ PROMPT="
 ($PR_BLUE%n$PR_NO_COLOUR@$PR_GREEN%m$PR_NO_COLOUR):<$PR_CYAN%~$PR_NO_COLOUR>
 [$PR_RED%*$PR_NO_COLOUR]$ "
 
-#RPROMPT="[]"
-}
+RPROMPT="$(git_super_status)"
 
-setprompt
+}
 
 
 # Ls aliases
@@ -120,6 +119,10 @@ autoload -Uz compinit
 compinit
 
 source ~/.zsh_go
+source ~/.zsh_git_prompt
+
+setprompt
+
 
 # End of lines added by compinstall
 # Lines configured by zsh-newuser-install
