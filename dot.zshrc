@@ -119,6 +119,7 @@ autoload -Uz compinit
 compinit
 
 source ~/.zsh_go
+source ~/.zsh_docker
 source ~/.zsh_git_prompt
 
 setprompt
