@@ -14,6 +14,7 @@ export EDITOR="emacsclient -c -t -a=''"
 export WATCH="all"
 export LANG="en_US.UTF-8"
 export TERM="xterm-256color"
+export GPGKEY=CB6E3FF3
 
 function clean {
     foreach tildefile (./${1}/*~(.N) ./${1}/.*~(.N) ./${1}/\#*\#(.N) ./${1}/.\#*\#(.N) ./${1}/a.out(.N))
@@ -22,6 +23,10 @@ function clean {
 
     find ./${1} -name '.\#*' -delete
     find ./${1} -name '*~' -delete
+}
+
+function gogrep() {
+    grep -R $1 `find . -name '*.go'`
 }
 
 setprompt ()
@@ -73,10 +78,9 @@ PROMPT="
 ($PR_BLUE%n$PR_NO_COLOUR@$PR_GREEN%m$PR_NO_COLOUR):<$PR_CYAN%~$PR_NO_COLOUR>
 [$PR_RED%*$PR_NO_COLOUR]$ "
 
-#RPROMPT="[]"
-}
+RPROMPT="$(git_super_status)"
 
-setprompt
+}
 
 
 # Ls aliases
@@ -94,6 +98,7 @@ alias grep="grep --color=auto -n"
 alias ne="emacs"
 alias ciao="kill -9 -1"
 alias emacs="emacsclient -t -c -a=''"
+alias gocov="sudo -E ~/goroot/bin/gocov test -deps -exclude-goroot . | gocov report"
 
 hosts=(`grep ^Host ~/.ssh/config | sed s/Host\ //`)
 hosts=($hosts `awk '{print $1}' ~/.ssh/known_hosts | tr ',' ' ' | tr -d '['  | tr -d ']'`)
@@ -114,6 +119,11 @@ autoload -Uz compinit
 compinit
 
 source ~/.zsh_go
+source ~/.zsh_docker
+source ~/.zsh_git_prompt
+
+setprompt
+
 
 # End of lines added by compinstall
 # Lines configured by zsh-newuser-install
@@ -139,6 +149,10 @@ bindkey ± insert-key-tilde
 
 zle -N insert-key-magicquote
 bindkey § insert-key-magicquote
+export GOPATH=~/go
+export GOROOT=~/goroot
+export GOBIN=$GOROOT/bin
+export PATH=$GOBIN:$PATH
 export GOPATH=~/go
 export GOROOT=~/goroot
 export GOBIN=$GOROOT/bin

@@ -126,3 +126,34 @@
 ;  (file-name-shadow-mode t))             ; be smart about filenames in mbuf
 (setq custom-theme-load-path (cons "~/.emacs.files/themes/emacs-color-theme-solarized" custom-theme-load-path))
 (load-theme 'solarized-dark t)
+
+
+;; GDB helper
+(eval-after-load "gud"
+  '(progn
+     (define-key gud-mode-map (kbd "<up>") 'comint-previous-input)
+     (define-key gud-mode-map (kbd "<down>") 'comint-next-input)))
+
+;;
+
+(add-hook
+ 'go-mode-hook
+ '(lambda ()
+    ;; Imenu & Speedbar
+    (setq imenu-generic-expression
+	    '(("type" "^type *\\([^ \t\n\r\f]*\\)" 1)
+	          ("func" "^func *\\(.*\\) {" 1)))
+    (imenu-add-to-menubar "Index")
+    ;; Outline mode
+    (make-local-variable 'outline-regexp)
+    (setq outline-regexp "//\\.\\|//[^\r\n\f][^\r\n\f]\\|pack\\|func\\|impo\\|cons\\|var.\\|type\\|\t\t*....")
+    (outline-minor-mode 1)
+    (local-set-key "\M-a" 'outline-previous-visible-heading)
+    (local-set-key "\M-e" 'outline-next-visible-heading)
+    ))
+
+;; helper function
+(defun go ()
+  "run current buffer"
+  (interactive)
+  (compile (concat "go run " (buffer-file-name))))
