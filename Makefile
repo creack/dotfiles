@@ -3,7 +3,10 @@ SRCS	=	dot.emacs	\
 		dot.emacs.files	\
 		dot.zshrc	\
 		dot.zsh_go	\
+		dot.zsh_docker	\
+		dot.zsh_git_prompt \
 		dot.gitconfig	\
+		dot.gdbinit	\
 		dot.tmux.conf
 
 OBJS	=	$(subst dot, ${HOME}/, $(SRCS))
