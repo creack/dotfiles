@@ -38,8 +38,8 @@ setprompt ()
     fi
     for color in RED GREEN YELLOW BLUE MAGENTA CYAN WHITE; do
 	eval PR_$color='%{$terminfo[bold]$fg[${(L)color}]%}'
-eval PR_LIGHT_$color='%{$fg[${(L)color}]%}'
-(( count = $count + 1 ))
+	eval PR_LIGHT_$color='%{$fg[${(L)color}]%}'
+	(( count = $count + 1 ))
     done
     PR_NO_COLOUR="%{$terminfo[sgr0]%}"
     typeset -A altchar
@@ -76,9 +76,9 @@ fi
 
 PROMPT="
 ($PR_BLUE%n$PR_NO_COLOUR@$PR_GREEN%m$PR_NO_COLOUR):<$PR_CYAN%~$PR_NO_COLOUR>
-[$PR_RED%*$PR_NO_COLOUR]$ "
+[$PR_RED%D{%r}$PR_NO_COLOUR]%# "
 
-RPROMPT="$(git_super_status)"
+RPROMPT="$(git_super_status)[$PR_RED%D{%a %d %b}$PR_NO_COLOUR]"
 
 }
 
@@ -149,10 +149,6 @@ bindkey ± insert-key-tilde
 
 zle -N insert-key-magicquote
 bindkey § insert-key-magicquote
-export GOPATH=~/go
-export GOROOT=~/goroot
-export GOBIN=$GOROOT/bin
-export PATH=$GOBIN:$PATH
 export GOPATH=~/go
 export GOROOT=~/goroot
 export GOBIN=$GOROOT/bin
