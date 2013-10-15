@@ -15,7 +15,7 @@ Vagrant::Config.run do |config|
   pkg_cmd = "[ -f /usr/bin/git ] || ("
 
   # Install basic env, git/mercurial, docker dependencies, emacs, zsh, etc
-  pkg_cmd << "apt-get update -qq; export DEBIAN_FRONTEND=noninteractive; apt-get install -q -y linux-image-extra-3.8.0-19-generic build-essential mercurial git lxc aufs-tools bsdtar htop most emacs24 zsh tmux ngrep tcpdump unzip ntp; "
+  pkg_cmd << "apt-get update -qq; export DEBIAN_FRONTEND=noninteractive; apt-get install -q -y linux-image-extra-3.8.0-19-generic build-essential mercurial git lxc aufs-tools bsdtar htop most emacs24 zsh tmux ngrep tcpdump unzip iotop; "
 
   # Change default shell
   pkg_cmd << "chsh -s /bin/zsh vagrant; "
@@ -23,6 +23,12 @@ Vagrant::Config.run do |config|
   # Create docker group and add vagrant user to it
   pkg_cmd << "groupadd docker; "
   pkg_cmd << "usermod -a -G docker vagrant; "
+
+  # Use PST timezone
+  pkg_cmd << "echo America/Los_Angeles > /etc/timezone; dpkg-reconfigure --frontend noninteractive tzdata; "
+
+  # Cron to sync time
+  pkg_cmd << "echo '#!/bin/sh' > /etc/cron.daily/ntpdate; echo 'ntpdate time.apple.com' >> /etc/cron.daily/ntpdate; chmod 755 /etc/cron.daily/ntpdate; "
 
   # Retrieve the dotfiles config
   pkg_cmd << "git clone https://github.com/creack/dotfiles /home/vagrant/.dotfiles; cd /home/vagrant/.dotfiles; "
