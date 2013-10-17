@@ -71,8 +71,8 @@ Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
   # Specific virtual box config: use only 1 CPU
   config.vm.provider "virtualbox" do |v|
     v.name = BOX_NAME
-    v.customize ["modifyvm", :id, "--cpus", "4"]
+    v.customize ["modifyvm", :id, "--cpus", "4", "--memory", "4096"]
   end
 
-  config.vm.network  :private_network, ip: "192.168.142.143"
+  config.vm.network  :private_network, ip: "192.168.142.144"
 end
