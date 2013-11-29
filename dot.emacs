@@ -159,6 +159,6 @@
   (compile (concat "go run " (buffer-file-name))))
 
 ;; highlight 80+columns
-(require 'whitespace)
-(setq whitespace-style '(face lines-tail trailing))
-(global-whitespace-mode t)
+;(require 'whitespace)
+;(setq whitespace-style '(face lines-tail trailing))
+;(global-whitespace-mode t)
