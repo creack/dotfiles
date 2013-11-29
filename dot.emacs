@@ -11,6 +11,7 @@
 
 ;; Load externals modes
 (require 'go-autocomplete) ; autocomplete (with nfs daemon)
+(require 'go-eldoc)
 (require 'auto-complete-config)
 (require 'go-flymake)
 (require 'sr-speedbar)
@@ -23,6 +24,7 @@
 
 ;; Auto apply gofmt when saving a file
 (add-hook 'before-save-hook 'gofmt-before-save)
+(add-hook 'go-mode-hook 'go-eldoc-setup)
 
 ;;; Flymake config ;;;
 ;; Better highlight colors
