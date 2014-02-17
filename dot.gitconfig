@@ -34,6 +34,9 @@
     tool = ediff
 
 [user]
-	email = charmes.guillaume@gmail.com
+	email = guillaume@charmes.net
 	name = Guillaume J. Charmes
 	signingkey = CB6E3FF3
+
+[github]
+	user = creack

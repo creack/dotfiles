@@ -2,6 +2,9 @@
 (setq load-path (cons "~/.emacs.files" load-path))
 (setq load-path (cons "~/.emacs.files/autocomplete" load-path))
 
+
+(setq ring-bell-function 'ignore)
+
 ;;; Golang config ;;;
 
 ;; Load extern files (from ~/.emacs.files/
