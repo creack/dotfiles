@@ -21,6 +21,8 @@ function clean {
     rm -vf ${tildefile} | sed 's/\/\//\//'
     end
 
+    find ./${1} -name 'flymake_*.go' -delete
+    find ./${1} -name '.flymake_*.go' -delete
     find ./${1} -name '.\#*' -delete
     find ./${1} -name '*~' -delete
     find ./${1} -name '*.orig' -delete
