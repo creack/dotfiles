@@ -152,7 +152,4 @@ bindkey ± insert-key-tilde
 
 zle -N insert-key-magicquote
 bindkey § insert-key-magicquote
-export GOPATH=~/go
-export GOROOT=~/goroot
-export GOBIN=$GOROOT/bin
-export PATH=$GOBIN:$PATH
+
