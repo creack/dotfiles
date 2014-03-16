@@ -25,7 +25,31 @@ set -x LANG="en_US.UTF-8"
 set -x TERM="xterm-256color"
 set -x GPGKEY=CB6E3FF3
 
-alias ls='ls -lh --color=auto'
+if command ls --version 1>/dev/null 2>/dev/null
+   # This is GNU ls
+   function ls --description "List contents of directory"
+   	    set -l param --color=auto -lh
+	    	if isatty 1
+		   	  set param $param --indicator-style=classify
+			      end
+				command ls $param $argv
+				end
+
+				if not set -q LS_COLORS
+				   if type -f dircolors >/dev/null
+				      	   eval (dircolors -c | sed 's/>&\/dev\/null$//')
+					   	end
+						end
+
+else
+	# BSD, OS X and a few more support colors through the -G switch instead
+	if command ls -G / 1>/dev/null 2>/dev/null
+	   function ls --description "List contents of directory"
+	   	       command ls -Glh $argv
+		       	       end
+			       end
+end
+
 alias emacs="emacsclient -t -c -a=''"
 alias gocov="sudo -E ~/goroot/bin/gocov test -deps -exclude-goroot . | gocov report"
 alias rm="rm -v"
