@@ -15,7 +15,7 @@ if begin; test -z $TMUX ; and test (tput colors) -ne 256; end
 end
 
 test -z $TMUX
-     and tmux attach
+     and exec tmux attach
 
 # Path to your oh-my-fish.
 set fish_path $HOME/.oh-my-fish
@@ -43,6 +43,7 @@ if test "$PLATFORM" = 'Darwin'
     set -x CLICOLOR 1
 #    set -x LSCOLORS gxBxhxDxfxhxhxhxhxcxcx
     set -x LSCOLORS ExFxCxDxBxegedabagacad
+    alias ls="ls -G -l"
     alias updatedb="/usr/libexec/locate.updatedb"
 else
 # Others
@@ -50,6 +51,7 @@ else
         and test -r ~/.ssh/id_rsa
         and eval (keychain --nogui --quiet --eval ~/.ssh/id_rsa)
        or echo "Missing keychain"
+    alias ls="ls --color=auto -l"
     alias emacs="emacsclient -t -c -a=''"
 end
 
