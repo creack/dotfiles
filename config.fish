@@ -9,7 +9,7 @@ set fish_theme zish
 
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-fish/plugins/*)
 # Custom plugins may be added to ~/.oh-my-fish/custom/plugins/
-set fish_plugins autojump bundler git tmux
+set fish_plugins autojump bundler git tmux brew
 
 # Path to your custom folder (default path is $FISH/custom)
 #set fish_custom $HOME/dotfiles/oh-my-fish
