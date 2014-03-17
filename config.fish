@@ -14,21 +14,12 @@ set fish_plugins autojump bundler git tmux
 # Path to your custom folder (default path is $FISH/custom)
 #set fish_custom $HOME/dotfiles/oh-my-fish
 
+# mac bc read the conf file to allow floating point maths
+# and load the standard library
+set -x BC_ENV_ARGS "$HOME/.bcrc -l"
+
 # Load oh-my-fish configuration.
 . $fish_path/oh-my-fish.fish
-
-# Set golang env
-set -x GOROOT /usr/local/go
-set -x GOBIN $GOROOT/bin
-set -x GOPATH $HOME/development/gocode
-
-# Set classic needed envs
-set -x PAGER="most"
-set -x EDITOR="emacsclient -c -t -a=''"
-set -x WATCH="all"
-set -x LANG="en_US.UTF-8"
-set -x GPGKEY=CB6E3FF3
-set -x GCC_COLORS 1
 
 # Darwin Specific
 set PLATFORM (uname)
@@ -41,7 +32,7 @@ else
     test -x /usr/bin/keychain
         and test -r ~/.ssh/id_rsa
         and eval (keychain --nogui --quiet --eval ~/.ssh/id_rsa)
-	or echo "Missing keychain"
+       or echo "Missing keychain"
     alias emacs="emacsclient -t -c -a=''"
 end
 
@@ -58,30 +49,29 @@ if begin; test -z $TMUX ; and test (tput colors) -ne 256; end
     set_color normal
 end
 
-if command ls --version 1>/dev/null 2>/dev/null
-   # This is GNU ls
-   function ls --description "List contents of directory"
-   	    set -l param --color=auto -lh
-	    	if isatty 1
-		   	  set param $param --indicator-style=classify
-			      end
-				command ls $param $argv
-				end
-
-				if not set -q LS_COLORS
-				   if type -f dircolors >/dev/null
-				      	   eval (dircolors -c | sed 's/>&\/dev\/null$//')
-					   	end
-						end
-
-else
-	# BSD, OS X and a few more support colors through the -G switch instead
-	if command ls -G / 1>/dev/null 2>/dev/null
-	   function ls --description "List contents of directory"
-	   	       command ls -Glh $argv
-		       	       end
-			       end
+# totally worth it
+if not test -d ~/.config/fish/generated_completions/
+   echo "One moment..."
+   fish_update_completions
 end
+
+# if you call a different shell, this does not happen automatically. WTF?
+set -x SHELL (which fish)
+
+# available since 4.8.0
+set -x GCC_COLORS 1
+
+set -x GOROOT ~/goroot
+set -x GOBIN $GOROOT/bin
+set -x GOPATH $HOME/go
+set -x PATH $PATH $GOROOT/bin
+
+set -x PAGER "most"
+set -x EDITOR "emacsclient -c -t -a=''"
+set -x WATCH "all"
+set -x LANG "en_US.UTF-8"
+set -x TERM "xterm-256color"
+set -x GPGKEY CB6E3FF3
 
 alias gocov="sudo -E ~/goroot/bin/gocov test -deps -exclude-goroot . | gocov report"
 alias rm="rm -v"
@@ -93,4 +83,19 @@ function clean --description "Remove unwanted temp files"
     find ./$argv[1] -name '.\#*' -delete
     find ./$argv[1] -name '*~' -delete
     find ./$argv[1] -name '*.orig' -delete
+end
+
+function di --description "Build and install docker"
+    set -l OLDPWD (pwd)
+    set -l error 1
+    set -l VERSION (cat VERSION)
+
+    cd ~/docker
+        and set -lx GOPATH (pwd)/vendor:$GOPATH
+   	and sudo -E hack/make.sh binary
+	and cp bundles/$VERSION/binary/docker-$VERSION ~/goroot/bin/docker
+	and set -l error 0
+
+    cd $OLDPWD;
+    return $error
 end
