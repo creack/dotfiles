@@ -14,8 +14,14 @@ if begin; test -z $TMUX ; and test (tput colors) -ne 256; end
     set_color normal
 end
 
+set -x HOSTNAME (hostname)
+set session_name $HOSTNAME
 test -z $TMUX
-     and exec tmux attach
+     and tmux has-session $session_name
+        or tmux new-session -d -s $session_name
+
+test -z $TMUX
+     and exec tmux attach-session -t $session_name
 
 # Path to your oh-my-fish.
 set fish_path $HOME/.oh-my-fish
@@ -76,7 +82,6 @@ set -x PAGER "most"
 set -x EDITOR "emacsclient -c -t -a=''"
 set -x WATCH "all"
 set -x LANG "en_US.UTF-8"
-set -x TERM "xterm-256color"
 set -x GPGKEY CB6E3FF3
 set -x GPG_TTY (tty)
 
