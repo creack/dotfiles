@@ -78,6 +78,7 @@ set -x WATCH "all"
 set -x LANG "en_US.UTF-8"
 set -x TERM "xterm-256color"
 set -x GPGKEY CB6E3FF3
+set -x GPG_TTY (tty)
 
 alias gocov="sudo -E ~/goroot/bin/gocov test -deps -exclude-goroot . | gocov report"
 alias rm="rm -v"
