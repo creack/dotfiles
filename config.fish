@@ -1,6 +1,22 @@
 # Use the config only for interactive mode
 status --is-interactive; or exit 0
 
+# TERM TYPE Inside screen/tmux, it should be screen-256color -- this is
+# configured in .tmux.conf.  Outside, it's up to you to make sure your terminal
+# is configured to provide the correct, 256 color terminal type. For putty,
+# it's putty-256color (which fixes a lot of things) and otherwise it's probably
+# something ilike xterm-256color. Most, if not all off the terminals I use
+# support 256 colors, so it's safe to force it as a last resort, but warn.
+if begin; test -z $TMUX ; and test (tput colors) -ne 256; end
+    set -x TERM xterm-256color
+    set_color red
+    echo "> TERM '$TERM' is not a 256 colour type! Overriding to xterm-256color. Please set. EG: Putty should have putty-256color."
+    set_color normal
+end
+
+test -z $TMUX
+     and tmux attach
+
 # Path to your oh-my-fish.
 set fish_path $HOME/.oh-my-fish
 
@@ -27,6 +43,7 @@ if test "$PLATFORM" = 'Darwin'
     set -x CLICOLOR 1
 #    set -x LSCOLORS gxBxhxDxfxhxhxhxhxcxcx
     set -x LSCOLORS ExFxCxDxBxegedabagacad
+    alias updatedb="/usr/libexec/locate.updatedb"
 else
 # Others
     test -x /usr/bin/keychain
@@ -34,19 +51,6 @@ else
         and eval (keychain --nogui --quiet --eval ~/.ssh/id_rsa)
        or echo "Missing keychain"
     alias emacs="emacsclient -t -c -a=''"
-end
-
-# TERM TYPE Inside screen/tmux, it should be screen-256color -- this is
-# configured in .tmux.conf.  Outside, it's up to you to make sure your terminal
-# is configured to provide the correct, 256 color terminal type. For putty,
-# it's putty-256color (which fixes a lot of things) and otherwise it's probably
-# something ilike xterm-256color. Most, if not all off the terminals I use
-# support 256 colors, so it's safe to force it as a last resort, but warn.
-if begin; test -z $TMUX ; and test (tput colors) -ne 256; end
-    set -x TERM xterm-256color
-    set_color red
-    echo "> TERM '$TERM' is not a 256 colour type! Overriding to xterm-256color. Please set. EG: Putty should have putty-256color."
-    set_color normal
 end
 
 # totally worth it
