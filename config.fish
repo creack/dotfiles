@@ -95,7 +95,7 @@ end
 function di --description "Build and install docker"
     set -l OLDPWD (pwd)
     set -l error 1
-    set -l VERSION (cat VERSION)
+    set -l VERSION (cat ~/docker/VERSION)
 
     cd ~/docker
         and set -lx GOPATH (pwd)/vendor:$GOPATH
@@ -105,4 +105,11 @@ function di --description "Build and install docker"
 
     cd $OLDPWD;
     return $error
+end
+
+function dockerb --description "Start docker daemon with btrfs"
+    if not test -d /var/lib/docker/btrfs
+       sudo mount /dev/sdb /var/lib/docker-btrfs
+    end
+    sudo docker -H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock -d --dns 8.8.8.8 --dns 8.8.4.4 -s btrfs -g /var/lib/docker-btrfs $argv
 end
