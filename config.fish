@@ -113,7 +113,7 @@ function di --description "Build and install docker"
 end
 
 function dockerb --description "Start docker daemon with btrfs"
-    if not test -d /var/lib/docker/btrfs
+    if not test -d /var/lib/docker-btrfs
        sudo mount /dev/sdb /var/lib/docker-btrfs
     end
     sudo docker -H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock -d --dns 8.8.8.8 --dns 8.8.4.4 -s btrfs -g /var/lib/docker-btrfs $argv
