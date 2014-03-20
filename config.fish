@@ -67,6 +67,13 @@ if not test -d ~/.config/fish/generated_completions/
    fish_update_completions
 end
 
+# Make sure we have a resolv conf
+if test "$PLATFORM" = 'Linux'
+   if not test -d /run/resolvconf/resolv.conf
+      sudo bash -c 'echo "nameserver 8.8.8.8" > /run/resolvconf/resolv.conf'
+   end
+end
+
 # if you call a different shell, this does not happen automatically. WTF?
 set -x SHELL (which fish)
 
