@@ -97,12 +97,16 @@ alias rm="rm -v"
 alias grep="grep --color=auto -n"
 
 function clean --description "Remove unwanted temp files"
-    find ./$argv[1] -name 'flymake_*.go' -delete
-    find ./$argv[1] -name '.flymake_*.go' -delete
-    find ./$argv[1] -name '.\#*' -delete
-    find ./$argv[1] -name '*~' -delete
-    find ./$argv[1] -name '*.orig' -delete
-    find ./$argv[1] -name '*.test' -delete
+    set -l directory .
+    if set -q argv[1]
+        set directory $argv[1]
+    end
+    find ./$directory -name 'flymake_*.go' -delete
+    find ./$directory -name '.flymake_*.go' -delete
+    find ./$directory -name '.\#*' -delete
+    find ./$directory -name '*~' -delete
+    find ./$directory -name '*.orig' -delete
+    find ./$directory -name '*.test' -delete
 end
 
 function di --description "Build and install docker"
