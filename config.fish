@@ -102,6 +102,7 @@ function clean --description "Remove unwanted temp files"
     find ./$argv[1] -name '.\#*' -delete
     find ./$argv[1] -name '*~' -delete
     find ./$argv[1] -name '*.orig' -delete
+    find ./$argv[1] -name '*.test' -delete
 end
 
 function di --description "Build and install docker"
@@ -124,4 +125,8 @@ function dockerb --description "Start docker daemon with btrfs"
        sudo mount /dev/sdb /var/lib/docker-btrfs
     end
     sudo docker -H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock -d --dns 8.8.8.8 --dns 8.8.4.4 -s btrfs -g /var/lib/docker-btrfs $argv
+end
+
+function \\
+        eval command $argv
 end
