@@ -115,6 +115,7 @@ function di --description "Build and install docker"
     set -l VERSION (cat ~/docker/VERSION)
 
     cd ~/docker
+        and clean
         and set -lx GOPATH (pwd)/vendor:$GOPATH
    	and sudo -E hack/make.sh binary
 	and cp bundles/$VERSION/binary/docker-$VERSION ~/goroot/bin/docker
@@ -125,7 +126,7 @@ function di --description "Build and install docker"
 end
 
 function dockerb --description "Start docker daemon with btrfs"
-    if test "$PLATFORM" = 'Darwin'
+    if test "$PLATFORM" = 'Linux'
         if not mount | grep docker > /dev/null
        	  echo "------------- Mounting /dev/sdb to /var/lib/docker-btrfs -----------"
        	  sudo mkdir -p /var/lib/docker-btrfs
