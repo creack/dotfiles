@@ -16,9 +16,7 @@ all	: $(OBJS)
 	mkdir -p ${HOME}/.config/powerline
 	touch ${HOME}/.ssh/config
 	touch ${HOME}/.ssh/known_hosts
-	if [ ! -d ~/.oh-my-fish ]; then curl -L https://github.com/bpinto/oh-my-fish/raw/master/tools/install.sh | sh; fi
 	cp config.fish ${HOME}/.config/fish
-	cp fish_prompt.fish ${HOME}/.oh-my-fish/themes/zish
 	cp -R powerline/ ${HOME}/.config/powerline
 
 powerline:

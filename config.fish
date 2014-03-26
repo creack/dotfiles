@@ -23,25 +23,10 @@ test -z $TMUX
 test -z $TMUX
      and exec tmux attach-session -t $session_name
 
-# Path to your oh-my-fish.
-set fish_path $HOME/.oh-my-fish
 
-# Theme
+# FIXME: from oh-my-fish. Is it still relevant?
 set fish_theme zish
-
-# Which plugins would you like to load? (plugins can be found in ~/.oh-my-fish/plugins/*)
-# Custom plugins may be added to ~/.oh-my-fish/custom/plugins/
 set fish_plugins autojump bundler git tmux brew
-
-# Path to your custom folder (default path is $FISH/custom)
-#set fish_custom $HOME/dotfiles/oh-my-fish
-
-# mac bc read the conf file to allow floating point maths
-# and load the standard library
-set -x BC_ENV_ARGS "$HOME/.bcrc -l"
-
-# Load oh-my-fish configuration.
-. $fish_path/oh-my-fish.fish
 
 # Darwin Specific
 set PLATFORM (uname)
@@ -55,8 +40,23 @@ else
 # Others
     test -x /usr/bin/keychain
         and test -r ~/.ssh/id_rsa
-        and eval (keychain --nogui --quiet --eval ~/.ssh/id_rsa)
-       or echo "Missing keychain"
+        and begin
+	        set -l keychain (keychain --nogui --quiet --eval ~/.ssh/id_rsa)
+	    	for i in $keychain
+	    	    if test "$i" != ""
+		       eval (echo $i)
+		    else
+			continue
+		    end
+	    	end
+	    end
+        or echo " ---- Missing keychain ----"
+	and begin
+	    if not ssh-add -l > /dev/null
+	       ssh-add
+	    end
+        end
+
     alias ls="ls --color=auto -l"
     alias emacs="emacsclient -t -c -a=''"
 end
@@ -138,4 +138,58 @@ end
 
 function \\
         eval command $argv
+end
+
+
+## Theme zish from oh-my-zish
+# name: Zish
+
+function _is_git_dirty
+  echo (command git status -s --ignore-submodules=dirty ^/dev/null)
+end
+
+function fish_prompt
+  set_color -o red
+  printf "\n"
+  printf '┌─<'
+  set_color -o blue
+  printf '%s ' (whoami)
+  set_color $fish_color_autosuggestion[1]
+  printf '@ '
+  set_color cyan
+  printf '%s ' (hostname|cut -d . -f 1)
+  set_color $fish_color_autosuggestion[1]
+  printf 'in '
+  set_color -o green
+  printf '%s' (prompt_pwd)
+  set_color -o red
+  printf '>'
+
+  echo
+  set_color -o red
+  printf '└─<'
+  set_color yellow
+  printf '%s' (__fish_git_prompt)
+  if [ (_is_git_dirty) ]
+    set_color blue
+    printf '* '
+  end
+  set_color -o red
+  printf '>──'
+  set_color yellow
+  printf '» '
+  set_color normal
+end
+
+function fish_right_prompt
+  set -l exit_code $status
+  if test $exit_code -ne 0
+    set_color red
+  else
+    set_color green
+  end
+  printf '%d' $exit_code
+  set_color yellow
+  printf ' < %s' (date +%H:%M:%S)
+  set_color normal
 end
