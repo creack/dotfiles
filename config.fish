@@ -1,12 +1,15 @@
 # Use the config only for interactive mode
-status --is-interactive; or exit 0
-
-
 
 set -x HOSTNAME (hostname)
-set -x PLATFORM (uname)
+set -x PLATFORM (uname -s)
+set -x ARCH (uname -i)
+set -x USER (whoami)
 
 function tmuxinit --description "Initialize tmux (check for 256 colors, create or attach to session)"
+	 if not status --is-interactive
+	    return 0
+	 end
+
 	# If we already are in a tmux, skip
 	if test $TMUX
 		echo "--> Already in tmux"
@@ -30,14 +33,13 @@ function tmuxinit --description "Initialize tmux (check for 256 colors, create o
 
 	# Set session name
 	set -l hostname local
-	if set -q $HOSTNAME
+	if test "$HOSTNAME"
 		set hostname $HOSTNAME
 	end
 
 	set -l session_name $hostname
 
 	# If the session does not exist, create it
-	#FIXME: This tmux thing result in the creation of 2 sessions..
 	if not tmux has-session -t $session_name 2> /dev/null
 	        tmux new-session -d -s $session_name
 	end
@@ -127,6 +129,10 @@ function clean --description "Remove unwanted temp files"
 end
 
 function di --description "Build and install docker"
+	if not test "$USER" = 'root'
+	   sudo -sE di
+	   return $status
+	end
 	set -l OLDPWD (pwd)
 	set -l error 1
 	set -l VERSION (cat ~/docker/VERSION)
@@ -134,12 +140,31 @@ function di --description "Build and install docker"
 	cd ~/docker
 	 and clean
 	 and set -lx GOPATH (pwd)/vendor:$GOPATH
-  	 and sudo -E hack/make.sh binary
+  	 and hack/make.sh binary
 	 and cp bundles/$VERSION/binary/docker-$VERSION ~/goroot/bin/docker
 	 and set -l error 0
 
 	cd $OLDPWD
 	return $error
+end
+
+function dockerb --description "Start docker daemon with btrfs"
+	if not test "$USER" = 'root'
+	   sudo -sE dockerb
+	   return $status
+	end
+	if test "$PLATFORM" = 'Linux'
+		if not mount | grep docker > /dev/null
+       			echo "------------- Mounting /dev/sdb to /var/lib/docker-btrfs -----------"
+       			mkdir -p /var/lib/docker-btrfs
+       			mount /dev/sdb /var/lib/docker-btrfs
+		end
+	end
+	docker -H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock -d --dns 8.8.8.8 --dns 8.8.4.4 -s btrfs -g /var/lib/docker-btrfs $argv
+end
+
+function \\
+        eval command $argv
 end
 
 function bootdev --description "Start and connect to dev environment"
@@ -154,21 +179,6 @@ function bootdev --description "Start and connect to dev environment"
 	cd $OLDPWD
 
 	mosh dev
-end
-
-function dockerb --description "Start docker daemon with btrfs"
-	if test "$PLATFORM" = 'Linux'
-		if not mount | grep docker > /dev/null
-       			echo "------------- Mounting /dev/sdb to /var/lib/docker-btrfs -----------"
-       			sudo mkdir -p /var/lib/docker-btrfs
-       			sudo mount /dev/sdb /var/lib/docker-btrfs
-		end
-	end
-	sudo docker -H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock -d --dns 8.8.8.8 --dns 8.8.4.4 -s btrfs -g /var/lib/docker-btrfs $argv
-end
-
-function \\
-        eval command $argv
 end
 
 
@@ -222,6 +232,6 @@ function fish_right_prompt
 	echo $exit_code
 	set_color yellow
 	echo ' < '
-	date +'%T %p'
+	date +'%r'
 	set_color normal
 end

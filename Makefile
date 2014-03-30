@@ -14,9 +14,10 @@ all	: $(OBJS)
 	mkdir -p ${HOME}/.emacs.files/tmp
 	mkdir -p ${HOME}/.ssh
 	mkdir -p ${HOME}/.config/powerline
+	mkdir -p ${HOME}/.config/fish
 	touch ${HOME}/.ssh/config
 	touch ${HOME}/.ssh/known_hosts
-	cp config.fish ${HOME}/.config/fish
+	cp config.fish ${HOME}/.config/fish/
 	cp -R powerline/ ${HOME}/.config/powerline
 
 powerline:
