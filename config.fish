@@ -160,7 +160,23 @@ function dockerb --description "Start docker daemon with btrfs"
        			mount /dev/sdb /var/lib/docker-btrfs
 		end
 	end
-	docker -H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock -d --dns 8.8.8.8 --dns 8.8.4.4 -s btrfs -g /var/lib/docker-btrfs $argv
+	docker -d -H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock --dns 8.8.8.8 --dns 8.8.4.4 -s btrfs -g /var/lib/docker-btrfs $argv
+end
+
+function dockerdm --description "Start docker daemon with devicemapper"
+	if not test "$USER" = 'root'
+	   sudo -sE dockerdm
+	   return $status
+	end
+	docker -d -H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock --dns 8.8.8.8 --dns 8.8.4.4 -s devicemapper -g /var/lib/docker-dm $argv
+end
+
+function dockera --description "Start docker daemon with devicemapper"
+	if not test "$USER" = 'root'
+	   sudo -sE dockera
+	   return $status
+	end
+	docker -d -H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock --dns 8.8.8.8 --dns 8.8.4.4 -s aufs -g /var/lib/docker-aufs $argv
 end
 
 function \\
