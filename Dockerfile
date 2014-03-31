@@ -2,13 +2,16 @@ FROM		ubuntu:13.10
 MAINTAINER	Guillaume J. Charmes <guillaume@charmes.net>
 
 RUN		apt-get update
-RUN		apt-get install -y curl	most unzip tmux		\
-				   fish emacs24			\
-				   git mercurial		\
-				   man-db locales		\
-				   build-essential python-pip	\
-				   pkg-config automake autoconf	\
+RUN		apt-get install -y curl	most unzip tmux				\
+				   emacs24					\
+				   git mercurial				\
+				   man-db locales software-properties-common	\
+				   build-essential python-pip			\
+				   pkg-config automake autoconf			\
 				   iptables tcpdump ngrep iotop
+
+# install latest fish version
+RUN		add-apt-repository ppa:fish-shell/nightly-master && apt-get update && apt-get install -y fish
 
 ### Docker deps  ###
 RUN		apt-get install -y aufs-tools btrfs-tools libsqlite3-dev libapparmor-dev libcap-dev
@@ -53,7 +56,7 @@ RUN		go get -u github.com/axw/gocov/gocov
 # Get docker sources
 RUN		go get -u github.com/dotcloud/docker/docker
 RUN		ln -s $HOME/go/src/github.com/dotcloud/docker $HOME/docker
-
+RUN		cd docker && git remote add creack https://github.com/creack/docker.git && git fetch --all
 RUN		fish -c fish_update_completions
 ADD		.	/root/.dotfiles
 RUN		cd /root/.dotfiles && make
