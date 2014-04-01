@@ -2,7 +2,7 @@
 
 set -x HOSTNAME (hostname)
 set -x PLATFORM (uname -s)
-set -x ARCH (uname -i)
+set -x ARCH (uname -m)
 set -x USER (whoami)
 
 function tmuxinit --description "Initialize tmux (check for 256 colors, create or attach to session)"
