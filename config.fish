@@ -150,7 +150,7 @@ end
 
 function dockerb --description "Start docker daemon with btrfs"
 	if not test "$USER" = 'root'
-	   sudo -sE dockerb
+	   sudo -sE dockerb $argv
 	   return $status
 	end
 	if test "$PLATFORM" = 'Linux'
@@ -165,7 +165,7 @@ end
 
 function dockerdm --description "Start docker daemon with devicemapper"
 	if not test "$USER" = 'root'
-	   sudo -sE dockerdm
+	   sudo -sE dockerdm $argv
 	   return $status
 	end
 	docker -d -H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock --dns 8.8.8.8 --dns 8.8.4.4 -s devicemapper -g /var/lib/docker-dm $argv
@@ -173,7 +173,7 @@ end
 
 function dockera --description "Start docker daemon with devicemapper"
 	if not test "$USER" = 'root'
-	   sudo -sE dockera
+	   sudo -sE dockera $argv
 	   return $status
 	end
 	docker -d -H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock --dns 8.8.8.8 --dns 8.8.4.4 -s aufs -g /var/lib/docker-aufs $argv
