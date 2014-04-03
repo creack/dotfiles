@@ -50,6 +50,12 @@ end
 # Initialize tmux (check for 256 colors, create or attach to session)
 tmuxinit
 
+if test "$PLATFORM" = 'Linux'
+	 if not status --is-interactive
+	    sudo ntpdate time.apple.com > /dev/null ^ /dev/null &
+	 end
+end
+
 if test "$PLATFORM" = 'Darwin'
 	set -x CLICOLOR 1
 	#   set -x LSCOLORS gxBxhxDxfxhxhxhxhxcxcx
