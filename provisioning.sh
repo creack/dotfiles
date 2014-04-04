@@ -32,7 +32,7 @@ apt-get install -y \
     curl most unzip tmux emacs24-nox git mercurial man-db locales software-properties-common \
     build-essential python-pip pkg-config automake autoconf \
     iptables tcpdump ngrep iotop watch \
-    gnupg2 gnupg-agent keychain \
+    gnupg2 gnupg-agent keychain pinentry-curses \
     protobuf-compiler libprotobuf-dev zlib1g-dev openssl libssl-dev libncurses5-dev
 
 # install latest fish version
@@ -51,8 +51,8 @@ cd /usr/local/lvm2 && ./configure --enable-static_link && make device-mapper && 
 
 # Make sure the locale is C.UTF-8
 dpkg-reconfigure locales
-#locale-gen C.UTF-8
-/usr/sbin/update-locale LANG=C.UTF-8
+locale-gen en_US.UTF-8
+/usr/sbin/update-locale LANG=en_US.UTF-8
 
 # Set the timezone
 echo America/Los_Angeles > /etc/timezone && dpkg-reconfigure --frontend noninteractive tzdata;
@@ -110,3 +110,7 @@ echo '#includedir /etc/sudoers.d' > /etc/sudoers
 # Setup my public ssh key
 mkdir -p $target_home/.ssh
 echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCTRpitHLsmeDCT7N7ZJWh+EjDAFdsy9i7a7A32hPBmMFUBgzkj/Dtaivx75RUQGkGKoR0DH1NGYWY0G5sTI1QLCw4rrcfOfFUvDtfkPF2qibecLj5x3DRtwikqjJNNj/3DsWBDZzJZ0nQDixn73G55Dy2QEGTT4ok3MgbWQaWjbfYz2kNsP6F20JkKbz+Z3V8QLXdTtFg0Cnh7Zme3N6RA38lWX2/njT+B2X7Gbhb7LQlzNWf4RSAvokYcpMs/F50dW1E+DFAAgdsjjEMN/uVaI9eVlQytS6R9oUqo867WtLOzq77KIFrRcJRm0U4M+Z4OHQBikkQJ8+TNb/gHeiDf guillaume.charmes' >> $target_home/.ssh/authorized_keys
+
+# Enable gpg-agent
+echo use-agent >> ~/.gnupg/gpg.conf
+echo 'pinentry-program /usr/bin/pinentry-curses' >> ~/.gnupg/gpg-agent.conf
