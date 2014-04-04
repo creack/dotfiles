@@ -1,14 +1,16 @@
 # Use the config only for interactive mode
+if not status --is-interactive
+	exit 0
+end
 
 set -x HOSTNAME (hostname)
 set -x PLATFORM (uname -s)
 set -x ARCH (uname -m)
-set -x USER (whoami)
 
 function tmuxinit --description "Initialize tmux (check for 256 colors, create or attach to session)"
-	 if not status --is-interactive
-	    return 0
-	 end
+	if not status --is-interactive
+		return 0
+	end
 
 	# If we already are in a tmux, skip
 	if test $TMUX
@@ -63,27 +65,28 @@ if test "$PLATFORM" = 'Darwin'
 	alias ls="ls -G -lh"
 	alias updatedb="/usr/libexec/locate.updatedb"
 else
-	test -x /usr/bin/keychain
-         and test -r ~/.ssh/id_rsa
-         and begin
+	if test -x /usr/bin/keychain; and test -r ~/.ssh/id_rsa
 	        set -l keychain (keychain --nogui --quiet --eval ~/.ssh/id_rsa)
 	    	for i in $keychain
-	    	    if test "$i" != ""
-		       eval (echo $i)
-		    else
-			continue
-		    end
-	    	end
-	    end
-        or echo " ---- Missing keychain ----"
-	and begin
-	    if not ssh-add -l > /dev/null
-	       ssh-add
-	    end
-        end
+	    		if test "$i" != ""
+				eval (echo $i)
+			else
+				continue
+			end
+		end
+		and begin
+			echo "ssh-add"
+			if not ssh-add -l > /dev/null
+				ssh-add -t 76000
+			end
+			echo "after ssh-add"
+		end
+	else
+		echo " ---- Missing keychain ----"
+	end
 
-    alias ls="ls --color=auto -lh"
-    alias emacs="emacsclient -t -c -a=''"
+	alias ls="ls --color=auto -lh"
+	alias emacs="emacsclient -t -c -a=''"
 end
 
 # totally worth it
@@ -93,11 +96,11 @@ if not test -d ~/.config/fish/generated_completions/
 end
 
 # Make sure we have a resolv conf
-if test "$PLATFORM" = 'Linux'
-	if not test -d /run/resolvconf/resolv.conf
-		sudo bash -c 'echo "nameserver 8.8.8.8" > /run/resolvconf/resolv.conf'
-	end
-end
+#if test "$PLATFORM" = 'Linux'
+#	if not test -d /run/resolvconf/resolv.conf
+#		sudo bash -c 'echo "nameserver 8.8.8.8" > /run/resolvconf/resolv.conf'
+#	end
+#end
 
 # if you call a different shell, this does not happen automatically. WTF?
 set -x SHELL (which fish)
@@ -115,7 +118,7 @@ set -x EDITOR "emacsclient -c -t -a=''"
 set -x WATCH "all"
 set -x LANG "en_US.UTF-8"
 set -x GPGKEY CB6E3FF3
-set -x GPG_TTY (tty)
+#set -x GPG_TTY (tty)
 
 alias gocov="sudo -E ~/goroot/bin/gocov test -deps -exclude-goroot . | gocov report"
 alias rm="rm -v"

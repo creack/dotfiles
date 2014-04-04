@@ -18,7 +18,7 @@
 (require 'auto-complete-config)
 (require 'go-flymake)
 (require 'sr-speedbar)
-
+(require 'fish-mode)
 ;; Convenient binding for go
 (global-set-key (kbd "C-c C-c") 'comment-region)
 (global-set-key (kbd "C-c C-u") 'uncomment-region)
