@@ -29,6 +29,9 @@ if test "$PLATFORM" = 'Linux'
 
 	## Start and load gpg/ssh agent
 	if test -x /usr/bin/keychain; and test -r ~/.ssh/id_rsa
+		set -x GPG_AGENT_INFO
+		set -x SSH_AUTH_SOCK
+		set -x SSH_AGENT_PID
 	        set -l keychain (keychain --nogui --quiet --eval ~/.ssh/id_rsa)
 	    	for i in $keychain
 	    		if test "$i" != ""
@@ -36,6 +39,7 @@ if test "$PLATFORM" = 'Linux'
 			else
 				continue
 			end
+
 		end
 		and begin
 			if not ssh-add -l > /dev/null
