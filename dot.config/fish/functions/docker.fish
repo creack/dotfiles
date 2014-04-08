@@ -2,19 +2,22 @@
 
 function di --description "Build and install docker"
 	if not test "$USER" = 'root'
-	   sudo -sE di
-	   return $status
+		sudo -sE di $argv
+		return $status
 	end
 	set -l OLDPWD (pwd)
 	set -l error 1
 	set -l VERSION (cat ~/docker/VERSION)
 
+	set -lx DOCKER_BUILDTAGS "apparmor selinux"
+	set -lx GOPATH (pwd)/vendor:$GOPATH
+
+	clean
 	cd ~/docker
-	 and clean
-	 and set -lx GOPATH (pwd)/vendor:$GOPATH
-  	 and hack/make.sh binary
-	 and cp bundles/$VERSION/binary/docker-$VERSION ~/goroot/bin/docker
-	 and set -l error 0
+
+  	if hack/make.sh binary; and cp bundles/$VERSION/binary/docker-$VERSION ~/goroot/bin/docker
+		set error 0
+	end
 
 	cd $OLDPWD
 	return $error
