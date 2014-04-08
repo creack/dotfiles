@@ -74,13 +74,13 @@ cd goroot/src && hg up release && ./all.bash
 export GOBIN=$target_home/goroot/bin
 export GOPATH=$target_home/go
 export PATH=$GOBIN:$PATH
-
 # Install golang common utils
 go get -u code.google.com/p/rog-go/exp/cmd/godef
 go get -u code.google.com/p/go.tools/cmd/cover
 go get -u github.com/nsf/gocode
 go get -u github.com/dougm/goflymake
 go get -u github.com/axw/gocov/gocov
+go get -u code.google.com/p/go.tools/cmd/vet
 
 # Get docker sources
 go get -u github.com/dotcloud/docker/docker
@@ -100,17 +100,31 @@ fish -c fish_update_completions
 cd $target_home/.dotfiles
 chown -R $1:$1 $target_home
 su $1 -c make
-}
+
 
 # Setup the sudoer file
 echo 'root    ALL=(ALL:ALL) ALL' > /etc/sudoers.d/root
 echo "$1 ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$1
 echo '#includedir /etc/sudoers.d' > /etc/sudoers
 
-# Setup my public ssh key
-mkdir -p $target_home/.ssh
-echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCTRpitHLsmeDCT7N7ZJWh+EjDAFdsy9i7a7A32hPBmMFUBgzkj/Dtaivx75RUQGkGKoR0DH1NGYWY0G5sTI1QLCw4rrcfOfFUvDtfkPF2qibecLj5x3DRtwikqjJNNj/3DsWBDZzJZ0nQDixn73G55Dy2QEGTT4ok3MgbWQaWjbfYz2kNsP6F20JkKbz+Z3V8QLXdTtFg0Cnh7Zme3N6RA38lWX2/njT+B2X7Gbhb7LQlzNWf4RSAvokYcpMs/F50dW1E+DFAAgdsjjEMN/uVaI9eVlQytS6R9oUqo867WtLOzq77KIFrRcJRm0U4M+Z4OHQBikkQJ8+TNb/gHeiDf guillaume.charmes' >> $target_home/.ssh/authorized_keys
-
 # Enable gpg-agent
 echo use-agent >> ~/.gnupg/gpg.conf
 echo 'pinentry-program /usr/bin/pinentry-curses' >> ~/.gnupg/gpg-agent.conf
+
+# Add user to trusted mercurial users
+echo "[trusted]
+users = root $1" > /etc/mercurial/hgrc.d/trust.rc
+chmod 644 /etc/mercurial/hgrc.d/trust.rc
+
+# Setup my public ssh key
+mkdir -p $target_home/.ssh
+echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCTRpitHLsmeDCT7N7ZJWh+EjDAFdsy9i7a7A32hPBmMFUBgzkj/Dtaivx75RUQGkGKoR0DH1NGYWY0G5sTI1QLCw4rrcfOfFUvDtfkPF2qibecLj5x3DRtwikqjJNNj/3DsWBDZzJZ0nQDixn73G55Dy2QEGTT4ok3MgbWQaWjbfYz2kNsP6F20JkKbz+Z3V8QLXdTtFg0Cnh7Zme3N6RA38lWX2/njT+B2X7Gbhb7LQlzNWf4RSAvokYcpMs/F50dW1E+DFAAgdsjjEMN/uVaI9eVlQytS6R9oUqo867WtLOzq77KIFrRcJRm0U4M+Z4OHQBikkQJ8+TNb/gHeiDf guillaume.charmes' >> $target_home/.ssh/authorized_keys
+}
+
+#install golang hg extenstion
+echo "
+[extensions]
+codereview = $target_home/goroot/lib/codereview/codereview.py
+
+[ui]
+username = Guillaume J. Charmes <guillaume@charmes.net>" >> $target_home/goroot/.hg/hgrc

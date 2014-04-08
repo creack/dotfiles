@@ -19,5 +19,5 @@ function setup_env --description "Setup global environment"
 	set -gx WATCH "all"
 	set -gx LANG "en_US.UTF-8"
 	set -gx GPGKEY CB6E3FF3
-	set -x GPG_TTY (tty)
+	set -gx GPG_TTY (tty)
 end
