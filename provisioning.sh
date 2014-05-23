@@ -29,9 +29,9 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get dist-upgrade -y && apt-get autoremove -y
 
 apt-get install -y \
-    curl most unzip tmux emacs24-nox git mercurial man-db locales software-properties-common \
+    curl most unzip tmux emacs24-nox git mercurial man-db locales htop software-properties-common \
     build-essential python-pip pkg-config automake autoconf \
-    iptables tcpdump ngrep iotop watch \
+    iptables tcpdump ngrep iotop watch htop \
     gnupg2 gnupg-agent keychain pinentry-curses \
     protobuf-compiler libprotobuf-dev zlib1g-dev openssl libssl-dev libncurses5-dev
 
@@ -75,12 +75,14 @@ export GOBIN=$target_home/goroot/bin
 export GOPATH=$target_home/go
 export PATH=$GOBIN:$PATH
 # Install golang common utils
-go get -u code.google.com/p/rog-go/exp/cmd/godef
 go get -u code.google.com/p/go.tools/cmd/cover
-go get -u github.com/nsf/gocode
-go get -u github.com/dougm/goflymake
-go get -u github.com/axw/gocov/gocov
+go get -u code.google.com/p/go.tools/cmd/godoc
+go get -u code.google.com/p/go.tools/cmd/goimports
 go get -u code.google.com/p/go.tools/cmd/vet
+go get -u code.google.com/p/rog-go/exp/cmd/godef
+go get -u github.com/axw/gocov/gocov
+go get -u github.com/dougm/goflymake
+go get -u github.com/nsf/gocode
 
 # Get docker sources
 go get -u github.com/dotcloud/docker/docker
