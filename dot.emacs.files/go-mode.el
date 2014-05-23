@@ -161,7 +161,7 @@ customize this variable to point to the wrapper script."
   :type 'string
   :group 'go)
 
-(defcustom gofmt-command "gofmt"
+(defcustom gofmt-command "goimports"
   "The 'gofmt' command.  Some users may replace this with 'goimports'
 from https://github.com/bradfitz/goimports."
   :type 'string

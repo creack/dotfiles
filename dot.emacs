@@ -28,7 +28,6 @@
 ;; Auto apply gofmt when saving a file
 (add-hook 'before-save-hook 'gofmt-before-save)
 (add-hook 'go-mode-hook 'go-eldoc-setup)
-
 ;;; Flymake config ;;;
 ;; Better highlight colors
 ;;(custom-set-faces
@@ -88,7 +87,21 @@
 (fset 'yes-or-no-p 'y-or-n-p)            ; yes/no shortcut
 (when (require 'ido nil t) (ido-mode t)) ; (much) better file/buffer browsing
 (global-font-lock-mode t)		 ; default enable syntax coloration
-(xterm-mouse-mode t)			 ; default enable mouse
+
+
+; enable mouse
+(require 'mouse)
+(xterm-mouse-mode t)
+(defun track-mouse (e))
+(setq mouse-sel-mode t)
+(global-set-key [mouse-4] (lambda ()
+			    (interactive)
+			    (scroll-down 1)))
+(global-set-key [mouse-5] (lambda ()
+			    (interactive)
+			    (scroll-up 1)))
+
+
 (setq initial-scratch-message "")	 ; remove the default text within the scratch buffer
 
 ;; Display current line/column
