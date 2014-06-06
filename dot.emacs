@@ -91,7 +91,10 @@
 
 ; enable mouse
 (require 'mouse)
-(xterm-mouse-mode t)
+;;(xterm-mouse-mode t)
+;; Do the xterm mode in a lambda to allow emacsclient to load.
+(add-hook 'after-make-frame-functions '
+	  (lambda (frame) (unless window-system (xterm-mouse-mode))))
 (defun track-mouse (e))
 (setq mouse-sel-mode t)
 (global-set-key [mouse-4] (lambda ()
