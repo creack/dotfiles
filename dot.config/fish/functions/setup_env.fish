@@ -12,7 +12,7 @@ function setup_env --description "Setup global environment"
 	set -gx ARCH (uname -m)
 	set -gx GOBIN $HOME/goroot/bin
 	set -gx GOPATH $HOME/go
-	set -gx PATH $GOBIN $PATH
+	set -gx PATH /usr/local/bin /usr/local/sbin $GOBIN $PATH
 
 	set -gx PAGER "most"
 	set -gx EDITOR "emacsclient -c -t -a=''"
