@@ -59,3 +59,9 @@ end
 
 ## Setup global environment
 setup_env
+
+. ~/go/src/github.com/dotcloud/docker/contrib/completion/fish/docker.fish
+
+set -gx PATH /usr/local/bin /usr/local/sbin $GOBIN $PATH
+#set -gx DOCKER_HOST 192.168.142.2:4243
+set -gx DOCKER_HOST 172.17.8.101:4243

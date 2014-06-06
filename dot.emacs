@@ -36,7 +36,7 @@
         "Save any unsaved buffers and compile"
         (interactive)
         (save-some-buffers t)
-        (compile "go build -o /tmp/a.out; /tmp/a.out"))
+        (compile "clean; go build -o /tmp/a.out; and /tmp/a.out"))
 ;; End of go helpers
 
 ;; Auto apply gofmt when saving a file

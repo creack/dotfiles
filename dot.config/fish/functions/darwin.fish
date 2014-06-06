@@ -5,11 +5,13 @@ if not test "$PLATFORM" = 'Darwin'
 end
 
 function setup_darwin_aliases --description "Setup aliases specific for darwin"
-	set -x CLICOLOR 1
+	set -gx CLICOLOR 1
+	set -gx GDBCOLOR 1
 	#   set -x LSCOLORS gxBxhxDxfxhxhxhxhxcxcx
-	set -x LSCOLORS ExFxCxDxBxegedabagacad
+	set -gx LSCOLORS ExFxCxDxBxegedabagacad
 	alias ls="ls -G -lh"
 	alias updatedb="/usr/libexec/locate.updatedb"
+	alias emacs="emacsclient -t -c -a=''"
 end
 
 function bootdev --description "Start and connect to dev environment"
