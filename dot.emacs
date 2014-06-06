@@ -4,7 +4,8 @@
 
 
 (setq ring-bell-function 'ignore)
-
+(setq compilation-always-kill t)
+`
 ;;; Golang config ;;;
 
 ;; Load extern files (from ~/.emacs.files/
@@ -22,8 +23,21 @@
 ;; Convenient binding for go
 (global-set-key (kbd "C-c C-c") 'comment-region)
 (global-set-key (kbd "C-c C-u") 'uncomment-region)
-(global-set-key (kbd "C-c C-r") 'go-remove-unused-imports)
 (global-set-key (kbd "C-c C-i") 'go-goto-imports)
+
+
+;; Go helper for compilation
+(global-set-key (kbd "C-c C-r") 'recompile)
+(global-set-key (kbd "C-c C-k") 'kill-compilation)
+(global-set-key (kbd "C-c C-f") 'save-and-compile-program)
+
+;;; save all files then run M-x compile
+(defun save-and-compile-program()
+        "Save any unsaved buffers and compile"
+        (interactive)
+        (save-some-buffers t)
+        (compile "go build -o /tmp/a.out; /tmp/a.out"))
+;; End of go helpers
 
 ;; Auto apply gofmt when saving a file
 (add-hook 'before-save-hook 'gofmt-before-save)
