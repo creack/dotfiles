@@ -1,11 +1,11 @@
-;;; go-eldoc.el --- eldoc for go-mode
+;;; go-eldoc.el --- eldoc for go-mode -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2013 by Syohei YOSHIDA
+;; Copyright (C) 2014 by Syohei YOSHIDA
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
 ;; URL: https://github.com/syohex/emacs-go-eldoc
-;; Version: 0.10
-;; Package-Requires: ((go-mode "0"))
+;; Version: 0.17
+;; Package-Requires: ((go-mode "0") (cl-lib "0.5"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -30,8 +30,7 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
+(require 'cl-lib)
 
 (require 'eldoc)
 (require 'go-mode)
@@ -63,15 +62,15 @@
       (while (search-forward "," curpoint t)
         (when (and (not (go-in-string-or-comment-p))
                    (= start-level (1- (go-paren-level))))
-          (incf count)))
+          (cl-incf count)))
       count)))
 
 (defun go-eldoc--count-string (str from to)
   (save-excursion
     (goto-char from)
-    (loop while (search-forward str to t)
-          unless (go-in-string-or-comment-p)
-          counting 1)))
+    (cl-loop while (search-forward str to t)
+             unless (go-in-string-or-comment-p)
+             counting 1)))
 
 (defun go-eldoc--inside-funcall-p (from to)
   (save-excursion
@@ -88,12 +87,25 @@
         (goto-char from)
         (re-search-forward "\\<func\\s-*(" func-start t)))))
 
+(defun go-eldoc--make-type ()
+  (save-excursion
+    (let ((cur (point)))
+      (when (re-search-forward "[,)]" (line-end-position) t)
+        (backward-char 1)
+        (skip-chars-backward "[:space:]")
+        (buffer-substring-no-properties (1+ cur) (point))))))
+
+(defun go-eldoc--make-signature (type index)
+  (when (or (not type) (string= type ""))
+    (setq type "Type"))
+  (if (= index 3)
+      (format "make,,func(%s, size IntegerType, capacity IntegerType) %s" type type)
+    (format "make,,func(%s, size IntegerType) %s" type type)))
+
 (defun go-eldoc--search-builtin-functions (symbol curpoint)
   (if (string= symbol "make")
       (let ((index (go-eldoc--current-arg-index curpoint)))
-        (if (= index 3)
-            "make,,func(Type, size IntegerType, capacity IntegerType) Type"
-          "make,,func(Type, size IntegerType) Type"))
+        (go-eldoc--make-signature (go-eldoc--make-type) index))
     (assoc-default symbol go-eldoc--builtins)))
 
 (defun go-eldoc--match-candidates (candidates cur-symbol curpoint)
@@ -111,19 +123,19 @@
        (not (string= "func" (thing-at-point 'word)))))
 
 (defun go-eldoc--goto-beginning-of-funcall ()
-  (loop with old-point = (point)
-        with retval = nil
-        initially (go-goto-opening-parenthesis)
-        while (and (not (bobp))
-                   (not (= old-point (point)))
-                   (progn
-                     (setq retval (go-eldoc--begining-of-funcall-p))
-                     (not retval)))
-        do
-        (progn
-          (setq old-point (point))
-          (go-goto-opening-parenthesis))
-        finally return retval))
+  (cl-loop with old-point = (point)
+           with retval = nil
+           initially (go-goto-opening-parenthesis)
+           while (and (not (bobp))
+                      (not (= old-point (point)))
+                      (progn
+                        (setq retval (go-eldoc--begining-of-funcall-p))
+                        (not retval)))
+           do
+           (progn
+             (setq old-point (point))
+             (go-goto-opening-parenthesis))
+           finally return retval))
 
 ;; Same as 'ac-go-invoke-autocomplete'
 (defun go-eldoc--invoke-autocomplete ()
@@ -142,11 +154,45 @@
 	(with-current-buffer temp-buffer (buffer-string))
       (kill-buffer temp-buffer))))
 
+(defsubst go-eldoc--assignment-index (lhs)
+  (1+ (cl-loop for c across lhs
+               when (= c ?,)
+               sum 1)))
+
+(defun go-eldoc--goto-statement-end ()
+  (if (re-search-forward ")\\s-*;" (line-end-position) t)
+      (goto-char (match-beginning 0))
+    (let ((curindent (current-indentation)))
+      (forward-line 1)
+      (cl-loop while (< curindent (current-indentation))
+               do (forward-line 1))
+      (forward-line -1)
+      (goto-char (line-end-position))
+      (when (looking-back ")\\s-*")
+        (goto-char (match-beginning 0))))))
+
+(defun go-eldoc--lhs-p (curpoint)
+  (save-excursion
+    (let ((limit (line-end-position)))
+      (when (search-forward ";" limit t)
+        (setq limit (1- (point))))
+      (goto-char curpoint)
+      (re-search-forward ":?=" limit t))))
+
+(defun go-eldoc--assignment-p (curpoint)
+  (when (and (not (looking-at-p "\\s-+")) (go-eldoc--lhs-p curpoint))
+    (let ((lhs (buffer-substring-no-properties (line-beginning-position) curpoint)))
+      (when (go-eldoc--goto-statement-end)
+        (- (go-eldoc--assignment-index lhs))))))
+
 (defun go-eldoc--get-funcinfo ()
-  (let ((curpoint (point)))
-    (save-excursion
-      (when (go-in-string-or-comment-p)
-        (go-goto-beginning-of-string-or-comment))
+  (save-excursion
+    (let ((curpoint (point))
+          assignment-index)
+      (if (go-in-string-or-comment-p)
+          (go-goto-beginning-of-string-or-comment)
+        (when (setq assignment-index (go-eldoc--assignment-p curpoint))
+          (setq curpoint (point))))
       (when (go-eldoc--goto-beginning-of-funcall)
         (when (and (go-eldoc--inside-funcall-p (1- (point)) curpoint)
                    (not (go-eldoc--inside-anon-function-p (1- (point)) curpoint)))
@@ -155,16 +201,18 @@
                           curpoint)))
             (when (and matched
                        (string-match "\\`\\(.+?\\),,\\(.+\\)$" matched))
-              (list :name (match-string-no-properties 1 matched)
-                    :signature (match-string-no-properties 2 matched)
-                    :index (go-eldoc--current-arg-index curpoint)))))))))
+              (let ((funcname (match-string-no-properties 1 matched))
+                    (signature (match-string-no-properties 2 matched)))
+                (list :name funcname :signature signature
+                      :index (or assignment-index
+                                 (go-eldoc--current-arg-index curpoint)))))))))))
 
 (defsubst go-eldoc--no-argument-p (arg-type)
   (string-match "\\`\\s-+\\'" arg-type))
 
 (defconst go-eldoc--argument-type-regexp
   (concat
-   "\\(" go-identifier-regexp "\\)" ;; $1 argname
+   "\\([]{}[:word:][:multibyte:]*.[]+\\)" ;; $1 argname
    (format "\\(?: %s%s\\)?"
            "\\(\\(?:\\[\\]\\)?\\(?:<-\\)?chan\\(?:<-\\)? \\)?" ;; $2 channel
            "\\(?:\\([]{}[:word:][:multibyte:]*.[]+\\)\\)?") ;; $3 argtype
@@ -176,8 +224,9 @@
         sym
       (concat chan sym))))
 
-(defun go-eldoc--split-argument-type (arg-type)
+(defun go-eldoc--split-types-string (arg-type)
   (with-temp-buffer
+    (set-syntax-table go-mode-syntax-table)
     (insert arg-type)
     (goto-char (point-min))
     (let ((name-types nil))
@@ -202,63 +251,81 @@
           (push name-type name-types)))
       (reverse name-types))))
 
+(defsubst go-eldoc--has-spaces (str)
+  (string-match-p "[[:space:]]" str))
+
+(defun go-eldoc--wrap-parenthesis (str len rettype)
+  ;; Don't wrap if return value is only one
+  (if (and rettype (<= len 1) (not (go-eldoc--has-spaces str)))
+      str
+    (concat "(" str ")")))
+
+(defun go-eldoc--highlight-index-position (types-str index &optional rettype-p)
+  (cl-loop with types = (go-eldoc--split-types-string types-str)
+           with highlight-done = nil
+           with len = (length types)
+           with last-index = (1- len)
+           for i from 0 below len
+           for type in types
+           if (and (not highlight-done)
+                   (or (= i (1- index))
+                       (and (= i last-index)
+                            (string-match-p "\\.\\{3\\}" type))))
+           collect
+           (progn
+             (setq highlight-done t)
+             (propertize type 'face 'eldoc-highlight-function-argument)) into args
+
+           else
+           collect type into args
+           finally return (go-eldoc--wrap-parenthesis
+                           (mapconcat 'identity args ", ") len rettype-p)))
+
 (defun go-eldoc--highlight-argument (signature index)
   (let* ((arg-type (plist-get signature :arg-type))
-         (ret-type (plist-get signature :ret-type))
-         (types (go-eldoc--split-argument-type arg-type)))
+         (ret-type (plist-get signature :ret-type)))
     (if (go-eldoc--no-argument-p arg-type)
         (concat "() " ret-type)
-      (loop with highlight-done = nil
-            with arg-len = (length types)
-            for i from 0 to arg-len
-            for type in types
-            if (and (not highlight-done)
-                    (or (= i (1- index))
-                        (and (= i (1- arg-len))
-                             (string-match "\\.\\{3\\}" type))))
-            collect
-            (progn
-              (setq highlight-done t)
-              (propertize type 'face 'eldoc-highlight-function-argument)) into args
+      (if (> index 0)
+          (let ((highlighed-args (go-eldoc--highlight-index-position arg-type index)))
+            (concat highlighed-args " " ret-type))
+        (let ((highlighed-rets (go-eldoc--highlight-index-position ret-type (- index) t)))
+          (concat "(" arg-type ") " highlighed-rets))))))
 
-            else
-            collect type into args
-            finally
-            return (concat "(" (mapconcat 'identity args ", ") ") " ret-type)))))
-
-(defun go-eldoc--analyze-func-signature (signature)
+(defun go-eldoc--analyze-func-signature ()
   (let (arg-start arg-end)
     (when (search-forward "func(" nil t)
       (setq arg-start (point))
       (backward-char 1)
-      (forward-list)
-      (setq arg-end (1- (point)))
-      (skip-chars-forward " \t")
-      (list :type 'function
-            :arg-type (buffer-substring-no-properties arg-start arg-end)
-            :ret-type (buffer-substring-no-properties (point) (point-max))))))
+      (when (ignore-errors (forward-list) t)
+        (setq arg-end (1- (point)))
+        (skip-chars-forward " \t")
+        (list :type 'function
+              :arg-type (buffer-substring-no-properties arg-start arg-end)
+              :ret-type (buffer-substring-no-properties (point) (point-max)))))))
 
-(defun go-eldoc--analyze-type-signature (signature)
+(defun go-eldoc--analyze-type-signature ()
   (when (search-forward "type " nil t)
     (list :type 'type
           :real-type (buffer-substring-no-properties (point) (point-max)))))
 
 (defun go-eldoc--analyze-signature (signature)
   (with-temp-buffer
+    (set-syntax-table go-mode-syntax-table)
     (insert signature)
     (goto-char (point-min))
     (let ((word (thing-at-point 'word)))
       (cond ((string= "func" word)
-             (go-eldoc--analyze-func-signature signature))
+             (go-eldoc--analyze-func-signature))
             ((string= "type" word)
-             (go-eldoc--analyze-type-signature signature))))))
+             (go-eldoc--analyze-type-signature))))))
 
 (defun go-eldoc--format-signature (funcinfo)
   (let ((name (plist-get funcinfo :name))
         (signature (go-eldoc--analyze-signature (plist-get funcinfo :signature)))
         (index (plist-get funcinfo :index)))
     (when signature
-      (case (plist-get signature :type)
+      (cl-case (plist-get signature :type)
         (function
          (format "%s: %s"
                  (propertize name 'face 'font-lock-function-name-face)
@@ -268,17 +335,62 @@
                  (propertize name 'face 'font-lock-type-face)
                  (plist-get signature :real-type)))))))
 
+(defun go-eldoc--retrieve-type (typeinfo symbol)
+  (cond ((string-match (format "^%s,,var \\(.+\\)$" symbol) typeinfo)
+         (match-string 1 typeinfo))
+        ((string-match-p (format "\\`%s,,package\\s-*$" symbol) typeinfo)
+         "package")
+        ((string-match (format "^%s,,\\(func.+\\)$" symbol) typeinfo)
+         (match-string 1 typeinfo))
+        ((string-match (format "^%s,,\\(.+\\)$" symbol) typeinfo)
+         (match-string 1 typeinfo))))
+
+(defun go-eldoc--get-cursor-info (bounds)
+  (save-excursion
+    (goto-char (cdr bounds))
+    (go-eldoc--retrieve-type
+     (go-eldoc--invoke-autocomplete)
+     (buffer-substring-no-properties (car bounds) (cdr bounds)))))
+
+(defun go-eldoc--retrieve-concrete-name (bounds)
+  (save-excursion
+    (goto-char (car bounds))
+    (while (looking-back "\\.")
+      (backward-char 1)
+      (skip-chars-backward "[:word:][:multibyte:]\\[\\]"))
+    (buffer-substring-no-properties (point) (cdr bounds))))
+
+(defun go-eldoc--bounds-of-go-symbol ()
+  (save-excursion
+    (let (start)
+      (skip-chars-backward "[:word:][:multibyte:]")
+      (setq start (point))
+      (skip-chars-forward "[:word:][:multibyte:]")
+      (unless (= start (point))
+        (cons start (point))))))
+
+(defsubst go-eldoc--propertize-cursor-thing (bounds)
+  (propertize (go-eldoc--retrieve-concrete-name bounds)
+              'face 'font-lock-variable-name-face))
+
 (defun go-eldoc--documentation-function ()
   (let ((funcinfo (go-eldoc--get-funcinfo)))
-    (when funcinfo
-      (go-eldoc--format-signature funcinfo))))
+    (if funcinfo
+        (go-eldoc--format-signature funcinfo)
+      (let ((bounds (go-eldoc--bounds-of-go-symbol)))
+        (when bounds
+          (let ((curinfo (go-eldoc--get-cursor-info bounds)))
+            (when curinfo
+              (format "%s: %s"
+                      (go-eldoc--propertize-cursor-thing bounds)
+                      curinfo))))))))
 
 ;;;###autoload
 (defun go-eldoc-setup ()
   (interactive)
   (set (make-local-variable 'eldoc-documentation-function)
        'go-eldoc--documentation-function)
-  (turn-on-eldoc-mode))
+  (eldoc-mode +1))
 
 (provide 'go-eldoc)
 

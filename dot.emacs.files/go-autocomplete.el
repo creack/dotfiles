@@ -1,9 +1,10 @@
 ;;; go-autocomplete.el --- auto-complete-mode backend for go-mode
 
-;; Copyright (C) 2010  
+;; Copyright (C) 2010
 
 ;; Author: Mikhail <tensai@cirno.in> Kuryshev
 ;; Keywords: languages
+;; Package-Requires: ((auto-complete "1.4.0"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -20,12 +21,12 @@
 
 ;;; Commentary:
 
-;; Ensure that go-autocomplete in your load-path and add to your ~/.emacs 
+;; Ensure that go-autocomplete in your load-path and add to your ~/.emacs
 ;; following line:
 ;;
 ;; (require 'go-autocomplete)
 
-;; Also you could setup any combination (for example M-TAB) 
+;; Also you could setup any combination (for example M-TAB)
 ;; for invoking auto-complete:
 ;;
 ;; (require 'auto-complete-config)
@@ -37,9 +38,19 @@
   (require 'cl)
   (require 'auto-complete))
 
+;; Close gocode daemon at exit unless it was already running
+(eval-after-load "go-mode"
+  '(progn
+     (let* ((user (or (getenv "USER") "all"))
+            (sock (format (concat temporary-file-directory "gocode-daemon.%s") user)))
+       (unless (file-exists-p sock)
+         (add-hook 'kill-emacs-hook #'(lambda ()
+                                        (ignore-errors
+                                          (call-process "gocode" nil nil nil "close"))))))))
+
 ;(defvar go-reserved-keywords
 ;  '("break" "case" "chan" "const" "continue" "default" "defer" "else"
-;    "fallthrough" "for" "func" "go" "goto" "if" "import" "interface" 
+;    "fallthrough" "for" "func" "go" "goto" "if" "import" "interface"
 ;    "map" "package" "range" "return" "select" "struct" "switch" "type" "var")
 ;  "Go reserved keywords.")
 
@@ -67,25 +78,26 @@
 
 (defun ac-go-invoke-autocomplete ()
   (let ((temp-buffer (generate-new-buffer "*gocode*")))
-    (prog2
-	(call-process-region (point-min)
-			     (point-max)
-			     "gocode"
-			     nil
-			     temp-buffer
-			     nil
-			     "-f=emacs"
-			     "autocomplete"
-			     (buffer-file-name)
-			     (int-to-string (- (point) 1)))
-	(with-current-buffer temp-buffer (buffer-string))
+    (unwind-protect
+        (progn
+          (call-process-region (point-min)
+                               (point-max)
+                               "gocode"
+                               nil
+                               temp-buffer
+                               nil
+                               "-f=emacs"
+                               "autocomplete"
+                               (or (buffer-file-name) "")
+                               (concat "c" (int-to-string (- (point) 1))))
+          (with-current-buffer temp-buffer (buffer-string)))
       (kill-buffer temp-buffer))))
 
 (defun ac-go-format-autocomplete (buffer-contents)
   (sort
-   (split-string buffer-contents "\n")
-   '(lambda (a b) (string< (downcase a)
-			   (downcase b)))))
+   (split-string buffer-contents "\n" t)
+   (lambda (a b) (string< (downcase a)
+                          (downcase b)))))
 
 (defun ac-go-get-candidates (strings)
   (let ((prop (lambda (entry)
@@ -95,23 +107,45 @@
 			      'summary summary))))
 	(split (lambda (strings)
 		 (mapcar (lambda (str)
-			   (split-string str ",,"))
+			   (split-string str ",," t))
 			 strings))))
     (mapcar prop (funcall split strings))))
+
+(defun ac-go-action ()
+  (let ((item (cdr ac-last-completion)))
+    (if (stringp item)
+        (message "%s" (get-text-property 0 'summary item)))))
+
+(defun ac-go-document (item)
+  (if (stringp item)
+      (let ((s (get-text-property 0 'summary item)))
+        (message "%s" s)
+        nil)))
 
 (defun ac-go-candidates ()
   (ac-go-get-candidates (ac-go-format-autocomplete (ac-go-invoke-autocomplete))))
 
-(defvar ac-source-go
-  '((candidates . ac-go-candidates)
-    (prefix . "\\.\\(.*\\)")
-    (requires . 0)))
+(defun ac-go-prefix ()
+  (or (ac-prefix-symbol)
+      (let ((c (char-before)))
+        (when (eq ?\. c)
+          (point)))))
 
-(add-hook 'go-mode-hook '(lambda()
-			   (auto-complete-mode 1)
-			   (setq ac-sources (append '(ac-source-go) ac-sources))))
+(ac-define-source go
+  '((candidates . ac-go-candidates)
+    (candidate-face . ac-candidate-face)
+    (selection-face . ac-selection-face)
+    (document . ac-go-document)
+    (action . ac-go-action)
+    (prefix . ac-go-prefix)
+    (requires . 0)
+    (cache)
+    (symbol . "g")))
 
 (add-to-list 'ac-modes 'go-mode)
+
+(add-hook 'go-mode-hook #'(lambda ()
+                           (add-to-list 'ac-sources 'ac-source-go)))
 
 (provide 'go-autocomplete)
 ;;; go-autocomplete.el ends here
