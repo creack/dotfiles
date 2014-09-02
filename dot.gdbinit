@@ -1,1 +1,1 @@
-add-auto-load-safe-path ~/goroot/src/pkg/runtime/runtime-gdb.py
+add-auto-load-safe-path /Users/guillaume/goroot/src/pkg/runtime/runtime-gdb.py
