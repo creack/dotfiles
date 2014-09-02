@@ -2,6 +2,7 @@ LN	=	ln -fFs
 SRCS	=	dot.emacs	\
 		dot.emacs.files	\
 		dot.zshrc	\
+		dot.oh-my-zsh	\
 		dot.zsh_go	\
 		dot.zsh_docker	\
 		dot.zsh_git_prompt \
