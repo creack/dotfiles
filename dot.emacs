@@ -1,24 +1,64 @@
-(setq server-socket-dir (format "/tmp/emacs%d" (user-uid)))
+;;; .emacs --- Emacs configuration ;;; -*- mode: lisp -*-
 
+;;; Commentary:
 
-; enable mouse
-(require 'mouse)
-(xterm-mouse-mode t)
-;; Do the xterm mode in a lambda to allow emacsclient to load.
-;;(add-hook 'after-make-frame-functions '
-;;	  (lambda (frame) (unless window-system (xterm-mouse-mode))))
-(defun track-mouse (e))
-(setq mouse-sel-mode t)
-(global-set-key [mouse-4] (lambda ()
-			    (interactive)
-			    (scroll-down 1)))
-(global-set-key [mouse-5] (lambda ()
-			    (interactive)
-			    (scroll-up 1)))
+;;; Code:
 
+;;(setq debug-on-error t)
 
 ;; Setup "path"
 (setq load-path (cons "~/.emacs.files" load-path))
+
+;; Setup emacs-server path
+;;(setq server-socket-dir (format "/tmp/emacs%d" (user-uid)))
+
+;;; git-glutter
+;;(require 'git-gutter)
+
+;; If you enable global minor mode
+;;(global-git-gutter-mode t)
+
+;; If you would like to use git-gutter.el and linum-mode
+;;(git-gutter:linum-setup)
+
+;;(global-set-key (kbd "C-x C-g") 'git-gutter:toggle)
+
+;;; enable mouse  ;;;
+(require 'mouse)
+(xterm-mouse-mode t)
+;; Do the xterm mode in a lambda to allow emacsclient to load.
+(add-hook 'after-make-frame-functions '
+	  (lambda (frame) (unless window-system
+			    (global-linum-mode t)
+(set-face-attribute 'linum nil :background "#222")
+(setq linum-format "%4d\u2502")
+
+			    )))
+;; Suspend-frame sucks, disable it
+;;(global-set-key (kbd "C-z") (kbd "C-x C-c"))
+;;(global-set-key (kbd "C-x C-z") nil)
+;;;;
+
+ (defun track-mouse (e))
+ (setq mouse-sel-mode t)
+ (global-set-key [mouse-4] (lambda ()
+ 			    (interactive)
+ 			    (scroll-down 1)))
+ (global-set-key [mouse-5] (lambda ()
+ 			    (interactive)
+ 			    (scroll-up 1)))
+
+
+;;; End of mouse setup ;;;
+
+
+;;; Marmalade (packet manager) ;;;
+(require 'package)
+(add-to-list 'package-archives
+    '("marmalade" .
+      "http://marmalade-repo.org/packages/"))
+(package-initialize)
+;;; End of Marmalage ;;;
 
 
 ;;; Golang config ;;;
@@ -27,6 +67,12 @@
 (add-to-list 'load-path "~/goroot/misc/emacs/")
 (require 'go-mode-load)
 (add-hook 'before-save-hook 'gofmt-before-save)
+
+;; (package-install yasnippet)
+(require 'yasnippet)
+(add-to-list 'yas-snippet-dirs "~/go/src/github.com/dominikh/yasnippet-go")
+(yas-global-mode 1)
+
 
 ;; Convenient binding for go
 (global-set-key (kbd "C-c C-c") 'comment-region)
@@ -50,6 +96,11 @@
 (require 'go-eldoc) ;; Don't need to require, if you install by package.el
 (add-hook 'go-mode-hook 'go-eldoc-setup)
 
+;; go-oracle
+(load-file "~/go/src/code.google.com/p/go.tools/cmd/oracle/oracle.el")
+(add-hook 'go-mode-hook 'go-oracle-mode)
+
+
 ;;; End of Golang config ;;
 
 
@@ -58,12 +109,13 @@
 (require 'go-autocomplete)
 (require 'auto-complete-config)
 (add-to-list 'ac-dictionary-directories "~/.emacs.files/ac-dict")
+(setq ac-source-yasnippet nil)
 (ac-config-default)
+(setq ac-delay 0.1)
 
 
 ;;; Flycheck config ;;;
 (setq load-path (cons "~/.emacs.files/flycheck" load-path))
-(setq load-path (cons "~/go/src/github.com/dougm/goflymake" load-path))
 (require 'flycheck)
 (add-hook 'after-init-hook #'global-flycheck-mode)
 
@@ -77,13 +129,12 @@
 (setq ring-bell-function 'ignore)
 
 ;; Display line number on the left
-(global-linum-mode 1)
-(set-face-attribute 'linum nil :background "#222")
-(setq linum-format "%4d\u2502")
+;; (global-linum-mode t)
+;; (set-face-attribute 'linum nil :background "#222")
+;; (setq linum-format "%4d\u2502")
 
 ;; Hightline current line
 (global-hl-line-mode t)
-;;(set-face-background hl-line-face "gray13")
 
 ;; Change the region background color
 ;;(set-face-background 'region "#770")
@@ -132,13 +183,6 @@
           `((".*" , temporary-file-directory t)))
 
 
-;;; Marmalade (packet manager) ;;;
-(require 'package)
-(add-to-list 'package-archives
-    '("marmalade" .
-      "http://marmalade-repo.org/packages/"))
-(package-initialize)
-
 ;; Random conf to be checked
 
 
@@ -168,6 +212,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(safe-local-variable-values (quote ((docker-image-name . "creack/apollo"))))
  '(send-mail-function (quote mailclient-send-it)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -176,3 +221,36 @@
  ;; If there is more than one, they won't work right.
  '(flycheck-error ((t (:inherit error :inverse-video t :underline (:color foreground-color :style wave)))))
  '(flycheck-warning ((t (:inherit warning :inverse-video t :underline t)))))
+
+
+;; Numpad on OSX (24.3.1)
+(global-set-key (kbd "M-O p") (kbd "0"))
+(global-set-key (kbd "M-O q") (kbd "1"))
+(global-set-key (kbd "M-O r") (kbd "2"))
+(global-set-key (kbd "M-O s") (kbd "3"))
+(global-set-key (kbd "M-O t") (kbd "4"))
+(global-set-key (kbd "M-O u") (kbd "5"))
+(global-set-key (kbd "M-O v") (kbd "6"))
+(global-set-key (kbd "M-O w") (kbd "7"))
+(global-set-key (kbd "M-O x") (kbd "8"))
+(global-set-key (kbd "M-O y") (kbd "9"))
+(global-set-key (kbd "M-O n") (kbd "."))
+(global-set-key (kbd "M-O o") (kbd "/"))
+(global-set-key (kbd "M-O j") (kbd "*"))
+(global-set-key (kbd "M-O k") (kbd "+"))
+(global-set-key (kbd "M-O m") (kbd "-"))
+(global-set-key (kbd "M-O M") (kbd ""))
+
+(require 'dockerfile-mode)
+(add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode))
+
+
+
+;;; White mode
+;; (set-face-attribute 'linum nil :background "#DDD")
+;; (set-face-background hl-line-face "#EEE")
+;; (load-theme 'solarized-light t)
+
+;;; Dark mode
+;; (set-face-attribute 'linum nil :background "#222")
+;; (set-face-background hl-line-face "#222")

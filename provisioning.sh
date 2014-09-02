@@ -78,11 +78,14 @@ export PATH=$GOBIN:$PATH
 go get -u code.google.com/p/go.tools/cmd/cover
 go get -u code.google.com/p/go.tools/cmd/godoc
 go get -u code.google.com/p/go.tools/cmd/goimports
+go get -u code.google.com/p/go.tools/cmd/oracle
 go get -u code.google.com/p/go.tools/cmd/vet
 go get -u code.google.com/p/rog-go/exp/cmd/godef
 go get -u github.com/axw/gocov/gocov
 go get -u github.com/dougm/goflymake
+go get -u github.com/golang/lint/golint
 go get -u github.com/nsf/gocode
+
 
 # Get docker sources
 go get -u github.com/dotcloud/docker/docker

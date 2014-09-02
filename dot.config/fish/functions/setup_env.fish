@@ -15,7 +15,7 @@ function setup_env --description "Setup global environment"
 	set -gx PATH /usr/local/bin /usr/local/sbin $GOBIN $PATH
 
 	set -gx PAGER "most"
-	set -gx EDITOR "emacsclient -c -t -a=''"
+	set -gx EDITOR "emacs"
 	set -gx WATCH "all"
 	set -gx LANG "en_US.UTF-8"
 	set -gx GPGKEY CB6E3FF3

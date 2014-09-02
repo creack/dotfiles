@@ -29,10 +29,6 @@ function tmuxinit --description "Initialize tmux (check for 256 colors, create o
 
 	# Set session name
 	set -l hostname local
-	if test "$HOSTNAME"
-		set hostname $HOSTNAME
-	end
-
 	set -l session_name $hostname
 
 	# If the session does not exist, create it

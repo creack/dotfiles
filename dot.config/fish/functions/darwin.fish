@@ -11,7 +11,6 @@ function setup_darwin_aliases --description "Setup aliases specific for darwin"
 	set -gx LSCOLORS ExFxCxDxBxegedabagacad
 	alias ls="ls -G -lh"
 	alias updatedb="/usr/libexec/locate.updatedb"
-	alias emacs="emacsclient -t -c -a=''"
 end
 
 function bootdev --description "Start and connect to dev environment"
