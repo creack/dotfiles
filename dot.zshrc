@@ -1,20 +1,93 @@
-#!/bin/zsh
-ulimit -c 0
+# Path to your oh-my-zsh installation.
+export ZSH=$HOME/.oh-my-zsh
 
-#if [ $TERM != "screen" ] && [[ -z "$TMUX" ]]; then
-#   export TERM=xterm-256color
-#   exec tmux a
-#fi
+# Set name of the theme to load.
+# Look in ~/.oh-my-zsh/themes/
+# Optionally, if you set this to "random", it'll load a random theme each
+# time that oh-my-zsh is loaded.
+ZSH_THEME="simple"
 
+# Example aliases
+# alias zshconfig="mate ~/.zshrc"
+# alias ohmyzsh="mate ~/.oh-my-zsh"
+
+# Uncomment the following line to use case-sensitive completion.
+# CASE_SENSITIVE="true"
+
+# Uncomment the following line to disable bi-weekly auto-update checks.
+# DISABLE_AUTO_UPDATE="true"
+
+# Uncomment the following line to change how often to auto-update (in days).
+# export UPDATE_ZSH_DAYS=13
+
+# Uncomment the following line to disable colors in ls.
+# DISABLE_LS_COLORS="true"
+
+# Uncomment the following line to disable auto-setting terminal title.
+# DISABLE_AUTO_TITLE="true"
+
+# Uncomment the following line to disable command auto-correction.
+# DISABLE_CORRECTION="true"
+
+# Uncomment the following line to display red dots whilst waiting for completion.
+# COMPLETION_WAITING_DOTS="true"
+
+# Uncomment the following line if you want to disable marking untracked files
+# under VCS as dirty. This makes repository status check for large repositories
+# much, much faster.
+# DISABLE_UNTRACKED_FILES_DIRTY="true"
+
+# Uncomment the following line if you want to change the command execution time
+# stamp shown in the history command output.
+# The optional three formats: "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
+# HIST_STAMPS="mm/dd/yyyy"
+
+# Would you like to use another custom folder than $ZSH/custom?
+# ZSH_CUSTOM=/path/to/new-custom-folder
+
+# Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
+# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
+# Example format: plugins=(rails git textmate ruby lighthouse)
+plugins=(git brew go gnu-utils gpg-agent mosh osx tmux vagrant ssh-agent emacs docker jira encode64)
+
+ZSH_TMUX_AUTOSTART=true
+JIRA_URL="https://jira.cloud.com"
+
+source $ZSH/oh-my-zsh.sh
+
+# User configuration
+
+export MANPATH="/usr/local/man:$MANPATH"
+export LSCOLORS="ExFxCxDxBxegedabagacad"
+export LANG=en_US.UTF-8
+export GPGKEY=CB6E3FF3
+export PAGER="most"
 export HOSTTYPE=`uname -s`
 export HOST=`uname -n`
-export SHELL="/bin/zsh"
-export PAGER="most"
-export EDITOR="emacsclient -c -t -a=''"
-export WATCH="all"
-export LANG="en_US.UTF-8"
-export TERM="xterm-256color"
-export GPGKEY=CB6E3FF3
+export EDITOR="emacs"
+export SHELL="/usr/local/bin/zsh"
+
+export GOROOT="$HOME/goroot"
+export GOBIN="$GOROOT/bin"
+export GOPATH="$HOME/go"
+
+export PATH="$GOBIN:/usr/local/bin:$PATH"
+
+export DOCKER_HOST=172.17.8.101:4243
+export FLEETCTL_TUNNEL=172.17.8.101
+
+export JAVA_HOME="$(/usr/libexec/java_home)"
+#export AWS_ACCESS_KEY="<Your AWS Access ID>"
+#export AWS_SECRET_KEY="<Your AWS Secret Key>"
+export EC2_HOME="/usr/local/Cellar/ec2-api-tools/1.6.13.0/libexec"
+
+#emacsclient -s "/tmp/emacs503/server" -a ''  -ct
+alias emacs="emacsclient -a ''  -ct"
+alias grep="grep --color=auto -n"
+alias rm="rm -v"
+
+alias a64="encode64"
+alias d64="decode64"
 
 function clean {
     foreach tildefile (./${1}/*~(.N) ./${1}/.*~(.N) ./${1}/\#*\#(.N) ./${1}/.\#*\#(.N) ./${1}/a.out(.N))
@@ -26,130 +99,13 @@ function clean {
     find ./${1} -name '.\#*' -delete
     find ./${1} -name '*~' -delete
     find ./${1} -name '*.orig' -delete
-}
-
-function gogrep() {
-    grep -R $1 `find . -name '*.go'`
-}
-
-setprompt ()
-{
-    setopt prompt_subst
-    autoload colors zsh/terminfo
-    if [[ "$terminfo[colors]" -ge 8 ]]; then
-	colors
-    fi
-    for color in RED GREEN YELLOW BLUE MAGENTA CYAN WHITE; do
-	eval PR_$color='%{$terminfo[bold]$fg[${(L)color}]%}'
-	eval PR_LIGHT_$color='%{$fg[${(L)color}]%}'
-	(( count = $count + 1 ))
-    done
-    PR_NO_COLOUR="%{$terminfo[sgr0]%}"
-    typeset -A altchar
-    set -A altchar ${(s..)terminfo[acsc]}
-    PR_SET_CHARSET="%{$terminfo[enacs]%}"
-    PR_SHIFT_IN="%{$terminfo[smacs]%}"
-    PR_SHIFT_OUT="%{$terminfo[rmacs]%}"
-    PR_HBAR=${altchar[q]:--}
-    PR_ULCORNER=${altchar[l]:--}
-    PR_LLCORNER=${altchar[m]:--}
-    PR_LRCORNER=${altchar[j]:--}
-    PR_URCORNER=${altchar[k]:--}
-
-    case $TERM in
-xterm*)
-    PR_TITLEBAR=$'%{\e]0;%(!.-=*[ROOT]*=- | .)%n@%m:%~ | ${COLUMNS}x${LINES} | %y\a%}'
-    ;;
-screen*)
-    PR_TITLEBAR=$'%{\e_screen \005 (\005t) | %(!.-=[ROOT]=- | .)%n@%m:%~ | ${COLUMNS}x${LINES} | %y\e\\%}'
-    ;;
-*)
-        PR_TITLEBAR=''
-    ;;
-    esac
-
-
-    ###
-    # Decide whether to set a screen title
-    if [[ "$TERM" == "screen" ]]; then
-PR_STITLE=$'%{\ekzsh\e\\%}'
-    else
-PR_STITLE=''
-fi
-
-PROMPT="
-($PR_BLUE%n$PR_NO_COLOUR@$PR_GREEN%m$PR_NO_COLOUR):<$PR_CYAN%~$PR_NO_COLOUR>
-[$PR_RED%D{%r}$PR_NO_COLOUR]%# "
-
-RPROMPT="$(git_super_status)[$PR_RED%D{%a %d %b}$PR_NO_COLOUR]"
-
+    find ./${1} -name '*.test' -delete
 }
 
 
-# Ls aliases
-alias l="ls -l"
-alias ll="ls -l"
-alias la="ls -lA"
-alias lsh="ls -h"
-alias lh="ls -lh"
-alias llh="ls -lh"
-alias lah="ls -lAh"
-alias ls="ls --color=auto"
-alias rm="rm -v"
-alias grep="grep --color=auto -n"
-# Other aliases
-alias ne="emacs"
-alias ciao="kill -9 -1"
-alias emacs="emacsclient -t -c -a=''"
-alias gocov="sudo -E ~/goroot/bin/gocov test -deps -exclude-goroot . | gocov report"
-
-hosts=(`grep ^Host ~/.ssh/config | sed s/Host\ //`)
-hosts=($hosts `awk '{print $1}' ~/.ssh/known_hosts | tr ',' ' ' | tr -d '['  | tr -d ']'`)
-
-# The following lines were added by compinstall
-zstyle ':completion:*:hosts' hosts $hosts
-zstyle ':completion:*' completer _expand _complete _approximate
-zstyle ':completion:*' file-sort name
-zstyle ':completion:*' format 'Completing %d'
-zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
-zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
-zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z} m:{a-zA-Z}={A-Za-z}' 'l:|=* r:|=*' 'r:|[._-]=* r:|=*'
-zstyle ':completion:*' menu select=long-list select=1
-zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
-zstyle :compinstall filename '/home/$USER/.zshrc'
-
-autoload -Uz compinit
-compinit
-
-source ~/.zsh_go
-source ~/.zsh_docker
 source ~/.zsh_git_prompt
+PROMPT="
+(%{$fg_bold[blue]%}%n%{$reset_color%}@%{$fg_bold[green]%}%m%{$reset_color%}):<%{$fg_bold[cyan]%}%~%{$reset_color%}>
+[%{$fg_bold[red]%}%D{%r}%{$reset_color%}]%% "
 
-setprompt
-
-
-# End of lines added by compinstall
-# Lines configured by zsh-newuser-install
-HISTFILE=~/.zsh_history
-HISTSIZE=1000
-SAVEHIST=1000
-setopt appendhistory autocd nomatch
-unsetopt beep extendedglob notify
-bindkey -e
-# End of lines configured by zsh-newuser-install
-
-## Use color in completion
-zstyle ':completion:*' list-colors ${(s.:.)LSCOLORS}
-
-
-#switch ± and ~ (macbookpro)
-eval "insert-key-tilde () { LBUFFER+='~'; }"
-eval "insert-key-magicquote () { LBUFFER+='\`'; }"
-
-# OSX specific
-zle -N insert-key-tilde
-bindkey ± insert-key-tilde
-
-zle -N insert-key-magicquote
-bindkey § insert-key-magicquote
-
+RPROMPT="[%{$fg_bold[red]%}%D{%a %d %b}%{$reset_color%}]"
