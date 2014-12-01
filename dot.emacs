@@ -254,3 +254,11 @@
 ;;; Dark mode
 ;; (set-face-attribute 'linum nil :background "#222")
 ;; (set-face-background hl-line-face "#222")
+
+
+
+(add-hook 'makefile-mode-hook
+	  (function
+	   (lambda ()
+	     (setq tab-width 4)
+	     )))
