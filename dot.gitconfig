@@ -15,6 +15,12 @@
     lg3 = !"git log --show-signature"
     lg = !"git lg1"
     pull = pull --rebase
+    change = codereview change
+    gofmt = codereview gofmt
+    mail = codereview mail
+    pending = codereview pending
+    submit = codereview submit
+    sync = codereview sync
 
 [color]
     ui = auto
@@ -34,9 +40,11 @@
     tool = ediff
 
 [user]
-	email = guillaume@cloud.com
+	email = gcharmes@simplereach.com
 	name = Guillaume J. Charmes
 	signingkey = CB6E3FF3
 
 [github]
 	user = creack
+[push]
+	default = simple
