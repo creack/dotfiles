@@ -9,6 +9,10 @@
 ;; Setup "path"
 (setq load-path (cons "~/.emacs.files" load-path))
 
+
+;;(set-face-background 'highlight-indentation-face "#222")
+;;(set-face-background 'highlight-indentation-current-column-face "#222")
+
 ;; Setup emacs-server path
 ;;(setq server-socket-dir (format "/tmp/emacs%d" (user-uid)))
 
@@ -55,17 +59,18 @@
 ;;; Marmalade (packet manager) ;;;
 (require 'package)
 (add-to-list 'package-archives
-    '("marmalade" .
-      "http://marmalade-repo.org/packages/"))
+             '("melpa" . "http://melpa.org/packages/") t)
 (package-initialize)
 ;;; End of Marmalage ;;;
 
 
 ;;; Golang config ;;;
 ;; Load go-mode
-(setq gofmt-command "goimports")
-(add-to-list 'load-path "~/goroot/misc/emacs/")
-(require 'go-mode-load)
+(setq gofmt-command "fmt2")
+;(add-to-list 'load-path "~/goroot/misc/emacs/")
+(add-to-list 'load-path "~/go/go-mode.el")
+(require 'go-mode-autoloads)
+;(require 'go-mode-load)
 (add-hook 'before-save-hook 'gofmt-before-save)
 
 ;; (package-install yasnippet)
@@ -78,6 +83,7 @@
 (global-set-key (kbd "C-c C-c") 'comment-region)
 (global-set-key (kbd "C-c C-u") 'uncomment-region)
 (global-set-key (kbd "C-c C-i") 'go-goto-imports)
+(global-set-key (kbd "C-c C-e") 'go-rename)
 
 ;; Go helper for compilation
 (setq compilation-always-kill t)
@@ -97,15 +103,19 @@
 (add-hook 'go-mode-hook 'go-eldoc-setup)
 
 ;; go-oracle
-(load-file "~/go/src/code.google.com/p/go.tools/cmd/oracle/oracle.el")
+(load-file "~/go/src/golang.org/x/tools/refactor/rename/rename.el")
+
+(load-file "~/go/src/golang.org/x/tools/cmd/oracle/oracle.el")
 (add-hook 'go-mode-hook 'go-oracle-mode)
+
+(load-file "~/go/src/github.com/dominikh/go-errcheck.el/go-errcheck.el")
 
 
 ;;; End of Golang config ;;
 
-
 ;;; Setup auto-complete ;;;
 (setq load-path (cons "~/.emacs.files/auto-complete" load-path))
+(require 'auto-complete)
 (require 'go-autocomplete)
 (require 'auto-complete-config)
 (add-to-list 'ac-dictionary-directories "~/.emacs.files/ac-dict")
@@ -255,10 +265,50 @@
 ;; (set-face-attribute 'linum nil :background "#222")
 ;; (set-face-background hl-line-face "#222")
 
-
-
 (add-hook 'makefile-mode-hook
 	  (function
 	   (lambda ()
-	     (setq tab-width 4)
+	     (setq tab-width 8)
 	     )))
+
+;; Standard Jedi.el setting
+(add-hook 'python-mode-hook 'jedi:setup)
+(setq jedi:complete-on-dot t)
+
+(add-hook 'python-mode-hook 'highlight-indentation-mode)
+
+(setq pylint "/usr/local/bin/epylint")
+(when (load "flymake" t)
+  (defun flymake-pylint-init ()
+    (let* ((temp-file (flymake-init-create-temp-buffer-copy
+                       'flymake-create-temp-inplace))
+           (local-file (file-relative-name
+                        temp-file
+                        (file-name-directory buffer-file-name))))
+      (list (expand-file-name pylint "") (list local-file))))
+  (add-to-list 'flymake-allowed-file-name-masks
+               '("\\.py\\'" flymake-pylint-init)))
+
+;; Set as a minor mode for Python
+(add-hook 'python-mode-hook '(lambda () (flymake-mode)))
+
+;; Configure to wait a bit longer after edits before starting
+(setq-default flymake-no-changes-timeout '3)
+
+;; Keymaps to navigate to the errors
+(add-hook 'python-mode-hook '(lambda () (define-key python-mode-map "\C-cn" 'flymake-goto-next-error)))
+(add-hook 'python-mode-hook '(lambda () (define-key python-mode-map "\C-cp" 'flymake-goto-prev-error)))
+
+;; To avoid having to mouse hover for the error message, these functions make flymake error messages
+;; appear in the minibuffer
+(defun show-fly-err-at-point ()
+  "If the cursor is sitting on a flymake error, display the message in the minibuffer"
+  (require 'cl)
+  (interactive)
+  (let ((line-no (line-number-at-pos)))
+    (dolist (elem flymake-err-info)
+      (if (eq (car elem) line-no)
+      (let ((err (car (second elem))))
+        (message "%s" (flymake-ler-text err)))))))
+
+(add-hook 'post-command-hook 'show-fly-err-at-point)
