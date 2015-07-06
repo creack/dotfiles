@@ -42,7 +42,8 @@ ${HOME}/goroot:
 	${GOBIN}/go get -u golang.org/x/tools/cmd/stringer
 	${GOBIN}/go get -u golang.org/x/tools/cmd/vet
 	${GOBIN}/go get -u github.com/nsf/gocode
-
+	${GOBIN}/go get -u github.com/golang/lint/golint
+	${GOBIN}/go get -u github.com/kisielk/errcheck
 	@touch $@
 go	: .go
 
