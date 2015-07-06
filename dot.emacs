@@ -54,6 +54,7 @@
 
 
 ;;; Package manager ;;;
+(require 'package)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
 (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/"))
 (load-file "~/.emacs.files/init-packages.el")
@@ -120,7 +121,10 @@
 ;;; End of Golang config ;;
 
 ;;; Setup auto-complete ;;;
-(setq ac-source-yasnippet nil)
+(require 'auto-complete)
+(require 'go-autocomplete)
+(require 'auto-complete-config)
+;;(setq ac-source-yasnippet nil)
 (ac-config-default)
 (setq ac-delay 0.1)
 
@@ -203,7 +207,7 @@
 ;  (file-name-shadow-mode t))             ; be smart about filenames in mbuf
 
 ;;(setq custom-theme-load-path (cons "~/.emacs.files/themes/emacs-color-theme-solarized" custom-theme-load-path))
-(load-theme 'solarized-dark t)
+;;(load-theme 'solarized-dark t)
 
 ;; GDB helper
 (eval-after-load "gud"

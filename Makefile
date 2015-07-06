@@ -11,30 +11,40 @@ SRCS	=	dot.emacs	\
 		dot.config
 OBJS	=	$(subst dot, ${HOME}/, $(SRCS))
 
+export GOPATH=${HOME}/go
+export GOROOT=${HOME}/goroot
+export GOBIN=${GOROOT}/bin
+
 all	: $(OBJS) go zsh
 	mkdir -p ${HOME}/.emacs.files/tmp
 	mkdir -p ${HOME}/.ssh
 	touch ${HOME}/.ssh/config
 	touch ${HOME}/.ssh/known_hosts
 
+${HOME}/.oh-my-zsh:
+	sh -c "$(shell curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+
 zsh	: ${HOME}/.oh-my-zsh
-	sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 
 ${HOME}/goroot:
 	git clone https://github.com/golang/go ${HOME}/goroot
 	cd ${HOME}/goroot/src && git checkout go1.4.2 && ./make.bash
 
-go	: ${HOME}/goroot
-	go get -u code.google.com/p/rog-go/exp/cmd/godef
-	go get -u github.com/jstemmer/gotags
-	go get -u golang.org/x/tools/cmd/gorename
-	go get -u golang.org/x/tools/cmd/oracle
-	go get -u golang.org/x/tools/cmd/goimports
-	go get -u golang.org/x/tools/cmd/benchcmp
-	go get -u golang.org/x/tools/cmd/cover
-	go get -u golang.org/x/tools/cmd/godoc
-	go get -u golang.org/x/tools/cmd/stringer
-	go get -u golang.org/x/tools/cmd/vet
+.go	: ${HOME}/goroot
+	${GOBIN}/go get -u code.google.com/p/rog-go/exp/cmd/godef
+	${GOBIN}/go get -u github.com/jstemmer/gotags
+	${GOBIN}/go get -u golang.org/x/tools/cmd/gorename
+	${GOBIN}/go get -u golang.org/x/tools/cmd/oracle
+	${GOBIN}/go get -u golang.org/x/tools/cmd/goimports
+	${GOBIN}/go get -u golang.org/x/tools/cmd/benchcmp
+	${GOBIN}/go get -u golang.org/x/tools/cmd/cover
+	${GOBIN}/go get -u golang.org/x/tools/cmd/godoc
+	${GOBIN}/go get -u golang.org/x/tools/cmd/stringer
+	${GOBIN}/go get -u golang.org/x/tools/cmd/vet
+	${GOBIN}/go get -u github.com/nsf/gocode
+
+	@touch $@
+go	: .go
 
 powerline:
 	sudo pip install powerline-status

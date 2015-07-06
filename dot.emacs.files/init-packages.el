@@ -32,8 +32,6 @@
 	epc
 	exec-path-from-shell
 	find-file-in-project
-        git-commit-mode
-	git-rebase-mode
 	highlight-indentation
 	iedit
 	jedi
