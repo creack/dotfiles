@@ -207,7 +207,7 @@
 ;  (file-name-shadow-mode t))             ; be smart about filenames in mbuf
 
 (setq custom-theme-load-path (cons "~/.emacs.files/themes/emacs-color-theme-solarized" custom-theme-load-path))
-;;(load-theme 'solarized-dark t)
+(load-theme 'solarized-dark t)
 
 ;; GDB helper
 (eval-after-load "gud"
