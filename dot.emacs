@@ -38,9 +38,6 @@
 (setq linum-format "%4d\u2502")
 
 			    )))
-;; Suspend-frame sucks, disable it
-;;(global-set-key (kbd "C-z") (kbd "C-x C-c"))
-;;(global-set-key (kbd "C-x C-z") nil)
 ;;;;
 
  (defun track-mouse (e))
@@ -56,26 +53,21 @@
 ;;; End of mouse setup ;;;
 
 
-;;; Marmalade (packet manager) ;;;
-(require 'package)
-(add-to-list 'package-archives
-             '("melpa" . "http://melpa.org/packages/") t)
-(package-initialize)
-;;; End of Marmalage ;;;
+;;; Package manager ;;;
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+(add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/"))
+(load-file "~/.emacs.files/init-packages.el")
+
+;;; End of Package ;;;
 
 
 ;;; Golang config ;;;
 ;; Load go-mode
-(setq gofmt-command "fmt2")
-;(add-to-list 'load-path "~/goroot/misc/emacs/")
-(add-to-list 'load-path "~/go/go-mode.el")
-(require 'go-mode-autoloads)
-;(require 'go-mode-load)
+(setq gofmt-command "goimports")
 (add-hook 'before-save-hook 'gofmt-before-save)
+(global-set-key (kbd "M-*") 'pop-tag-mark)
 
-;; (package-install yasnippet)
-(require 'yasnippet)
-(add-to-list 'yas-snippet-dirs "~/go/src/github.com/dominikh/yasnippet-go")
+;;(add-to-list 'yas-snippet-dirs "~/.emacs.files/yasnippet-go")
 (yas-global-mode 1)
 
 
@@ -84,50 +76,59 @@
 (global-set-key (kbd "C-c C-u") 'uncomment-region)
 (global-set-key (kbd "C-c C-i") 'go-goto-imports)
 (global-set-key (kbd "C-c C-e") 'go-rename)
+(global-set-key (kbd "C-c d") 'godoc-at-point)
+(global-set-key (kbd "C-c c") '(lambda() (interactive) (go-coverage "/tmp/c")))
 
 ;; Go helper for compilation
 (setq compilation-always-kill t)
 (global-set-key (kbd "C-c C-r") 'recompile)
 (global-set-key (kbd "C-c C-k") 'kill-compilation)
 (global-set-key (kbd "C-c C-f") 'save-and-compile-program)
+(global-set-key (kbd "C-c C-t") 'save-and-test-program)
+(global-set-key (kbd "C-c C-m") 'save-and-make-program)
+
+(global-set-key (kbd "C-c C-l") 'linum-mode)
+
 
 ;; save all files then run M-x compile
 (defun save-and-compile-program()
         "Save any unsaved buffers and compile"
         (interactive)
         (save-some-buffers t)
-        (compile "/usr/local/bin/fish -c 'clean; go install; and go build -o /tmp/a.out; and /tmp/a.out'"))
+        (compile "bash -c 'go install && go build -o /tmp/a.out && /tmp/a.out'"))
 
-;; go-eldoc
-(require 'go-eldoc) ;; Don't need to require, if you install by package.el
+(defun save-and-test-program()
+        "Save any unsaved buffers and compile"
+        (interactive)
+        (save-some-buffers t)
+        (compile "go test -v -cover -coverprofile=/tmp/c -covermode=count"))
+
+(defun save-and-make-program()
+        "Save any unsaved buffers and compile"
+        (interactive)
+        (save-some-buffers t)
+        (compile "make local"))
+
 (add-hook 'go-mode-hook 'go-eldoc-setup)
 
 ;; go-oracle
-(load-file "~/go/src/golang.org/x/tools/refactor/rename/rename.el")
-
 (load-file "~/go/src/golang.org/x/tools/cmd/oracle/oracle.el")
-(add-hook 'go-mode-hook 'go-oracle-mode)
-
-(load-file "~/go/src/github.com/dominikh/go-errcheck.el/go-errcheck.el")
+;(add-hook 'go-mode-hook 'go-oracle)
+(load-file "~/go/src/golang.org/x/tools/refactor/rename/rename.el")
 
 
 ;;; End of Golang config ;;
 
 ;;; Setup auto-complete ;;;
-(setq load-path (cons "~/.emacs.files/auto-complete" load-path))
-(require 'auto-complete)
-(require 'go-autocomplete)
-(require 'auto-complete-config)
-(add-to-list 'ac-dictionary-directories "~/.emacs.files/ac-dict")
 (setq ac-source-yasnippet nil)
 (ac-config-default)
 (setq ac-delay 0.1)
 
 
 ;;; Flycheck config ;;;
-(setq load-path (cons "~/.emacs.files/flycheck" load-path))
-(require 'flycheck)
-(add-hook 'after-init-hook #'global-flycheck-mode)
+;;(setq load-path (cons "~/.emacs.files/flycheck" load-path))
+;;(require 'flycheck)
+(add-hook 'after-init-hook 'global-flycheck-mode)
 
 (global-set-key (kbd "C-c <up>") 'flycheck-next-error)
 (global-set-key (kbd "C-c <down>") 'flycheck-previous-error)
@@ -145,7 +146,7 @@
 
 ;; Hightline current line
 (global-hl-line-mode t)
-
+(setq col-highlight-vline-face-flag t)
 ;; Change the region background color
 ;;(set-face-background 'region "#770")
 
@@ -181,7 +182,7 @@
 
 
 ;;; VC config ;;;
-(autoload 'magit-status "magit" nil t)
+;(autoload 'magit-status "magit" nil t)
 
 ;;; Auto Save/Backup config ;;;
 
@@ -201,7 +202,7 @@
 ;(when (fboundp file-name-shadow-mode)    ; emacs22+
 ;  (file-name-shadow-mode t))             ; be smart about filenames in mbuf
 
-(setq custom-theme-load-path (cons "~/.emacs.files/themes/emacs-color-theme-solarized" custom-theme-load-path))
+;;(setq custom-theme-load-path (cons "~/.emacs.files/themes/emacs-color-theme-solarized" custom-theme-load-path))
 (load-theme 'solarized-dark t)
 
 ;; GDB helper
@@ -217,23 +218,9 @@
 ;(require 'whitespace)
 ;(setq whitespace-style '(face lines-tail trailing))
 ;(global-whitespace-mode t)
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(safe-local-variable-values (quote ((docker-image-name . "creack/apollo"))))
- '(send-mail-function (quote mailclient-send-it)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(flycheck-error ((t (:inherit error :inverse-video t :underline (:color foreground-color :style wave)))))
- '(flycheck-warning ((t (:inherit warning :inverse-video t :underline t)))))
 
 
-;; Numpad on OSX (24.3.1)
+;; Numpad on OSX (emacs 24.3.1)
 (global-set-key (kbd "M-O p") (kbd "0"))
 (global-set-key (kbd "M-O q") (kbd "1"))
 (global-set-key (kbd "M-O r") (kbd "2"))
@@ -251,7 +238,6 @@
 (global-set-key (kbd "M-O m") (kbd "-"))
 (global-set-key (kbd "M-O M") (kbd ""))
 
-(require 'dockerfile-mode)
 (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode))
 
 
@@ -271,33 +257,9 @@
 	     (setq tab-width 8)
 	     )))
 
-;; Standard Jedi.el setting
-(add-hook 'python-mode-hook 'jedi:setup)
-(setq jedi:complete-on-dot t)
-
-(add-hook 'python-mode-hook 'highlight-indentation-mode)
-
-(setq pylint "/usr/local/bin/epylint")
-(when (load "flymake" t)
-  (defun flymake-pylint-init ()
-    (let* ((temp-file (flymake-init-create-temp-buffer-copy
-                       'flymake-create-temp-inplace))
-           (local-file (file-relative-name
-                        temp-file
-                        (file-name-directory buffer-file-name))))
-      (list (expand-file-name pylint "") (list local-file))))
-  (add-to-list 'flymake-allowed-file-name-masks
-               '("\\.py\\'" flymake-pylint-init)))
-
-;; Set as a minor mode for Python
-(add-hook 'python-mode-hook '(lambda () (flymake-mode)))
 
 ;; Configure to wait a bit longer after edits before starting
 (setq-default flymake-no-changes-timeout '3)
-
-;; Keymaps to navigate to the errors
-(add-hook 'python-mode-hook '(lambda () (define-key python-mode-map "\C-cn" 'flymake-goto-next-error)))
-(add-hook 'python-mode-hook '(lambda () (define-key python-mode-map "\C-cp" 'flymake-goto-prev-error)))
 
 ;; To avoid having to mouse hover for the error message, these functions make flymake error messages
 ;; appear in the minibuffer
@@ -312,3 +274,10 @@
         (message "%s" (flymake-ler-text err)))))))
 
 (add-hook 'post-command-hook 'show-fly-err-at-point)
+
+;; platform vertica CFLAGS - OSX
+(setenv "CGO_CFLAGS" (concat (getenv "CGO_CFLAGS") " " "-I /usr/local/Cellar/unixodbc/2.3.2_1/include"))
+(setenv "CGO_LDFLAGS" (concat (getenv "CGO_LDFLAGS") " " "-L /usr/local/Cellar/unixodbc/2.3.2_1/lib"))
+
+;; platform file regexp
+(add-to-list 'compilation-error-regexp-alist '(".*? \\[.*?\\] [0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+:[0-9]+\.[0-9]+ \\(.*?\\):\\([0-9]+\\)" 1 2))
