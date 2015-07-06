@@ -54,7 +54,6 @@
 	go-errcheck
 	go-mode
 	go-snippets
-	solarized-theme
 	yasnippet
 ))
 
