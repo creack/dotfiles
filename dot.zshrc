@@ -1,3 +1,7 @@
+# -*- mode: sh -*-
+
+fpath=(~/.zsh_comp $fpath)
+
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
 
@@ -72,11 +76,21 @@ export GOPATH="$HOME/go"
 
 export PATH="$GOBIN:/usr/local/bin:/usr/local/sbin:$PATH"
 
-if [ ! -f /tmp/.dockercache ]; then
-    boot2docker socket 2> /dev/null > /tmp/.dockercache
-fi
-eval $(cat /tmp/.dockercache)
-export DOCKER_IP=$(boot2docker ip 2> /dev/null)
+function loaddocker() {
+    if [ ! -f /tmp/.dockercache ]; then
+	docker-machine start dev
+	docker-machine env dev > /tmp/.dockercache
+	docker-machine ip dev > /tmp/.dockerip
+    fi
+    export DOCKER_IP=$(cat /tmp/.dockerip)
+    eval $(cat /tmp/.dockercache)
+}
+loaddocker
+
+function dockerclear {
+    rm -f /tmp/.dockercache /tmp/.dockerip
+    loaddocker
+}
 
 #export JAVA_HOME="$(/usr/libexec/java_home)"
 #export AWS_ACCESS_KEY="<Your AWS Access ID>"
@@ -115,7 +129,7 @@ RPROMPT="[%{$fg_bold[red]%}%D{%a %d %b}%{$reset_color%}]"
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 
 export WORKON_HOME=~/Envs
-source /usr/local/bin/virtualenvwrapper.sh
+#source /usr/local/bin/virtualenvwrapper.sh
 
 unsetopt share_history
 
@@ -164,4 +178,4 @@ alias vv='docker exec -i vertica_c vsql -U dbadmin'
 alias vvt='docker exec -it vertica_c vsql -U dbadmin'
 bindkey "^[l" down-case-word
 
-export NO_STATS_LOOP=1
+fpath=(/usr/local/share/zsh-completions $fpath)
