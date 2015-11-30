@@ -26,9 +26,9 @@ ${HOME}/.oh-my-zsh:
 
 zsh	: ${HOME}/.oh-my-zsh
 
-${HOME}/goroot:
-	git clone https://github.com/golang/go ${HOME}/goroot
-	cd ${HOME}/goroot/src && git checkout go1.4.2 && ./make.bash
+${GOROOT}:
+	@echo "Go is not installed"
+	@exit 1
 
 .go	: ${HOME}/goroot
 	${GOBIN}/go get -u code.google.com/p/rog-go/exp/cmd/godef
