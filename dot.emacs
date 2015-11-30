@@ -7,6 +7,13 @@
 ;;(setq debug-on-error t)
 
 ;; Setup "path"
+
+;; Added by Package.el.  This must come before configurations of
+;; installed packages.  Don't delete this line.  If you don't want it,
+;; just comment it out by adding a semicolon to the start of the line.
+;; You may delete these explanatory comments.
+(package-initialize)
+
 (setq load-path (cons "~/.emacs.files" load-path))
 
 
@@ -78,7 +85,7 @@
 (global-set-key (kbd "C-c C-i") 'go-goto-imports)
 (global-set-key (kbd "C-c C-e") 'go-rename)
 (global-set-key (kbd "C-c d") 'godoc-at-point)
-(global-set-key (kbd "C-c c") '(lambda() (interactive) (go-coverage "/tmp/c")))
+(global-set-key (kbd "C-c c") '(lambda() (interactive) (go-coverage "coverprofile")))
 
 ;; Go helper for compilation
 (setq compilation-always-kill t)
@@ -86,6 +93,8 @@
 (global-set-key (kbd "C-c C-k") 'kill-compilation)
 (global-set-key (kbd "C-c C-f") 'save-and-compile-program)
 (global-set-key (kbd "C-c C-t") 'save-and-test-program)
+(global-set-key (kbd "C-c t")   'save-and-make-test-program)
+(global-set-key (kbd "C-c b")   'save-and-make-clean-program)
 (global-set-key (kbd "C-c C-m") 'save-and-make-program)
 
 (global-set-key (kbd "C-c C-l") 'linum-mode)
@@ -102,20 +111,33 @@
         "Save any unsaved buffers and compile"
         (interactive)
         (save-some-buffers t)
-        (compile "go test -v -cover -coverprofile=/tmp/c -covermode=count"))
+        (compile "go test -v -cover -coverprofile=coverprofile -covermode=count"))
+
+(defun save-and-make-test-program()
+        "Save any unsaved buffers and compile"
+        (interactive)
+        (save-some-buffers t)
+        (compile "make test SKIP_FMT=1 TEST_OPTS='-v .'"))
+
+
+(defun save-and-make-clean-program()
+        "Save any unsaved buffers and compile"
+        (interactive)
+        (save-some-buffers t)
+        (compile "make clean"))
 
 (defun save-and-make-program()
         "Save any unsaved buffers and compile"
         (interactive)
         (save-some-buffers t)
-        (compile "make local"))
+        (compile "make start"))
 
 (add-hook 'go-mode-hook 'go-eldoc-setup)
 
 ;; go-oracle
 (load-file "~/go/src/golang.org/x/tools/cmd/oracle/oracle.el")
 ;(add-hook 'go-mode-hook 'go-oracle)
-(load-file "~/go/src/golang.org/x/tools/refactor/rename/rename.el")
+(load-file "~/go/src/golang.org/x/tools/refactor/rename/go-rename.el")
 
 
 ;;; End of Golang config ;;
@@ -285,3 +307,17 @@
 
 ;; platform file regexp
 (add-to-list 'compilation-error-regexp-alist '(".*? \\[.*?\\] [0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+:[0-9]+\.[0-9]+ \\(.*?\\):\\([0-9]+\\)" 1 2))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (markdown-mode sr-speedbar elixir-mix elixir-mode go-snippets go-errcheck go-eldoc go-direx go-autocomplete flycheck dockerfile-mode direx sql-indent minimap magit jedi iedit exec-path-from-shell epc elpy cyberpunk-theme ctable concurrent company))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
