@@ -179,3 +179,4 @@ alias vvt='docker exec -it vertica_c vsql -U dbadmin'
 bindkey "^[l" down-case-word
 
 fpath=(/usr/local/share/zsh-completions $fpath)
+source /usr/local/share/zsh/site-functions/_aws
