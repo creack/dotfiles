@@ -55,6 +55,7 @@
 	go-mode
 	go-snippets
 	yasnippet
+	flycheck-gometalinter
 ))
 
 

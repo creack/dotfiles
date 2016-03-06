@@ -125,7 +125,7 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
         "Save any unsaved buffers and compile"
         (interactive)
         (save-some-buffers t)
-        (compile "make test SKIP_FMT=1 TEST_OPTS='-v .'"))
+        (compile "make test SKIP_FMT=1 NOPULL=1 TEST_OPTS='-v .'"))
 
 
 (defun save-and-make-clean-program()
@@ -138,7 +138,7 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
         "Save any unsaved buffers and compile"
         (interactive)
         (save-some-buffers t)
-        (compile "make start"))
+        (compile "make start NOPULL=1"))
 
 (add-hook 'go-mode-hook 'go-eldoc-setup)
 
@@ -237,6 +237,7 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
 ;  (file-name-shadow-mode t))             ; be smart about filenames in mbuf
 
 (setq custom-theme-load-path (cons "~/.emacs.files/themes/emacs-color-theme-solarized" custom-theme-load-path))
+;;(load-theme 'solarized-light t)
 (load-theme 'solarized-dark t)
 
 ;; GDB helper
@@ -322,10 +323,13 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (markdown-mode sr-speedbar elixir-mix elixir-mode go-snippets go-errcheck go-eldoc go-direx go-autocomplete flycheck dockerfile-mode direx sql-indent minimap magit jedi iedit exec-path-from-shell epc elpy cyberpunk-theme ctable concurrent company))))
+    (yaml-mode gnuplot json-mode markdown-mode sr-speedbar elixir-mix elixir-mode go-snippets go-errcheck go-eldoc go-direx go-autocomplete flycheck dockerfile-mode direx sql-indent minimap magit jedi iedit exec-path-from-shell epc elpy cyberpunk-theme ctable concurrent company))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+(eval-after-load 'flycheck
+  '(add-hook 'flycheck-mode-hook #'flycheck-gometalinter-setup))

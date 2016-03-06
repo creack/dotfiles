@@ -3,7 +3,7 @@
 _make() {
       local -a options
 
-      options=($(sh -c 'make --dry-run --print-data-base 2> /dev/null | grep ^.PHONY | sed "s/.PHONY: //"'))
+      options=($(sh -c 'make --dry-run --print-data-base 2> /dev/null | \grep ^.PHONY | sed "s/.PHONY: //"'))
       _describe 'values' options
 }
 
