@@ -56,6 +56,12 @@
 	go-snippets
 	yasnippet
 	flycheck-gometalinter
+
+        js2-mode
+	jsx-mode
+        web-mode
+        tern
+        tern-auto-complete
 ))
 
 

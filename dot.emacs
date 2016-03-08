@@ -97,7 +97,7 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
 
 ;; Go helper for compilation
 (setq compilation-always-kill t)
-(global-set-key (kbd "C-c C-r") 'recompile)
+(global-set-key (kbd "C-c C-r") 'my-recompile)
 (global-set-key (kbd "C-c C-k") 'kill-compilation)
 (global-set-key (kbd "C-c C-f") 'save-and-compile-program)
 (global-set-key (kbd "C-c C-t") 'save-and-test-program)
@@ -107,38 +107,56 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
 
 (global-set-key (kbd "C-c C-l") 'linum-mode)
 
+(defun end-of-line-compile()
+  (setq curbuf (current-buffer))
+  (pop-to-buffer "*compilation*")
+  (end-of-buffer)
+  (pop-to-buffer curbuf)
+  )
 
 ;; save all files then run M-x compile
+(defun my-recompile()
+        "Save any unsaved buffers and compile"
+        (interactive)
+        (save-some-buffers t)
+        (recompile)
+	(end-of-line-compile))
+
 (defun save-and-compile-program()
         "Save any unsaved buffers and compile"
         (interactive)
         (save-some-buffers t)
-        (compile "bash -c 'go install && go build -o /tmp/a.out && /tmp/a.out'"))
+        (compile "bash -c 'go install && go build -o /tmp/a.out && /tmp/a.out'")
+	(end-of-line-compile))
 
 (defun save-and-test-program()
         "Save any unsaved buffers and compile"
         (interactive)
         (save-some-buffers t)
-        (compile "go test -v -cover -coverprofile=coverprofile -covermode=count"))
+        (compile "go test -v -cover -coverprofile=coverprofile -covermode=count")
+	(end-of-line-compile))
 
 (defun save-and-make-test-program()
         "Save any unsaved buffers and compile"
         (interactive)
         (save-some-buffers t)
-        (compile "make test SKIP_FMT=1 NOPULL=1 TEST_OPTS='-v .'"))
+        (compile "make test SKIP_FMT=1 NOPULL=1 TEST_OPTS='-v .'")
+	(end-of-line-compile))
 
 
 (defun save-and-make-clean-program()
         "Save any unsaved buffers and compile"
         (interactive)
         (save-some-buffers t)
-        (compile "make clean"))
+        (compile "make clean")
+	(end-of-line-compile))
 
 (defun save-and-make-program()
         "Save any unsaved buffers and compile"
         (interactive)
         (save-some-buffers t)
-        (compile "make start NOPULL=1"))
+        (compile "make start NOPULL=1")
+	(end-of-line-compile))
 
 (add-hook 'go-mode-hook 'go-eldoc-setup)
 
@@ -323,7 +341,7 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (yaml-mode gnuplot json-mode markdown-mode sr-speedbar elixir-mix elixir-mode go-snippets go-errcheck go-eldoc go-direx go-autocomplete flycheck dockerfile-mode direx sql-indent minimap magit jedi iedit exec-path-from-shell epc elpy cyberpunk-theme ctable concurrent company))))
+    (tern-auto-complete tern js2-mode web-mode jsfmt jsx-mode yaml-mode gnuplot json-mode markdown-mode sr-speedbar elixir-mix elixir-mode go-snippets go-errcheck go-eldoc go-direx go-autocomplete flycheck dockerfile-mode direx sql-indent minimap magit jedi iedit exec-path-from-shell epc elpy cyberpunk-theme ctable concurrent company))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -333,3 +351,25 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
 
 (eval-after-load 'flycheck
   '(add-hook 'flycheck-mode-hook #'flycheck-gometalinter-setup))
+
+
+(add-to-list 'auto-mode-alist '("\\.js\\'" . web-mode))
+
+(add-hook 'web-mode-hook
+          (lambda ()
+            (web-mode-set-content-type "jsx")
+            (message "now set to: %s" web-mode-content-type)
+            (setq web-mode-markup-indent-offset 2)
+            (setq web-mode-css-indent-offset 2)
+            (setq web-mode-code-indent-offset 2)
+            (setq js-indent-level 2)
+            (setq jsx-indent-level 2)
+            (setq indent-tabs-mode nil)
+	    (global-set-key (kbd "C-c .") 'tern-ac-complete)
+            ))
+
+(add-hook 'web-mode-hook (lambda () (tern-mode t)))
+(eval-after-load 'tern
+   '(progn
+      (require 'tern-auto-complete)
+      (tern-ac-setup)))
