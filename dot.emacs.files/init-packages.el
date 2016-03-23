@@ -36,8 +36,6 @@
 	iedit
 	jedi
 	let-alist
-	magit
-	minimap
 	popup
 	python-environment
 	pyvenv
@@ -56,6 +54,11 @@
 	go-snippets
 	yasnippet
 	flycheck-gometalinter
+
+	helm
+	helm-swoop
+	helm-git
+	helm-flycheck
 
         js2-mode
 	jsx-mode
