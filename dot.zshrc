@@ -52,7 +52,7 @@ ZSH_THEME="simple"
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(git brew go gnu-utils mosh osx tmux vagrant ssh-agent emacs docker encode64)
+plugins=(git brew go gpg-agent gnu-utils mosh osx tmux vagrant ssh-agent emacs docker encode64)
 
 ZSH_TMUX_AUTOSTART=true
 
@@ -70,17 +70,13 @@ export HOST=`uname -n`
 export EDITOR="emacs"
 export SHELL="/usr/local/bin/zsh"
 
-export GOROOT="$HOME/goroot"
-export GOBIN="$GOROOT/bin"
-export GOPATH="$HOME/go"
-
-export PATH="$GOBIN:/usr/local/bin:/usr/local/sbin:$PATH"
+export ORIGIN_PATH=$PATH
 
 function loaddocker() {
     if [ ! -f /tmp/.dockercache ]; then
-	docker-machine start dev
-	docker-machine env dev > /tmp/.dockercache
-	docker-machine ip dev > /tmp/.dockerip
+	docker-machine start default
+	docker-machine env default > /tmp/.dockercache
+	docker-machine ip default > /tmp/.dockerip
     fi
     export DOCKER_IP=$(cat /tmp/.dockerip)
     eval $(cat /tmp/.dockercache)
@@ -180,3 +176,56 @@ bindkey "^[l" down-case-word
 
 fpath=(/usr/local/share/zsh-completions $fpath)
 source /usr/local/share/zsh/site-functions/_aws
+
+eval $(cat `echo $GPG_ENV`; echo export GPG_AGENT_INFO)
+
+function installgo() {
+    set -e
+
+    # Install go1.4 (needed to compile 1.5+)
+    if [ ! -d ~/go1.4 ]; then
+	setgo1.4
+	git clone https://github.com/golang/go ~/go1.4
+	cd ~/go1.4/src && git checkout go1.4.3 && ./make.bash
+    fi
+
+    # Install go1.5 (TODO: remove this once fully migrated to 1.6)
+    if [ ! -d ~/go1.5 ]; then
+	setgo1.5
+	cp -r ~/go1.4 ~/go1.5
+	cd ~/go1.5/src && git checkout go1.5.3 && ./make.bash
+    fi
+
+    if [ ! -d ~/go1.6 ]; then
+	setgo1.6
+	cp -r ~/go1.4 ~/go1.6
+	cd ~/go1.6/src && git checkout go1.6 && ./make.bash
+    fi
+}
+
+## Golang version swticher
+
+### NOTES: require ~/go1.4, ~/go1.5 and ~/go1.6 installed.
+
+function setgo1.6() {
+    export GOROOT=~/go1.6
+    export GOBIN=$GOROOT/bin
+    export GOPATH=~/gopath1.6
+    export PATH=$GOBIN:$ORIGIN_PATH
+}
+
+function setgo1.5() {
+    export GOROOT=~/go1.5
+    export GOBIN=$GOROOT/bin
+    export GOPATH=~/go
+    export PATH=$GOBIN:$ORIGIN_PATH
+}
+
+function setgo1.4() {
+    export GOROOT=~/go1.4
+    export GOBIN=$GOROOT/bin
+    export GOPATH=~/gopath1.4
+    export PATH=$GOBIN:$ORIGIN_PATH
+}
+
+setgo1.6
