@@ -52,6 +52,7 @@
 	go-errcheck
 	go-mode
 	go-snippets
+	go-guru
 	yasnippet
 	flycheck-gometalinter
 

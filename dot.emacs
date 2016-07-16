@@ -167,9 +167,10 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
 	(end-of-line-compile))
 
 (add-hook 'go-mode-hook 'go-eldoc-setup)
+(add-hook 'go-mode-hook 'go-guru-hl-identifier-mode)
 
 ;; go-oracle
-(load-file "~/go/src/golang.org/x/tools/cmd/oracle/oracle.el")
+;;(load-file "~/go/src/golang.org/x/tools/cmd/oracle/oracle.el")
 ;(add-hook 'go-mode-hook 'go-oracle)
 (load-file "~/go/src/golang.org/x/tools/refactor/rename/go-rename.el")
 
@@ -372,7 +373,7 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
     ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
  '(package-selected-packages
    (quote
-    (helm-swoop monokai-theme helm-package helm-git helm-flycheck helm tern-auto-complete tern js2-mode web-mode jsfmt jsx-mode yaml-mode gnuplot json-mode markdown-mode go-snippets go-errcheck go-eldoc go-direx go-autocomplete flycheck dockerfile-mode direx sql-indent magit jedi iedit exec-path-from-shell epc elpy cyberpunk-theme ctable concurrent company)))
+    (go-mode guru-mode go-guru format-sql helm-swoop monokai-theme helm-package helm-git helm-flycheck helm tern-auto-complete tern js2-mode web-mode jsfmt jsx-mode yaml-mode gnuplot json-mode markdown-mode go-snippets go-errcheck go-eldoc go-direx go-autocomplete flycheck dockerfile-mode direx sql-indent magit jedi iedit exec-path-from-shell epc elpy cyberpunk-theme ctable concurrent company)))
  '(pos-tip-background-color "#073642")
  '(pos-tip-foreground-color "#93a1a1")
  '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#073642" 0.2))
@@ -418,6 +419,7 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(go-guru-hl-identifier-face ((t (:inherit highlight :inverse-video t :underline t))))
  '(web-mode-block-face ((t (:background "brightblue")))))
 
 ;;(eval-after-load 'flycheck
@@ -563,3 +565,8 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
 (setq compilation-scroll-output t)
 
 (global-set-key (kbd "C-s") 'helm-swoop)
+
+;; Org-mode config
+
+;; Display date when closing a TODO
+(setq org-log-done 'time)

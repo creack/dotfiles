@@ -5,7 +5,7 @@
     mergeoptions = --no-commit --no-ff
 
 [alias]
-    ci = commit -S
+    ci = commit -s -S
     co = checkout
     st = status -sb
     b = branch
