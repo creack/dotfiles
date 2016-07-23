@@ -96,7 +96,7 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
 	    (global-set-key (kbd "C-c c") '(lambda() (interactive) (go-coverage "coverprofile")))
 
 	    ;; Go helper for compilation
-	    (global-set-key (kbd "C-c C-f") 'save-and-compile-program)
+	    (global-set-key (kbd "C-c f") 'save-and-compile-program)
 	    (global-set-key (kbd "C-c C-t") 'save-and-test-program)
 	    (global-set-key (kbd "C-c t")   'save-and-make-test-program)
 	    (global-set-key (kbd "C-c b")   'save-and-make-clean-program)
