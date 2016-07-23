@@ -1,6 +1,6 @@
 # -*- mode: sh -*-
 
-fpath=(~/.zsh_comp $fpath)
+fpath=(/usr/local/share/zsh-completions $fpath)
 
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
@@ -34,7 +34,7 @@ ZSH_THEME="simple"
 # DISABLE_CORRECTION="true"
 
 # Uncomment the following line to display red dots whilst waiting for completion.
-# COMPLETION_WAITING_DOTS="true"
+COMPLETION_WAITING_DOTS="true"
 
 # Uncomment the following line if you want to disable marking untracked files
 # under VCS as dirty. This makes repository status check for large repositories
@@ -52,7 +52,7 @@ ZSH_THEME="simple"
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(git brew go gpg-agent gnu-utils mosh osx tmux vagrant ssh-agent emacs docker encode64)
+plugins=(aws git brew go gpg-agent gnu-utils mosh osx tmux vagrant ssh-agent emacs docker encode64)
 
 ZSH_TMUX_AUTOSTART=true
 
@@ -60,17 +60,18 @@ source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
+bindkey "^[l" down-case-word
+eval $(cat `echo $GPG_ENV`; echo export GPG_AGENT_INFO)
+
 export MANPATH="/usr/local/man:$MANPATH"
 export LSCOLORS="ExFxCxDxBxegedabagacad"
 export LANG=en_US.UTF-8
 export GPGKEY=CB6E3FF3
 export PAGER="most"
-export HOSTTYPE=`uname -s`
-export HOST=`uname -n`
+export HOSTTYPE=$(uname -s)
+export HOST=$(uname -n)
 export EDITOR="emacs"
 export SHELL="/usr/local/bin/zsh"
-
-export ORIGIN_PATH=$PATH
 
 function loaddocker() {
     if [ ! -f /tmp/.dockercache ]; then
@@ -122,23 +123,14 @@ PROMPT="
 
 RPROMPT="[%{$fg_bold[red]%}%D{%a %d %b}%{$reset_color%}]"
 
-export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
-
-export WORKON_HOME=~/Envs
-#source /usr/local/bin/virtualenvwrapper.sh
-
 unsetopt share_history
 
 deeppep8() { [ -z "$1" ] && 1="."; files=$(find $1 -name '*.py'); echo -n "Total issues: "; echo $files | xargs pep8 --count -qq; echo; echo $files | xargs pep8 --statistic -qq --select=E | sort -n; echo; echo $files | xargs pep8 --statistic -qq --select=W | sort -n }
 pep8s(){[-z "$1" ] && 1="."; files=$(find $1 -name '*.py'); echo -n "Total issues: "; echo $files | xargs pep8 --count -qq; echo; echo $files | xargs pep8 --statistic -qq --select=E | sort -n; echo; echo $files | xargs pep8 --statistic -qq --select=W | sort -n }
 
-export PATH=$PATH:/opt/vertica/bin
-
 
 function update_go() {
     packages="
-code.google.com/p/rog-go/exp/cmd/godef
-
 github.com/ajstarks/svgo/benchviz
 github.com/axw/gocov/gocov
 github.com/cespare/prettybench
@@ -149,15 +141,16 @@ github.com/kisielk/errcheck
 github.com/kisielk/godepgraph
 github.com/nsf/gocode
 github.com/tools/godep
+github.com/rogpeppe/godef
+github.com/pkg/errors
 
 golang.org/x/tools/cmd/benchcmp
 golang.org/x/tools/cmd/cover
 golang.org/x/tools/cmd/godoc
 golang.org/x/tools/cmd/goimports
 golang.org/x/tools/cmd/gorename
-golang.org/x/tools/cmd/oracle
+golang.org/x/tools/cmd/guru
 golang.org/x/tools/cmd/stringer
-golang.org/x/tools/cmd/vet
 
 sourcegraph.com/sqs/goreturns
 "
@@ -167,65 +160,68 @@ sourcegraph.com/sqs/goreturns
     done
 }
 
-# added by travis gem
-[ -f /Users/guillaume/.travis/travis.sh ] && source /Users/guillaume/.travis/travis.sh
-
-alias vv='docker exec -i vertica_c vsql -U dbadmin'
-alias vvt='docker exec -it vertica_c vsql -U dbadmin'
-bindkey "^[l" down-case-word
-
-fpath=(/usr/local/share/zsh-completions $fpath)
-source /usr/local/share/zsh/site-functions/_aws
-
-eval $(cat `echo $GPG_ENV`; echo export GPG_AGENT_INFO)
-
-function installgo() {
+function _installgo() {
     set -e
 
-    # Install go1.4 (needed to compile 1.5+)
-    if [ ! -d ~/go1.4 ]; then
-	setgo1.4
-	git clone https://github.com/golang/go ~/go1.4
-	cd ~/go1.4/src && git checkout go1.4.3 && ./make.bash
+    if [ -z "$1" ]; then
+	echo 'Usage: installgo <versionMajor.versionMinor>' >& 2
+	false
+    fi
+    version=$1
+
+    if [ ! -d ~/go$version ]; then
+	git clone https://github.com/golang/go ~/go$version
     fi
 
-    # Install go1.5 (TODO: remove this once fully migrated to 1.6)
-    if [ ! -d ~/go1.5 ]; then
-	setgo1.5
-	cp -r ~/go1.4 ~/go1.5
-	cd ~/go1.5/src && git checkout go1.5.3 && ./make.bash
+    cd ~/go$version/src
+    rev=$(git rev-parse HEAD)
+    git checkout master && git pull
+    git checkout $rev
+
+    latest=$(git tag -l | \grep go$version | \grep -v 'beta' | \grep -v 'rc' | sort | tail -1)
+    if [ -z "$latest" ]; then
+	echo "No tag found for go$version" >&2
+	false
     fi
 
-    if [ ! -d ~/go1.6 ]; then
-	setgo1.6
-	cp -r ~/go1.4 ~/go1.6
-	cd ~/go1.6/src && git checkout go1.6 && ./make.bash
+    if [ "$(git rev-parse $latest)" != "$(git rev-parse HEAD)" ]; then
+	setgo $version
+	git checkout $latest
+	./make.bash
     fi
+}
+
+function installgo() {
+    $SHELL -c "source ~/.zshrc; _installgo $@"
 }
 
 ## Golang version swticher
+export ORIGIN_PATH=$PATH
+export GOLINK=~/go
 
-### NOTES: require ~/go1.4, ~/go1.5 and ~/go1.6 installed.
+function setgo() {
+    if [ -z "$1" ]; then
+	echo 'Usage: setgo <versionMajor.versionMinor>' >& 2
+	return 1
+    fi
 
-function setgo1.6() {
-    export GOROOT=~/go1.6
+    version=$1
+
+    echo -n 'Using: '
+    ~/go$version/bin/go version 2> /dev/null
+    if [ $? != 0 ]; then
+	echo
+	echo 'go '$version' not found, please run `installgo '$version'`'
+	return 1
+    fi
+
+    export GOROOT=~/go$version
     export GOBIN=$GOROOT/bin
-    export GOPATH=~/gopath1.6
+    export GOPATH=~/gopath$version
     export PATH=$GOBIN:$ORIGIN_PATH
+    export CURGOVERSION=go$version
+    rm -f $GOLINK > /dev/null
+    ln -s $GOPATH $GOLINK
 }
 
-function setgo1.5() {
-    export GOROOT=~/go1.5
-    export GOBIN=$GOROOT/bin
-    export GOPATH=~/go
-    export PATH=$GOBIN:$ORIGIN_PATH
-}
-
-function setgo1.4() {
-    export GOROOT=~/go1.4
-    export GOBIN=$GOROOT/bin
-    export GOPATH=~/gopath1.4
-    export PATH=$GOBIN:$ORIGIN_PATH
-}
-
-setgo1.6
+setgo 1.6 > /dev/null
