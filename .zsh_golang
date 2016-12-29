@@ -1,7 +1,7 @@
 # -*- mode: sh -*-
 
 # Environement.
-export GOROOT=
+[ -d /usr/local/opt/go/libexec/ ] && export GOROOT=/usr/local/opt/go/libexec || export GOROOT=$(go env GOROOT)
 export GOPATH=~/go
 export GOBIN=$GOPATH/bin
 export PATH=$GOBIN:$PATH
