@@ -10,8 +10,6 @@ ZSH_THEME="simple"
 CASE_SENSITIVE="true"
 # Disable auto-correct.
 DISABLE_CORRECTION="true"
-# Don't set "dity" for untracked file.
-DISABLE_UNTRACKED_FILES_DIRTY="true"
 # Autostart tmux.
 ZSH_TMUX_AUTOSTART="true"
 # Autostart docker-machine default.
@@ -39,15 +37,11 @@ function main() {
     # Disable shared history.
     unsetopt share_history
 
-    # Customize the prompt a little (shorten pwd)
-    ZSH_THEME_GIT_PROMPT_PREFIX="("
-    ZSH_THEME_GIT_PROMPT_SUFFIX=")"
-    ZSH_THEME_GIT_PROMPT_DIRTY=" %{$fg_bold[red]%}✗%{$reset_color%}"
-    ZSH_THEME_GIT_PROMPT_CLEAN=" %{$fg_bold[green]%}✔%{$reset_color%}"
-
-    PROMPT="
+    # Customize the prompt a little.
+    source ~/.zsh_git_prompt
+    PROMPT='
 (%{$fg_bold[blue]%}%n%{$reset_color%}@%{$fg_bold[green]%}%m%{$reset_color%}):<%{$fg_bold[cyan]%}%~%{$reset_color%}>
-[%{$fg_bold[red]%}%D{%a %b %d %r}%{$reset_color%}]$(git_prompt_info)%{$reset_color%}%% "
+[%{$fg_bold[red]%}%D{%a %b %d %r}%{$reset_color%}]$(git_super_status)%{$reset_color%}%% '
 
     # Set host metadata.
     [ -z "$LANG" ]     && export LANG=en_US.UTF-8
