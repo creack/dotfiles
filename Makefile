@@ -15,7 +15,7 @@ install: ~/.oh-my-zsh
 clean:
 	@rm -rf ~/.oh-my-zsh
 	@for f in $(shell ls -a); do \
-	  [ "$$f" = "." ] || [ "$$f" = ".." ] && [ "$$f" = ".git" ] && continue; \
+	  [ "$$f" = "." ] || [ "$$f" = ".." ] || [ "$$f" = ".git" ] && continue; \
           [[ "$$f" != "."* ]] && continue; \
 	  [ -h "$$HOME/$$f" ] && rm "$$HOME/$$f"; \
 	done
