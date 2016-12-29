@@ -9,72 +9,33 @@
 ;; Setup "path"
 (defun set-exec-path-from-shell-PATH ()
     "Set up Emacs' `exec-path' and PATH environment variable to match that used by the user's shell.
-
-This is particularly useful under Mac OSX, where GUI apps are not started from a shell."
+     This is particularly useful under Mac OSX, where GUI apps are not started from a shell."
     (interactive)
-    (let ((path-from-shell (replace-regexp-in-string "[ \t\n]*$" "" (shell-command-to-string "$SHELL --login -i -c 'echo $PATH'"))))
+    (let ((path-from-shell (replace-regexp-in-string "[ \t\n]*$" "" (shell-command-to-string "$SHELL --login -i"))))
       (setenv "PATH" path-from-shell)
           (setq exec-path (split-string path-from-shell path-separator))))
 
-;; Added by Package.el.  This must come before configurations of
-;; installed packages.  Don't delete this line.  If you don't want it,
-;; just comment it out by adding a semicolon to the start of the line.
-;; You may delete these explanatory comments.
+;;; Package manager ;;;
 (package-initialize)
-
 (setq load-path (cons "~/.emacs.files" load-path))
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+(load-file "~/.emacs.files/init-packages.el")
+;;; End of Package ;;;
 
-
-;;(set-face-background 'highlight-indentation-face "#222")
-;;(set-face-background 'highlight-indentation-current-column-face "#222")
-
-;; Setup emacs-server path
-;;(setq server-socket-dir (format "/tmp/emacs%d" (user-uid)))
-
-;;; git-glutter
-;;(require 'git-gutter)
-
-;; If you enable global minor mode
-;;(global-git-gutter-mode t)
-
-;; If you would like to use git-gutter.el and linum-mode
-;;(git-gutter:linum-setup)
-
-;;(global-set-key (kbd "C-x C-g") 'git-gutter:toggle)
 
 ;;; enable mouse  ;;;
 (require 'mouse)
 (xterm-mouse-mode t)
-;; Do the xterm mode in a lambda to allow emacsclient to load.
-;; (add-hook 'after-make-frame-functions '
-;; 	  (lambda (frame) (unless window-system
-;; 			    (global-linum-mode t)
-;; (set-face-attribute 'linum nil :background "#222")
-;; (setq linum-format "%4d\u2502")
-;;
-;; 			    )))
-;;;;
-
 (defun track-mouse (e))
 (setq mouse-sel-mode t)
 (global-set-key [mouse-4] (lambda ()
  			    (interactive)
- 			    (scroll-down 1)))
+ 			    (scroll-down 5)))
 (global-set-key [mouse-5] (lambda ()
  			    (interactive)
- 			    (scroll-up 1)))
-
-
+ 			    (scroll-up 5)))
 ;;; End of mouse setup ;;;
-
-
-;;; Package manager ;;;
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-(add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/"))
-(load-file "~/.emacs.files/init-packages.el")
-
-;;; End of Package ;;;
 
 
 ;;; Golang config ;;;
@@ -169,12 +130,6 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
 (add-hook 'go-mode-hook 'go-eldoc-setup)
 (add-hook 'go-mode-hook 'go-guru-hl-identifier-mode)
 
-;; go-oracle
-;;(load-file "~/go/src/golang.org/x/tools/cmd/oracle/oracle.el")
-;(add-hook 'go-mode-hook 'go-oracle)
-(load-file "~/go/src/golang.org/x/tools/refactor/rename/go-rename.el")
-
-
 ;;; End of Golang config ;;
 
 ;;; Setup auto-complete ;;;
@@ -185,36 +140,23 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
 (ac-config-default)
 (setq ac-delay 0.1)
 
-
 ;;; Flycheck config ;;;
-;;(setq load-path (cons "~/.emacs.files/flycheck" load-path))
-;;(require 'flycheck)
 (add-hook 'after-init-hook 'global-flycheck-mode)
 
 (global-set-key (kbd "C-c <up>") 'flycheck-next-error)
 (global-set-key (kbd "C-c <down>") 'flycheck-previous-error)
 ;(global-set-key (kbd "C-c l") 'flycheck-list-errors)
 (eval-after-load 'flycheck
-  '(define-key flycheck-mode-map (kbd "C-c l") 'helm-flycheck)
-  )
+  '(define-key flycheck-mode-map (kbd "C-c l") 'helm-flycheck))
 
 ;;; Emacs general config ;;;
 
 ;; No bell
 (setq ring-bell-function 'ignore)
-
-;; Display line number on the left
-;; (global-linum-mode t)
-;; (set-face-attribute 'linum nil :background "#222")
-;; (setq linum-format "%4d\u2502")
+(setq bell-volume 0)
 
 ;; Hightline current line
 (global-hl-line-mode t)
-;(setq col-highlight-vline-face-flag t)
-
-;; Change the region background color
-;;(set-face-background 'region "#770")
-
 
 ;; Show trailing whitespaces
 (setq-default show-trailing-whitespace t)
@@ -222,16 +164,12 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
 ;; windows management
 (winner-mode 1)
 
-;; Remove useless default emacs crap
-(menu-bar-mode 0)                        ; no file/edit/blabla top menu
-(setq inhibit-startup-message t)
-(setq bell-volume 0)
-(setq-default truncate-lines t)          ; no wrapping
-(fset 'yes-or-no-p 'y-or-n-p)            ; yes/no shortcut
-(when (require 'ido nil t) (ido-mode t)) ; (much) better file/buffer browsing
-(global-font-lock-mode t)		 ; default enable syntax coloration
-
-
+(menu-bar-mode 0)                        ; no file/edit/blabla top menu.
+(setq inhibit-startup-message t)         ; no splash display.
+(setq-default truncate-lines t)          ; no wrapping.
+(fset 'yes-or-no-p 'y-or-n-p)            ; yes/no shortcut.
+(when (require 'ido nil t) (ido-mode t)) ; (much) better file/buffer browsing.
+(global-font-lock-mode t)		 ; default enable syntax coloration.
 (setq initial-scratch-message "")	 ; remove the default text within the scratch buffer
 
 ;; Display current line/column
@@ -245,31 +183,14 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
 (require 'paren)
 (show-paren-mode t)
 
-
 ;;; VC config ;;;
-;(autoload 'magit-status "magit" nil t)
 
 ;;; Auto Save/Backup config ;;;
-
-;(setq make-backup-files nil) ; stop ~ files
 (setq temporary-file-directory "~/.emacs.files/tmp/")
 (setq backup-directory-alist
           `((".*" . , temporary-file-directory)))
     (setq auto-save-file-name-transforms
           `((".*" , temporary-file-directory t)))
-
-
-;; Random conf to be checked
-
-
-;(put 'narrow-to-region 'disabled nil)    ; enable...
-;(put 'erase-buffer 'disabled nil)        ; ... useful things
-;(when (fboundp file-name-shadow-mode)    ; emacs22+
-;  (file-name-shadow-mode t))             ; be smart about filenames in mbuf
-
-;(setq custom-theme-load-path (cons "~/.emacs.files/themes/emacs-color-theme-solarized" custom-theme-load-path))
-;;(load-theme 'solarized-light t)
-;(load-theme 'solarized-dark t)
 
 ;; GDB helper
 (eval-after-load "gud"
@@ -278,12 +199,6 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
      (define-key gud-mode-map (kbd "<down>") 'comint-next-input)))
 
 ;;
-
-
-;; highlight 80+columns
-;(require 'whitespace)
-;(setq whitespace-style '(face lines-tail trailing))
-;(global-whitespace-mode t)
 
 
 ;; Numpad on OSX (emacs 24.3.1)
@@ -304,21 +219,18 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
 (global-set-key (kbd "M-O m") (kbd "-"))
 (global-set-key (kbd "M-O M") (kbd ""))
 
+
+;; Setup modes.
 (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode))
+(add-to-list 'auto-mode-alist '("\\.js\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.mk\\'" . makefile-mode))
 
 ;; Makefile tab size.
 (add-hook 'makefile-mode-hook
-	  (function
-	   (lambda ()
-	     (setq tab-width 8)
-	     )))
-
-;; platform vertica CFLAGS - OSX
-;(setenv "CGO_CFLAGS" (concat (getenv "CGO_CFLAGS") " " "-I /usr/local/Cellar/unixodbc/2.3.2_1/include"))
-;(setenv "CGO_LDFLAGS" (concat (getenv "CGO_LDFLAGS") " " "-L /usr/local/Cellar/unixodbc/2.3.2_1/lib"))
-
-;; platform file regexp
-(add-to-list 'compilation-error-regexp-alist '(".*? \\[.*?\\] [0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+:[0-9]+\.[0-9]+ \\(.*?\\):\\([0-9]+\\)" 1 2))
+  (function
+    (lambda ()
+      (setq tab-width 8
+))))
 
 ; Autogenerated variables.
 (custom-set-variables
@@ -329,7 +241,7 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
  '(ansi-color-faces-vector
    [default default default italic underline success warning error])
  '(ansi-color-names-vector
-   ["#073642" "#dc322f" "#859900" "#b58900" "#268bd2" "#d33682" "#2aa198" "#657b83"])
+   ["#272822" "#F92672" "#A6E22E" "#E6DB74" "#66D9EF" "#FD5FF0" "#A1EFE4" "#F8F8F2"])
  '(background-color nil)
  '(background-mode dark)
  '(compilation-message-face (quote default))
@@ -342,9 +254,9 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
  '(custom-safe-themes
    (quote
     ("1e7e097ec8cb1f8c3a912d7e1e0331caeed49fef6cff220be63bd2a6ba4cc365" "fc5fcb6f1f1c1bc01305694c59a1a861b008c534cae8d0e48e4d5e81ad718bc6" "38ba6a938d67a452aeb1dada9d7cdeca4d9f18114e9fc8ed2b972573138d4664" "8db4b03b9ae654d4a57804286eb3e332725c84d7cdab38463cb6b97d5762ad26" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" default)))
- '(fci-rule-color "#073642")
+ '(fci-rule-color "#20240E")
  '(foreground-color nil)
- '(highlight-changes-colors (quote ("#d33682" "#6c71c4")))
+ '(highlight-changes-colors (quote ("#FD5FF0" "#AE81FF")))
  '(highlight-symbol-colors
    (--map
     (solarized-color-blend it "#002b36" 0.25)
@@ -353,14 +265,14 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
  '(highlight-symbol-foreground-color "#93a1a1")
  '(highlight-tail-colors
    (quote
-    (("#073642" . 0)
-     ("#546E00" . 20)
-     ("#00736F" . 30)
-     ("#00629D" . 50)
-     ("#7B6000" . 60)
-     ("#8B2C02" . 70)
-     ("#93115C" . 85)
-     ("#073642" . 100))))
+    (("#20240E" . 0)
+     ("#679A01" . 20)
+     ("#4BBEAE" . 30)
+     ("#1DB4D0" . 50)
+     ("#9A8F21" . 60)
+     ("#A75B00" . 70)
+     ("#F309DF" . 85)
+     ("#20240E" . 100))))
  '(hl-bg-colors
    (quote
     ("#7B6000" "#8B2C02" "#990A1B" "#93115C" "#3F4D91" "#00629D" "#00736F" "#546E00")))
@@ -373,9 +285,9 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
     ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
  '(package-selected-packages
    (quote
-    (go-mode guru-mode go-guru format-sql helm-swoop monokai-theme helm-package helm-git helm-flycheck helm tern-auto-complete tern js2-mode web-mode jsfmt jsx-mode yaml-mode gnuplot json-mode markdown-mode go-snippets go-errcheck go-eldoc go-direx go-autocomplete flycheck dockerfile-mode direx sql-indent magit jedi iedit exec-path-from-shell epc elpy cyberpunk-theme ctable concurrent company)))
- '(pos-tip-background-color "#073642")
- '(pos-tip-foreground-color "#93a1a1")
+    (go-rename jenkins groovy-mode yaml-mode guru-mode go-guru format-sql helm-swoop helm-package helm-git helm-flycheck helm tern-auto-complete js2-mode jsfmt jsx-mode gnuplot json-mode go-snippets go-errcheck go-eldoc go-direx go-autocomplete flycheck dockerfile-mode direx sql-indent jedi iedit exec-path-from-shell epc elpy cyberpunk-theme ctable concurrent company)))
+ '(pos-tip-background-color "#A6E22E")
+ '(pos-tip-foreground-color "#272822")
  '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#073642" 0.2))
  '(solarized-broken-srgb t)
  '(solarized-diff-mode (quote normal))
@@ -386,28 +298,27 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
  '(vc-annotate-background nil)
  '(vc-annotate-color-map
    (quote
-    ((20 . "#dc322f")
-     (40 . "#c37300")
-     (60 . "#b97d00")
-     (80 . "#b58900")
-     (100 . "#a18700")
-     (120 . "#9b8700")
-     (140 . "#948700")
-     (160 . "#8d8700")
-     (180 . "#859900")
-     (200 . "#5a942c")
-     (220 . "#439b43")
-     (240 . "#2da159")
-     (260 . "#16a870")
-     (280 . "#2aa198")
-     (300 . "#009fa7")
-     (320 . "#0097b7")
-     (340 . "#008fc7")
-     (360 . "#268bd2"))))
+    ((20 . "#F92672")
+     (40 . "#CF4F1F")
+     (60 . "#C26C0F")
+     (80 . "#E6DB74")
+     (100 . "#AB8C00")
+     (120 . "#A18F00")
+     (140 . "#989200")
+     (160 . "#8E9500")
+     (180 . "#A6E22E")
+     (200 . "#729A1E")
+     (220 . "#609C3C")
+     (240 . "#4E9D5B")
+     (260 . "#3C9F79")
+     (280 . "#A1EFE4")
+     (300 . "#299BA6")
+     (320 . "#2896B5")
+     (340 . "#2790C3")
+     (360 . "#66D9EF"))))
  '(vc-annotate-very-old-color nil)
  '(weechat-color-list
-   (quote
-    (unspecified "#002b36" "#073642" "#990A1B" "#dc322f" "#546E00" "#859900" "#7B6000" "#b58900" "#00629D" "#268bd2" "#93115C" "#d33682" "#00736F" "#2aa198" "#839496" "#657b83")))
+   (unspecified "#272822" "#20240E" "#F70057" "#F92672" "#86C30D" "#A6E22E" "#BEB244" "#E6DB74" "#40CAE4" "#66D9EF" "#FB35EA" "#FD5FF0" "#74DBCD" "#A1EFE4" "#F8F8F2" "#F8F8F0"))
  '(xterm-color-names
    ["#073642" "#dc322f" "#859900" "#b58900" "#268bd2" "#d33682" "#2aa198" "#eee8d5"])
  '(xterm-color-names-bright
@@ -420,13 +331,12 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(go-guru-hl-identifier-face ((t (:inherit highlight :inverse-video t :underline t))))
+ '(hl-line ((t (:background "color-236"))))
  '(web-mode-block-face ((t (:background "brightblue")))))
 
 ;;(eval-after-load 'flycheck
 ;;  '(add-hook 'flycheck-mode-hook #'flycheck-gometalinter-setup))
 
-
-(add-to-list 'auto-mode-alist '("\\.js\\'" . web-mode))
 
 (defun start-fe-local()
         "Save any unsaved buffers and start the frontend"
@@ -434,6 +344,14 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
         (save-some-buffers t)
 	(end-of-line-compile)
         (compile "bash -c 'cd $GOPATH/src/github.com/agrarianlabs/farm-dashboard && make local_dev NOPULL=1'")
+	(end-of-line-compile))
+
+(defun start-viz-local()
+        "Save any unsaved buffers and start the frontend"
+        (interactive)
+        (save-some-buffers t)
+	(end-of-line-compile)
+        (compile "bash -c 'cd $GOPATH/src/github.com/agrarianlabs/viztool && make local_dev NOPULL=1 ENV_MODE=production'")
 	(end-of-line-compile))
 
 
@@ -479,6 +397,7 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
 	    (global-set-key (kbd "C-c .") 'tern-ac-complete)
 	    (global-set-key (kbd "C-c r") 'my-recompile)
 	    (global-set-key (kbd "C-c m") 'start-fe-local)
+	    (global-set-key (kbd "C-c n") 'start-viz-local)
 	    (global-set-key (kbd "C-c k") 'kill-compilation)
 	    (flycheck-add-mode 'javascript-eslint 'web-mode)
 	    ;; Disable jshint in favor of eslint.
@@ -503,6 +422,13 @@ This is particularly useful under Mac OSX, where GUI apps are not started from a
 
 ;; Octave mode for .m files
 (add-to-list 'auto-mode-alist '("\\.m\\'" . octave-mode))
+
+;; Geplo yaml mode.
+(add-to-list 'auto-mode-alist '("\\.geplo\\'" . yaml-mode))
+
+
+;; Web-mode for .jsx
+(add-to-list 'auto-mode-alist '("\\.jsx\\'" . web-mode))
 
 (defun stop-tern-process ()
   (interactive)

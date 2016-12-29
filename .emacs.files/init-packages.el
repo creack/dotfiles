@@ -7,14 +7,14 @@
 
 (require 'package)
 
-(add-to-list 'package-archives
-             '("elpy" . "http://jorgenschaefer.github.io/packages/"))
+;;(add-to-list 'package-archives
+;;             '("elpy" . "http://jorgenschaefer.github.io/packages/"))
 
-(add-to-list 'package-archives
-             '("marmalade" . "http://marmalade-repo.org/packages/"))
+;;(add-to-list 'package-archives
+;;             '("marmalade" . "http://marmalade-repo.org/packages/"))
 
-(add-to-list 'package-archives
-             '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/") t)
+;;(add-to-list 'package-archives
+;;             '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/") t)
 
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
 
@@ -23,27 +23,15 @@
 ; list the packages you want
 (setq package-list
       '(
-	company
-	concurrent
 	ctable
-	cyberpunk-theme
-	deferred
-	elpy
-	epc
 	exec-path-from-shell
 	find-file-in-project
 	highlight-indentation
-	iedit
-	jedi
 	let-alist
-	popup
-	python-environment
-	pyvenv
 	sql
         sql-indent
 
 	auto-complete
-	direx
 	dockerfile-mode
 	flycheck
 	go-autocomplete
@@ -61,11 +49,11 @@
 	helm-git
 	helm-flycheck
 
-        js2-mode
-	jsx-mode
         web-mode
         tern
         tern-auto-complete
+
+	monokai-theme
 ))
 
 
