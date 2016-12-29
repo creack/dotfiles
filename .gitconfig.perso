@@ -1,0 +1,10 @@
+[alias]
+    ci = commit -s -S
+
+[user]
+    email      = gcharmes@leaf.ag
+    name       = Guillaume J. Charmes
+    signingkey = CB6E3FF3
+
+[github]
+    user = creack

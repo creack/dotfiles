@@ -97,10 +97,15 @@ function main() {
     [ -f "$HOME/.zsh_priv_config" ] && source $HOME/.zsh_priv_config
 }
 
-# Load oh-my-zsh.
+
+# Save cursor position.
 tput sc
+
 echo "Loading oh-my-sh..."
 source $ZSH/oh-my-zsh.sh
+
 echo "Loading user config..."
 main
+
+# Restore cursor & clear line.
 tput rc; tput el
