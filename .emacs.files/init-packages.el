@@ -23,6 +23,7 @@
 ; list the packages you want
 (setq package-list
       '(
+	;; Various helpers.
 	ctable
 	exec-path-from-shell
 	find-file-in-project
@@ -31,8 +32,8 @@
 	sql
         sql-indent
 
+	;; For golang.
 	auto-complete
-	dockerfile-mode
 	flycheck
 	go-autocomplete
 	go-direx
@@ -41,19 +42,29 @@
 	go-mode
 	go-snippets
 	go-guru
-	yasnippet
+	go-rename
 	flycheck-gometalinter
 
+	yasnippet
+
+	;; Helm.
 	helm
 	helm-swoop
 	helm-git
 	helm-flycheck
 
+	;; JS/JSX.
         web-mode
         tern
         tern-auto-complete
 
+	;; Theme.
 	monokai-theme
+
+	;; Various modes.
+	dockerfile-mode
+	markdown-mode
+	yaml-mode
 ))
 
 
