@@ -1,0 +1,22 @@
+# -*- mode: sh -*-
+
+# Small helper to configure docker.
+function loaddocker() {
+    if [ ! -f /tmp/.dockercache ]; then
+	docker-machine start $DOCKER_MACHINE_NAME
+	docker-machine env   $DOCKER_MACHINE_NAME > /tmp/.dockercache
+	docker-machine ip    $DOCKER_MACHINE_NAME > /tmp/.dockerip
+    fi
+    export DOCKER_IP=$(cat /tmp/.dockerip)
+    eval $(cat /tmp/.dockercache)
+}
+
+function dockerclear {
+    rm -f /tmp/.dockercache /tmp/.dockerip
+    loaddocker
+}
+
+# Default to "default" as docker-machine name.
+[ -z "$DOCKER_MACHINE_NAME" ] && export DOCKER_MACHINE_NAME="default"
+# If requested, auto start the docker-machine
+[ "$DOCKER_MACHINE_AUTOSTART" = true ] && loaddocker
