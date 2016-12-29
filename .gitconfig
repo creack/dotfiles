@@ -2,36 +2,36 @@
     # When creating a new branch off a remote branch, always set it up to
     # track the remote branch so that we can pull from there.
     autosetupmerge = always
-    mergeoptions = --no-commit --no-ff
+    mergeoptions   = --no-commit --no-ff
 
 [alias]
-    ci = commit -s -S
-    co = checkout
-    st = status -sb
-    b = branch
-    merge = merge --no-ff --no-commit
-    lg1 = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(bold white)— %an%C(reset)%C(bold yellow)%d%C(reset)' --abbrev-commit --date=relative
-    lg2 = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(bold white)— %an%C(reset)' --abbrev-commit
-    lg3 = !"git log --show-signature"
-    lg = !"git lg1"
-    pull = pull --rebase
-    change = codereview change
-    gofmt = codereview gofmt
-    mail = codereview mail
+    ci      = commit
+    co      = checkout
+    st      = status -sb
+    b       = branch
+    merge   = merge --no-ff --no-commit
+    lg1     = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(bold white)— %an%C(reset)%C(bold yellow)%d%C(reset)' --abbrev-commit --date=relative
+    lg2     = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(bold white)— %an%C(reset)' --abbrev-commit
+    lg3     = !"git log --show-signature"
+    lg      = !"git lg1"
+    pull    = pull --rebase
+    change  = codereview change
+    gofmt   = codereview gofmt
+    mail    = codereview mail
     pending = codereview pending
-    submit = codereview submit
-    sync = codereview sync
+    submit  = codereview submit
+    sync    = codereview sync
 
 [color]
-    ui = auto
+    ui          = auto
     interactive = true
-    branch = true
-    diff = true
-    status = true
+    branch      = true
+    diff        = true
+    status      = true
 
 [mergetool.ediff]
-    cmd = emacs --eval \"(progn  (defun ediff-write-merge-buffer ()    (let ((file ediff-merge-store-file))      (set-buffer ediff-buffer-C)      (write-region (point-min) (point-max) file)      (message \\\"Merge buffer saved in: %s\\\" file)      (set-buffer-modified-p nil)      (sit-for 1)))  (setq ediff-quit-hook 'kill-emacs        ediff-quit-merge-hook 'ediff-write-merge-buffer)   (ediff-merge-files-with-ancestor \\\"$LOCAL\\\" \\\"$REMOTE\\\"                                   \\\"$BASE\\\" nil \\\"$MERGED\\\"))\"
-       trustExitCode = true
+    cmd           = emacs --eval \"(progn  (defun ediff-write-merge-buffer ()    (let ((file ediff-merge-store-file))      (set-buffer ediff-buffer-C)      (write-region (point-min) (point-max) file)      (message \\\"Merge buffer saved in: %s\\\" file)      (set-buffer-modified-p nil)      (sit-for 1)))  (setq ediff-quit-hook 'kill-emacs        ediff-quit-merge-hook 'ediff-write-merge-buffer)   (ediff-merge-files-with-ancestor \\\"$LOCAL\\\" \\\"$REMOTE\\\"                                   \\\"$BASE\\\" nil \\\"$MERGED\\\"))\"
+    trustExitCode = true
 
 [mergetool]
     prompt = false
@@ -39,12 +39,8 @@
 [merge]
     tool = ediff
 
-[user]
-	email = gcharmes@leaf.ag
-	name = Guillaume J. Charmes
-	signingkey = CB6E3FF3
-
-[github]
-	user = creack
 [push]
-	default = simple
+    default = simple
+
+[include]
+    path = ~/.gitconfig.perso
