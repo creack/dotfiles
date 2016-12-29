@@ -1,9 +1,11 @@
 # -*- mode: sh -*-
 
 # Small helper to configure docker.
-function loaddocker() {
+function _loaddocker() {
     if [ ! -f /tmp/.dockercache ]; then
+	echo "Starting docker machine..."
 	docker-machine start $DOCKER_MACHINE_NAME
+	echo "Docker Started."
 	docker-machine env   $DOCKER_MACHINE_NAME > /tmp/.dockercache
 	docker-machine ip    $DOCKER_MACHINE_NAME > /tmp/.dockerip
     fi
@@ -11,8 +13,13 @@ function loaddocker() {
     eval $(cat /tmp/.dockercache)
 }
 
+function loaddocker() {
+    echo "Loading docker config..."
+    _loaddocker $@
+}
+
 function dockerclear {
-    rm -f /tmp/.dockercache /tmp/.dockerip
+    \rm -f /tmp/.dockercache /tmp/.dockerip
     loaddocker
 }
 
