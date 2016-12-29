@@ -220,11 +220,6 @@
 (global-set-key (kbd "M-O M") (kbd ""))
 
 
-;; Setup modes.
-(add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode))
-(add-to-list 'auto-mode-alist '("\\.js\\'" . web-mode))
-(add-to-list 'auto-mode-alist '("\\.mk\\'" . makefile-mode))
-
 ;; Makefile tab size.
 (add-hook 'makefile-mode-hook
   (function
@@ -334,10 +329,6 @@
  '(hl-line ((t (:background "color-236"))))
  '(web-mode-block-face ((t (:background "brightblue")))))
 
-;;(eval-after-load 'flycheck
-;;  '(add-hook 'flycheck-mode-hook #'flycheck-gometalinter-setup))
-
-
 (defun start-fe-local()
         "Save any unsaved buffers and start the frontend"
         (interactive)
@@ -420,79 +411,39 @@
       ad-do-it)
     ad-do-it))
 
-;; Octave mode for .m files
-(add-to-list 'auto-mode-alist '("\\.m\\'" . octave-mode))
-
-;; Geplo yaml mode.
-(add-to-list 'auto-mode-alist '("\\.geplo\\'" . yaml-mode))
-
-
-;; Web-mode for .jsx
-(add-to-list 'auto-mode-alist '("\\.jsx\\'" . web-mode))
 
 (defun stop-tern-process ()
   (interactive)
   (delete-process "Tern"))
 
 
-;; Experimental
+;; Experimental.
 
 (helm-mode 1)
-;(helm-autoresize-mode 1)
-(global-set-key (kbd "M-x") 'helm-M-x)
+(global-set-key (kbd "M-x")     'helm-M-x)
 (global-set-key (kbd "C-x C-f") 'helm-find-files)
-(global-set-key (kbd "C-x b") 'helm-mini)
-(global-set-key (kbd "M-y") 'helm-show-kill-ring)
+(global-set-key (kbd "C-x b")   'helm-mini)
+(global-set-key (kbd "M-y")     'helm-show-kill-ring)
+(global-set-key (kbd "C-s")     'helm-swoop)
 
-(defun which-active-modes ()
-  "Give a message of which minor modes are enabled in the current buffer."
-  (interactive)
-  (let ((active-modes))
-    (mapc (lambda (mode) (condition-case nil
-                             (if (and (symbolp mode) (symbol-value mode))
-                                 (add-to-list 'active-modes mode))
-                           (error nil) ))
-          minor-mode-list)
-    (message "Active modes are %s" active-modes)))
-
-;(setq helm-split-window-in-side-p t)
-;(setq helm-M-x-fuzzy-match t) ;; Approximate match.
-
-;(eval-after-load 'flycheck
-;  '(define-key flycheck-mode-map (kbd "C-c ! h") 'helm-flycheck))
-
-;(
-; add-hook 'after-make-frame-functions '
-; 	  (lambda (frame) (unless window-system
-;(set-terminal-parameter nil 'background-mode 'dark)
-;(setq solarized-termcolors 256)
-;(load-theme 'solarized)
-;
-; 			    )))
-
-;; Have flycheck underline instead of change background.
-
-;(custom-set-faces
-; ;; custom-set-faces was added by Custom.
-; ;; If you edit it by hand, you could mess it up, so be careful.
-; ;; Your init file should contain only one such instance.
-; ;; If there is more than one, they won't work right.
-; '(flycheck-error ((((class color)) (:underline "Red"))))
-; '(flycheck-warning ((((class color)) (:underline "Orange")))))
-
-;; Force flycheck to push marker before jump
+;; Force flycheck to push marker before jump.
 (defadvice flycheck-next-error (around wh/flycheck-next-error-push-mark activate)
   (push-mark)
   ad-do-it)
 
 
 (load-theme 'monokai t)
-
 (setq compilation-scroll-output t)
 
-(global-set-key (kbd "C-s") 'helm-swoop)
+;; Org-mode config.
 
-;; Org-mode config
-
-;; Display date when closing a TODO
+;; Display date when closing a TODO.
 (setq org-log-done 'time)
+
+;; Setup modes.
+(add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode))
+(add-to-list 'auto-mode-alist '("\\.js\\'"      . web-mode))
+(add-to-list 'auto-mode-alist '("\\.mk\\'"      . makefile-mode))
+(add-to-list 'auto-mode-alist '("\\.m\\'"       . octave-mode))
+(add-to-list 'auto-mode-alist '("\\.geplo\\'"   . yaml-mode))
+(add-to-list 'auto-mode-alist '("\\.jsx\\'"     . web-mode))
