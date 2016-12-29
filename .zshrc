@@ -40,7 +40,7 @@ function main() {
     # Customize the prompt a little.
     source ~/.zsh_git_prompt
     PROMPT='
-(%{$fg_bold[blue]%}%n%{$reset_color%}@%{$fg_bold[green]%}%m%{$reset_color%}):<%{$fg_bold[cyan]%}%~%{$reset_color%}>
+(%{$fg_bold[blue]%}%n%{$reset_color%}@%{$fg_bold[green]%}%m%{$reset_color%}):<%{$fg_bold[cyan]%}%(5~|%-1~/…/%3~|%4~)%{$reset_color%}>
 [%{$fg_bold[red]%}%D{%a %b %d %r}%{$reset_color%}]$(git_super_status)%{$reset_color%}%% '
 
     # Set host metadata.
