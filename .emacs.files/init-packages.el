@@ -58,7 +58,7 @@
         tern
         tern-auto-complete
 
-	;; Theme.
+	;; Themes.
 	monokai-theme
 
 	;; Various modes.
@@ -81,4 +81,3 @@
   (unless (package-installed-p package)
     (package-install package)))
 
-;; Add custom snippets
