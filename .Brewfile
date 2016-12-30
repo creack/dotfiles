@@ -18,6 +18,7 @@ brew 'aria2'                      # torrent / file downloader/accelerator.
 brew 'remake'                     # makefile debugger.
 brew 'gdb'                        # debugger.
 brew 'unixodbc'                   # ODBC drivers.
+brew 'coreutils'                  # gdate & co.
 
 # 3rd part services.
 brew 'awscli'
