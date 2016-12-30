@@ -53,10 +53,10 @@ brew 'docker-compose'
 # Applications.
 cask_args appdir: '/Applications'
 tap 'caskroom/cask'
-tap 'caskroom/homebrew-versions'
+tap 'caskroom/homebrew-versions' # For iterm2-nightly.
 cask 'google-chrome'
 cask 'virtualbox'
-cask 'iterm2-nightly'
+cask 'iterm2-nightly'            # Nightly for ligature font support.
 cask 'slack'
 cask 'skype'
 cask 'gpgtools'
