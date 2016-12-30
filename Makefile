@@ -10,7 +10,7 @@ install: ~/.oh-my-zsh
 	@for f in $(shell ls -a); do \
 	  [ "$$f" = "." ] || [ "$$f" = ".." ] || [ "$$f" = ".git" ] || [ "$$f" = ".gitignore" ] && continue; \
           [[ "$$f" != "."* ]] && continue; \
-	  [ -e "$(PWD)/$$f" ] || ln -s $(PWD)/$$f ~/$$f; \
+	  [ -e "$$HOME/$$f" ] || ln -s "$(PWD)/$$f" "$$HOME/$$f"; \
 	done
 
 clean:
