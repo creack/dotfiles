@@ -17,7 +17,6 @@ DOCKER_MACHINE_AUTOSTART="true"
 DOCKER_MACHINE_NAME="default"
 
 plugins=(
-    aws
     encode64
     git
     gnu-utils
@@ -97,15 +96,27 @@ function main() {
     [ -f "$HOME/.zsh_priv_config" ] && source $HOME/.zsh_priv_config
 }
 
+# Helper to fetch current time with ms.
+function mstime() {
+    # Get the time in "ns" and trim down the last 6 digits.
+    echo "$(gdate +%s.%N | sed 's/......$//')" | \bc
+}
 
 # Save cursor position.
 tput sc
+echo
 
 echo "Loading oh-my-sh..."
+a=$(mstime)
 source $ZSH/oh-my-zsh.sh
+b=$(mstime)
+echo "Loaded in $(echo "($b - $a)" | \bc) ms"
 
 echo "Loading user config..."
+a=$(mstime)
 main
+b=$(mstime)
+echo "Loaded in $(echo "($b - $a)" | \bc) ms"
 
 # Restore cursor & clear line.
 tput rc; tput el
