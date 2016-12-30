@@ -1,4 +1,5 @@
 SHELL=zsh
+PWD=$(shell pwd)
 
 all: install
 
@@ -9,7 +10,7 @@ install: ~/.oh-my-zsh
 	@for f in $(shell ls -a); do \
 	  [ "$$f" = "." ] || [ "$$f" = ".." ] || [ "$$f" = ".git" ] || [ "$$f" = ".gitignore" ] && continue; \
           [[ "$$f" != "."* ]] && continue; \
-	  ln -s $(shell pwd)/$$f ~/$$f; \
+	  [ -e "$(PWD)/$$f" ] || ln -s $(PWD)/$$f ~/$$f; \
 	done
 
 clean:
