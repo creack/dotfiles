@@ -62,6 +62,7 @@ cask 'gpgtools'
 cask 'vlc'
 cask 'bettertouchtool'
 cask 'dropbox'
+cask 'spotify'
 
 # Fonts.
 tap 'caskroom/fonts'
