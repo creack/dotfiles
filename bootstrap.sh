@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+set -x
+
 # Install the dotfiles.
 make install
 
