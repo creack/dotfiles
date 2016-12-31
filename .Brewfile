@@ -64,6 +64,7 @@ cask 'vlc'
 cask 'bettertouchtool'
 cask 'dropbox'
 cask 'spotify'
+cask 'istat-menus'
 
 # Fonts.
 tap 'caskroom/fonts'
