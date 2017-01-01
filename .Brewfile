@@ -14,11 +14,15 @@ brew 'tree'                       # nice tool to dump diectory tree.
 brew 'unrar'                      # unrar tool.
 brew 'terraform'                  # infrastructure from files.
 brew 'siege'                      # HTTP benchmark tool.
+brew 'wrk'                        # HTTP benchmark tool.
 brew 'aria2'                      # torrent / file downloader/accelerator.
 brew 'remake'                     # makefile debugger.
+brew 'gcc'                        # Compiler.
 brew 'gdb'                        # debugger.
 brew 'unixodbc'                   # ODBC drivers.
 brew 'coreutils'                  # gdate & co.
+brew 'asciinema'                  # terminal recorder.
+brew 'xz'                         # compression tool.
 
 # 3rd part services.
 brew 'awscli'
@@ -81,8 +85,8 @@ brew 'libevent'
 brew 'protobuf'
 brew 's-lang'
 brew 'sqlite'
-brew 'gmp@4'
-brew 'isl@0.11'
+brew 'gmp'
+brew 'isl'
 brew 'pango'
 brew 'librsvg'
 brew 'libpng'
@@ -103,3 +107,5 @@ brew 'libcroco'
 brew 'icu4c'
 brew 'harfbuzz'
 brew 'oniguruma'
+brew 'libmpc'
+brew 'mpfr'
