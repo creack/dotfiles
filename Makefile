@@ -1,24 +1,45 @@
-SHELL=zsh
-PWD=$(shell pwd)
+HOME           ?= $(shell [ -d "/Users/$$(whoami)" ] && echo /Users/$$(whoami) || echo /home/$$(whoami))
+PWD            ?= $(shell pwd)
+SRCS            = .Brewfile         \
+                  .bcrc             \
+                  .dockercloudorg   \
+                  .emacs            \
+                  .emacs.files      \
+                  .gitconfig        \
+                  .gitconfig.perso  \
+                  .gpgkey           \
+                  .tmux.conf        \
+                  .zsh_docker       \
+                  .zsh_golang       \
+                  .zsh_git_prompt   \
+                  .zsh_gitstatus.py \
+                  .zshrc
+LINKS           = $(addprefix $(HOME)/, $(SRCS))
 
-all: install
+# Default to install_dotfiles target.
+all             : install_dotfiles
 
-~/.oh-my-zsh:
-	@git clone 'https://github.com/robbyrussell/oh-my-zsh' ~/.oh-my-zsh
+# Install oh-my-zsh if not installed.
+$(HOME)/.oh-my-zsh:
+		@git clone 'https://github.com/robbyrussell/oh-my-zsh' ~/.oh-my-zsh
 
-install: ~/.oh-my-zsh
-	@for f in $(shell ls -a); do \
-	  [ "$$f" = "." ] || [ "$$f" = ".." ] || [ "$$f" = ".git" ] || [ "$$f" = ".gitignore" ] && continue; \
-          [[ "$$f" != "."* ]] && continue; \
-	  [ -e "$$HOME/$$f" ] || ln -s "$(PWD)/$$f" "$$HOME/$$f"; \
-	done
+# One target per link.
+$(LINKS)        : $(@F)
+		ln -s $(PWD)/$(@F) $@
 
-clean:
-	@rm -rf ~/.oh-my-zsh
-	@for f in $(shell ls -a); do \
-	  [ "$$f" = "." ] || [ "$$f" = ".." ] || [ "$$f" = ".git" ] || [ "$$f" = ".gitignore" ] && continue; \
-          [[ "$$f" != "."* ]] && continue; \
-	  [ -h "$$HOME/$$f" ] && rm "$$HOME/$$f"; \
-	done
+# Main target for dotfiles.
+install_dotfiles: $(HOME)/.oh-my-zsh $(LINKS)
 
-.PHONY: install clean
+# Uninstall oh-my-zsh.
+clean_oh-my-zsh :
+		@rm -rf $(HOME)/.oh-my-zsh
+
+# Uninstall dotfiles.
+clean_dotfiles  : clean_oh-my-zsh
+		@rm -f $(LINKS)
+
+# Main uninstall target.
+clean           : clean_dotfiles
+
+# Phony targets.
+.PHONY          : all install_dotfiles clean clean_dotfiles clean_oh-my-zsh
