@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>build</key>
+	<real>705</real>
+	<key>preferences</key>
+	<dict>
+		<key>Diagnostics_Enabled</key>
+		<integer>1</integer>
+		<key>Diagnostics_Sent_3.2</key>
+		<true/>
+		<key>Diagnostics_Sent_3.3</key>
+		<true/>
+		<key>DropdownShowLauncher</key>
+		<integer>1</integer>
+		<key>DropdownTheme</key>
+		<integer>1</integer>
+		<key>FanControl_Enabled</key>
+		<false/>
+		<key>MenubarSkinColor</key>
+		<integer>8</integer>
+		<key>MenubarTheme</key>
+		<integer>1</integer>
+		<key>StatusItems-Order</key>
+		<array>
+			<integer>5</integer>
+			<integer>4</integer>
+			<integer>3</integer>
+			<integer>2</integer>
+			<integer>1</integer>
+			<integer>7</integer>
+			<integer>6</integer>
+		</array>
+		<key>Theme-SeperateStyles</key>
+		<integer>0</integer>
+		<key>Time_MenubarFormat</key>
+		<array>
+			<string>EE</string>
+			<string>', '</string>
+			<string>MMM</string>
+			<string>' '</string>
+			<string>dd</string>
+			<string>__DAY_SUFFIX__</string>
+			<string>' '</string>
+			<string>hh</string>
+			<string>':'</string>
+			<string>mm</string>
+			<string>' '</string>
+			<string>a</string>
+		</array>
+		<key>TimerFrequency</key>
+		<integer>0</integer>
+	</dict>
+	<key>version</key>
+	<real>5.309999942779541</real>
+</dict>
+</plist>
