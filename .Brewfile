@@ -65,10 +65,10 @@ cask 'slack'
 cask 'skype'
 cask 'gpgtools'
 cask 'vlc'
-cask 'bettertouchtool'
 cask 'dropbox'
 cask 'spotify'
-cask 'istat-menus'
+cask 'bettertouchtool'          # Requires a license ($6.5, https://sites.fastspring.com/boastr/product/bettertouchtool).
+cask 'istat-menus'              # Requires a license ($18, https://bjango.com/mac/istatmenus/)
 
 # Fonts.
 tap 'caskroom/fonts'
