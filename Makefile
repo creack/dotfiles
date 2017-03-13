@@ -9,6 +9,7 @@ SRCS            = .Brewfile         \
                   .gitconfig.perso  \
                   .gpgkey           \
                   .tmux.conf        \
+                  .zsh_alias        \
                   .zsh_docker       \
                   .zsh_golang       \
                   .zsh_git_prompt   \
