@@ -79,12 +79,11 @@ function main() {
 	find ./${1} -name '*.test' -delete
     }
 
-    alias emacs="emacsclient -a ''  -ct"
-    alias grep="grep --color=auto -n"
-    alias rm="rm -v"
-    alias a64="encode64"
-    alias d64="decode64"
-    alias bc="bc -l $HOME/.bcrc"
+    # Add .local/bin to path
+    export PATH=$HOME/.local/bin:$PATH
+
+    # Load aliases.
+    [ -f "$HOME/.zsh_alias" ] && source $HOME/.zsh_alias
 
     # Load docker-machine "plugin".
     [ -f "$HOME/.zsh_docker" ] && source $HOME/.zsh_docker
