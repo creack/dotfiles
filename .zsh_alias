@@ -7,12 +7,6 @@ alias e="emacs"
 # Go related
 alias gml="gometalinter -t --vendor --deadline=5m ./..."
 
-# Ls
-alias ls="gls --color --group-directories-first --quoting-style=literal"
-alias l="ls -lh"
-alias ll="ls -l"
-alias la="ls -lhA"
-
 # Better, faster, ...
 alias grep="grep --color=auto -n"
 alias bc="bc -q -l $HOME/.bcrc"
@@ -20,3 +14,6 @@ alias a64="encode64"
 alias d64="decode64"
 alias rm="rm -v"
 alias j="jobs"
+
+# Load personal aliases.
+[ -f "$HOME/.zsh_alias.perso" ] && source $HOME/.zsh_alias.perso
