@@ -2,9 +2,9 @@
     ci = commit -s -S
 
 [user]
-    email      = maxime.lgx@gmail.com
-    name       = Maxime Legaignoux
-    signingkey = B850D853
+    email      = gcharmes@leaf.ag
+    name       = Guillaume J. Charmes
+    signingkey = CB6E3FF3
 
 [github]
-    user = mlgx
+    user = creack
