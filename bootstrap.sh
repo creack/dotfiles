@@ -13,9 +13,10 @@ function dryrun_check() {
     export haspython=$(hash python >& /dev/null                                                                  && echo true || echo false)
     export haspip=$($haspython && [ -f /usr/local/bin/pip ]                                                      && echo true || echo false)
     export hasdockermachine=$(hash docker-machine >& /dev/null                                                   && echo true || echo false)
-    export zshwhilelisted=$(cat /etc/shells | \grep /usr/local/bin/zsh >& /dev/null                              && echo true || echo false)
+    export zshwhitelisted=$(cat /etc/shells | \grep /usr/local/bin/zsh >& /dev/null                              && echo true || echo false)
     export zshdefault=$([ "$(dscl . -read /Users/$(whoami) UserShell | sed 's/.*: //')" = "/usr/local/bin/zsh" ] && echo true || echo false)
     export dotfilesuptodate=$(make --dry-run install_dotfiles | \grep "Nothing to be done" >& /dev/null          && echo true || echo false)
+    export hassshdir=$([ -d "/Users/$(whoami)/.ssh" ]                                                            && echo true || echo false)
 
     if $haspip; then
 	tput sc
@@ -44,7 +45,7 @@ function dryrun_check() {
     if $hasdockermachine; then
 	tput sc
 	echo "Loading docker-machine name from zshrc..."
-	export dockermachine_name=$(/usr/local/bin/zsh -c 'source .zshrc >& /dev/null; echo $DOCKER_MACHINE_NAME')
+	export dockermachine_name=$(/usr/local/bin/zsh -c 'export ZSH_TMUX_AUTOSTART=false; source .zshrc >& /dev/null; echo $DOCKER_MACHINE_NAME')
 	tput rc; tput el
     fi
     export hasdockermachinedefault=false
@@ -67,7 +68,8 @@ function dryrun_out() {
       echo "---------\t------"
       echo ".\t"
       assert "├── Dotfiles"                                      '$dotfilesuptodate'
-      assert "├── ZSH"                                           "$zshwhilelisted && $zshdefault"
+      assert "├── SSH Dir"                                       "$hassshdir"
+      assert "├── ZSH"                                           "$zshwhitelisted && $zshdefault"
       assert "│   ├── Whitelisted"                               "$zshwhitelisted"
       assert "│   └── Default Shell"                             "$zshdefault"
       assert "├── Homebrew"                                      "$hasbrew && $hasbrewbundle && $bundle_content"
@@ -117,6 +119,12 @@ if ! $dotfilesuptodate; then
     dotfilesuptodate=true
 fi
 
+# Create ssh dir.
+if ! $hassshdir; then
+    mkdir /Users/$(whoami)/.ssh
+    hassshdir=true
+fi
+
 # Install brew.
 if ! $hasbrew; then
     echo "Homebrew is missing. Installing it."
@@ -151,7 +159,7 @@ elif ! $bundle_content; then
     echo "Homebrew bundle not satisfied. Running bundle."
     brew bundle --global
     bundle_content=true
-    hasdockermachine=$(hash docker-machien >& /dev/null && echo true || echo false)
+    hasdockermachine=$(hash docker-machine >& /dev/null && echo true || echo false)
     haspip=$([ -f /usr/local/bin/pip ] && echo true || echo false)
 fi
 
@@ -194,11 +202,11 @@ fi
 if ! $zshwhitelisted; then
     echo "Homebrew's zsh not whiltelisted in /etc/shells. Whitelisting it. (Requires sudo password)."
     sudo sh -c 'echo /usr/local/bin/zsh >> /etc/shells'
-    zshwhilelisted=$(cat /etc/shells | \grep /usr/local/bin/zsh >& /dev/null && echo true || echo false)
+    zshwhitelisted=$(cat /etc/shells | \grep /usr/local/bin/zsh >& /dev/null && echo true || echo false)
 fi
 
 # Set zsh to default.
-if [ ! -f /user/local/bin/zsh ]; then
+if [ ! -f /usr/local/bin/zsh ]; then
     echo "Brew failed to install zsh." >& 2
     ret=1
 elif ! $zshdefault; then

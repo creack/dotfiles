@@ -11,7 +11,7 @@ CASE_SENSITIVE="true"
 # Disable auto-correct.
 DISABLE_CORRECTION="true"
 # Autostart tmux.
-ZSH_TMUX_AUTOSTART="true"
+[ -z "$ZSH_TMUX_AUTOSTART" ] && ZSH_TMUX_AUTOSTART="true"
 # Autostart docker-machine default.
 DOCKER_MACHINE_AUTOSTART="true"
 DOCKER_MACHINE_NAME="default"
