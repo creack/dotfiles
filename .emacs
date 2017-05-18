@@ -359,3 +359,20 @@
 (setq-default ediff-highlight-all-diffs 'nil) ;; Only hilight current diff:
 (setq ediff-diff-options "-w")                ;; Turn off whitespace checking:
 (setq ediff-show-clashes-only t)              ;; Default to conflict diff.
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (powerline plantuml-mode yaml-mode web-mode tern-auto-complete sql-indent monokai-theme markdown-mode magit json-mode highlight-indentation helm-swoop helm-git helm-flycheck go-snippets go-rename go-guru go-errcheck go-eldoc go-direx go-autocomplete flycheck-gometalinter find-file-in-project exec-path-from-shell dockerfile-mode ctable))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+;; Load powerline.
+(powerline-default-theme)

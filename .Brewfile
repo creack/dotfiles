@@ -74,6 +74,11 @@ cask 'istat-menus'              # Requires a license ($18, https://bjango.com/ma
 tap 'caskroom/fonts'
 cask 'font-fira-code'
 
+# Random
+cask 'java'
+cask 'keybase'
+brew 'xmlstarlet'
+
 # Dependencies. (Optional, for `brew bundle cleanup`)
 brew 'autoconf'
 brew 'pcre'

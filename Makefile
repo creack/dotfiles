@@ -5,6 +5,7 @@ SRCS            = .Brewfile         \
                   .dockercloudorg   \
                   .emacs            \
                   .emacs.files      \
+                  .config           \
                   .gitconfig        \
                   .gitconfig.perso  \
                   .gpgkey           \

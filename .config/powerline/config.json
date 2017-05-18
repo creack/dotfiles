@@ -1,0 +1,32 @@
+{
+	"common": {
+		"term_truecolor": false
+	},
+	"ext": {
+		"ipython": {
+			"colorscheme": "default",
+			"theme": "in",
+			"local_themes": {
+				"rewrite": "rewrite",
+				"out": "out",
+				"in2": "in2"
+			}
+		},
+		"pdb": {
+			"colorscheme": "default",
+			"theme": "default"
+		},
+		"shell": {
+			"colorscheme": "default",
+			"theme": "default",
+			"local_themes": {
+				"continuation": "continuation",
+				"select": "select"
+			}
+		},
+		"tmux": {
+			"colorscheme": "default",
+			"theme": "default"
+		}
+	}
+}
