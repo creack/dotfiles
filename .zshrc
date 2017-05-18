@@ -37,10 +37,11 @@ function main() {
     unsetopt share_history
 
     # Customize the prompt a little.
-    source ~/.zsh_git_prompt
-    PROMPT='
-(%{$fg_bold[blue]%}%n%{$reset_color%}@%{$fg_bold[green]%}%m%{$reset_color%}):<%{$fg_bold[cyan]%}%(5~|%-1~/…/%3~|%4~)%{$reset_color%}>
-[%{$fg_bold[red]%}%D{%a %b %d %r}%{$reset_color%}]$(git_super_status)%{$reset_color%}%% '
+#    source ~/.zsh_git_prompt
+#    PROMPT='
+#(%{$fg_bold[blue]%}%n%{$reset_color%}@%{$fg_bold[green]%}%m%{$reset_color%}):<%{$fg_bold[cyan]%}%(5~|%-1~/…/%3~|%4~)%{$reset_color%}>
+    #[%{$fg_bold[red]%}%D{%a %b %d %r}%{$reset_color%}]$(git_super_status)%{$reset_color%}%% '
+    source /usr/local/lib/python2.7/site-packages/powerline/bindings/zsh/powerline.zsh
 
     # Set host metadata.
     [ -z "$LANG" ]     && export LANG=en_US.UTF-8
@@ -120,3 +121,7 @@ echo "Loaded in $(echo "($b - $a)" | \bc) ms"
 
 # Restore cursor & clear line.
 tput rc; tput el
+
+function igo() {
+    tmp=$(mktemp); mv $tmp $tmp.go; echo "package main\nfunc main() {" > $tmp.go; cat >> $tmp.go; echo "}" >> $tmp.go; goimports -w $tmp.go; go run $tmp.go; \rm $tmp.go
+}
