@@ -1,0 +1,97 @@
+{
+    "segments": {
+	"above": [
+	    {
+		"left": [
+		    {
+			"function": "powerline.segments.shell.mode"
+		    },
+		    {
+			"function": "powerline.segments.common.env.user",
+			"priority": 30
+		    },
+		    {
+			"function": "powerline.segments.common.env.virtualenv",
+			"priority": 50
+		    },
+		    {
+			"function": "powerline.segments.shell.cwd",
+			"priority": 10,
+			"args": {
+			    "use_path_separator": false
+			}
+		    },
+		    {
+			"function": "powerline.segments.shell.jobnum",
+			"priority": 20
+		    },
+		    {
+			"function": "powerline.segments.shell.continuation",
+                        "draw_hard_divider": false
+		    }
+		],
+		"right": [
+		    {
+			"function": "powerline.segments.common.time.date"
+		    },
+		    {
+			"function": "powerline.segments.common.time.date",
+			"name": "time",
+			"args": {
+			    "format": "%H:%M:%S",
+			    "istime": true
+			}
+		    },
+		    {
+			"function": "powerline.segments.common.time.date",
+			"name": "time",
+			"args": {
+			    "format": "%A",
+			    "istime": true
+			}
+		    },
+		    {
+			"function": "powerline.segments.common.bat.battery",
+			"priority": 10,
+			"args": {
+			}
+		    },
+		    {
+			"function": "powerline.segments.common.net.hostname",
+			"priority": 10,
+			"args": {
+			    "only_if_ssh": false,
+			    "exclude_domain": false
+			}
+		    }
+		]
+	    },
+	    {
+	    }
+	],
+	"left": [
+	    {
+		"function": "powerline.segments.shell.mode"
+	    },
+	    {
+		"function": "powerline.segments.shell.last_pipe_status",
+		"priority": 10
+	    },
+	    {
+		"function": "powerline.segments.common.time.date",
+		"args": {
+		    "format": "$"
+		}
+	    }
+	],
+	"right": [
+	    {
+		"function": "powerline_gitstatus.gitstatus",
+		"priority": 40,
+		"args": {
+		    "show_tag": true
+		}
+	    }
+	]
+    }
+}

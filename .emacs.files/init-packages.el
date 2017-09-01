@@ -1,83 +1,63 @@
-;;; package --- init
+;;; Package --- Init
 
 ;;; Commentary:
 ;;;
 
 ;;; Code:
 
+;; Activate package management.
+(package-initialize)
+
+;; Add melpa sources to the package manager.
+(add-to-list 'package-archives
+             '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+
 (require 'package)
 
-;;(add-to-list 'package-archives
-;;             '("elpy" . "http://jorgenschaefer.github.io/packages/"))
-
-;;(add-to-list 'package-archives
-;;             '("marmalade" . "http://marmalade-repo.org/packages/"))
-
-;;(add-to-list 'package-archives
-;;             '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/") t)
-
-(add-to-list 'load-path "~/.emacs.d/site-lisp/")
-
+;; List the packages we want.
 (defvar package-list)
-
-; list the packages you want
 (setq package-list
       '(
-	;; Various helpers.
-	ctable
-	exec-path-from-shell
-	find-file-in-project
-	highlight-indentation
-	let-alist
-	sql
-        sql-indent
 
-	;; For golang.
-	auto-complete
-	flycheck
-	go-autocomplete
-	go-direx
-	go-eldoc
-	go-errcheck
-	go-mode
-	go-snippets
-	go-guru
-	go-rename
-	flycheck-gometalinter
-
-	yasnippet
-
-	;; Helm.
-	helm
-	helm-swoop
-	helm-git
-	helm-flycheck
-
-	;; JS/JSX.
-        web-mode
-        tern
+	web-mode
+	tern
         tern-auto-complete
 
-	;; Themes.
-	monokai-theme
+	;;; General. ;;;
+	flycheck         ;; Linter.
+	yasnippet        ;; Snippet management.
+	auto-complete    ;; Auto completion.
+	neotree          ;; Sidebar dir tree.
+	multiple-cursors ;; Multi cursor.
 
-	;; Various modes.
+	;; For golang.
+	go-mode         ;; Go major mode.
+	go-eldoc        ;; Doc at point in minibuffer.
+	go-autocomplete ;; Autocomplete mode for golang.
+	go-errcheck     ;; Enforce errcheck.
+	go-guru         ;; Guru integration.
+	go-rename       ;; go-rename integration.
+	; flycheck-gometalinter ;; Stricter Go linter module for flycheck.
+
+	;;; Helm. ;;;
+	helm
+
+	;;; Themes. ;;;
+	monokai-theme
+	powerline
+
+	;;; Various modes. ;;;
 	dockerfile-mode
 	markdown-mode
 	yaml-mode
 	json-mode
-	powerline
 ))
 
-
-; activate all the packages
-(package-initialize)
-
-; fetch the list of packages available
+;; Fetch the list of packages available.
 (unless package-archive-contents
   (package-refresh-contents))
 
-; install the missing packages
+;; Install the missing packages.
 (dolist (package package-list)
   (unless (package-installed-p package)
     (package-install package)))
