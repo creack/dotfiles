@@ -55,11 +55,11 @@ function dryrun_check() {
 
     export haspowerline=false
     if $haspip; then
-	export haspowerline=$((echo "$pipfreeze" | \grep powerline-status && echo "$pipfreeze" | \grep psutil) >& /dev/null && echo true || echo false)
+	export haspowerline=$((echo "$pipfreeze" | \grep powerline-status && echo "$pipfreeze" | \grep psutil && echo "$pipfreeze" | \grep powerline-gitstatus) >& /dev/null && echo true || echo false)
     fi
     export powerlineuptodate=false
     if $haspowerline; then
-	export powerlineuptodate=$((! echo "$pipoutdated" | \grep powerline-status && ! echo $pipoutdated | \grep psutil) >& /dev/null && echo true || echo false)
+	export powerlineuptodate=$((! echo "$pipoutdated" | \grep powerline-status && ! echo $pipoutdated | \grep psutil && ! echo $pipoutdated | \grep powerline-gitstatus) >& /dev/null && echo true || echo false)
     fi
 }
 
@@ -169,12 +169,12 @@ if ! $haspip; then
     ret=1
 elif ! $haspowerline; then
     echo "Missing powerline-status and/or psutil. Installing them."
-    /usr/local/bin/pip install --upgrade powerline-status psutil
+    /usr/local/bin/pip install --upgrade powerline-status psutil powerline-gitstatus
     haspowerline=true
     powerlineuptodate=true
 elif ! $powerlineuptodate; then
     echo "Outdated powerline-status and/or psutil. Updating them."
-    /usr/local/bin/pip install --upgrade powerline-status psutil
+    /usr/local/bin/pip install --upgrade powerline-status psutil powerline-gitstatus
     powerlineuptodate=true
 fi
 

@@ -2,7 +2,7 @@
     ci = commit -s -S
 
 [user]
-    email      = gcharmes@leaf.ag
+    email      = guillaume@charmes.net
     name       = Guillaume J. Charmes
     signingkey = CB6E3FF3
 
