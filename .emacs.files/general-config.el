@@ -52,7 +52,7 @@
 (setq temporary-file-directory "~/.emacs.files/tmp/")
 (setq backup-directory-alist         `((".*" . , temporary-file-directory)))
 (setq auto-save-file-name-transforms `((".*" , temporary-file-directory t)))
-
+(setq create-lockfiles nil)
 
 ;;; Helm config. ;;;
 (helm-mode 1)                                       ;; Enable helm major mode.
@@ -142,6 +142,10 @@
 (global-set-key (kbd "C-c r") 'recompile-scroll)
 
 ;;; Neotree config. ;;;
+(add-to-list 'load-path "~/.emacs.files/packages/neotree")
+(require 'neotree)
+
+;; Start neotree with emacs.
 (defun neotree-startup ()
   (interactive)
   (neotree-show)
@@ -150,18 +154,31 @@
     (add-hook 'server-switch-hook #'neotree-startup)
   (add-hook 'after-init-hook #'neotree-startup)
 )
+
+;; Key binding to toggle neotree.
 (global-set-key (kbd "C-c /") 'neotree-toggle)
 
+;; Customize neotree.
 (custom-set-variables
- '(neo-theme (quote nerd))        ;; Use arrows utf-8 instead of '+' sign.
- '(neo-smart-open t)                     ;; Update neotree buffer.
+ '(neo-theme (quote nerd))                 ;; Use arrows utf-8 instead of '+' sign.
+ '(neo-smart-open t)                       ;; Update neotree buffer.
  '(neo-vc-integration (quote (face char))) ;; Enable VC integration.
- '(neo-show-hidden-files t)  ;; Show hidden files.
- '(neo-window-position 'left))         ;; use neotree on the left.
+ '(neo-show-hidden-files t)                ;; Show hidden files.
+ '(neo-window-position 'left))             ;; Use neotree on the left.
+
+;; Refresh the tree each time we switch buffer.
+(add-hook 'switch-buffer-functions
+          (lambda (prev cur)
+            (interactive)
+	    (setq curbuf (current-buffer))
+            (neotree-refresh)
+	    (pop-to-buffer curbuf)
+            )
+          )
 
 ;;; Multiple cursor config. ;;;
-(global-set-key (kbd "S-<mouse-1>") 'mc/add-cursor-on-click)
-(global-set-key (kbd "M-n")         'mc/mark-next-like-this)
-(global-set-key (kbd "M-p")         'mc/mark-previous-like-this)
-(global-set-key (kbd "M-]")         'mc/mark-all-like-this)
-(global-set-key (kbd "C-c SPC")     'set-rectangular-region-anchor)
+(global-set-key (kbd "S-<mouse-1>") 'mc/add-cursor-on-click)         ;; Add new cursor with shift-click.
+(global-set-key (kbd "M-n")         'mc/mark-next-like-this)         ;; Add new cursor with matching region.
+(global-set-key (kbd "M-p")         'mc/mark-previous-like-this)     ;; Add new cursor with matching region.
+(global-set-key (kbd "M-]")         'mc/mark-all-like-this)          ;; Add new cursor with matching region.
+(global-set-key (kbd "C-c SPC")     'set-rectangular-region-anchor)  ;; Rectangular region with many cursors.
