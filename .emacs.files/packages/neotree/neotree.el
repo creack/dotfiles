@@ -429,11 +429,18 @@ This variable is used in `neo-vc-for-node' when
 (defvar neo-button-face 'neo-button-face)
 
 (defface neo-cur-file-face
-  '((((background dark)) (:foreground "White" :background "Black" :underline t :weight bold))
-    (t                   (:foreground "Black" :background "White" :underline t :weight bold)))
+  '((((background dark)) (:underline t))
+    (t                   (:underline t)))
   "*Face used for current active file."
   :group 'neotree :group 'font-lock-highlighting-faces)
 (defvar  neo-cur-file-face 'neo-cur-file-face)
+
+(defface neo-mod-file-face
+  '((((background dark)) (:weight bold))
+    (t                   (:weight bold)))
+  "*Face used for current active file."
+  :group 'neotree :group 'font-lock-highlighting-faces)
+(defvar  neo-mod-file-face 'neo-mod-file-face)
 
 (defface neo-expand-btn-face
   '((((background dark)) (:foreground "SkyBlue"))
@@ -1375,19 +1382,37 @@ PATH is value."
       (insert-char ?\s))
     (neo-buffer--insert-fold-symbol 'leaf node-short-name)
 
+    (defvar button-faces)
+    (setq button-faces '())
+
     ;; Check if entry has been modified.
-    (when (buffer-modified-p (find-buffer-visiting node))
-      (setq node-short-name (concat "* " node-short-name))
+    (defvar cur-buf)
+    (setq cur-buf (find-buffer-visiting node))
+    (when cur-buf
+      (when (buffer-modified-p cur-buf)
+	(setq node-short-name (concat "* " node-short-name))
+	(add-to-list 'button-faces 'neo-mod-file-face)
+	)
       )
+
+    ;; Check if entry is the current file.
+    (when (string= node cur-file-name)
+      (setq node-short-name (concat "> " node-short-name))
+      (add-to-list 'button-faces 'neo-cur-file-face)
+      )
+    (if (memq 'face neo-vc-integration)
+	  (add-to-list 'button-faces (cdr vc))
+	(add-to-list 'button-faces neo-file-link-face)
+	)
 
     (insert-button node-short-name
                    'follow-link t
-                   'face (if (string= node cur-file-name) neo-cur-file-face (if (memq 'face neo-vc-integration)
-                             (cdr vc)
-                           neo-file-link-face))
+                   'face button-faces
                    'neo-full-path node
                    'keymap neotree-file-button-keymap
                    'help-echo (neo-buffer--help-echo-message node-short-name))
+
+
     (neo-buffer--node-list-set nil node)
     (neo-buffer--newline-and-begin)))
 
