@@ -71,7 +71,6 @@ cask 'skype'                     # Voip.
 cask 'gpgtools'                  # GPG support.
 cask 'vlc'                       # Media player.
 cask 'dropbox'                   # File sharing.
-cask 'google-drive'              # File sharing.
 cask 'spotify'                   # Music player.
 cask 'bettertouchtool'           # Window snap / macro management. Requires a license ($6.5, https://sites.fastspring.com/boastr/product/bettertouchtool).
 cask 'istat-menus'               # Network / Sensor stats in the menu. Requires a license ($18, https://bjango.com/mac/istatmenus/)
@@ -84,6 +83,7 @@ cask 'transmission'              # Torrent client.
 cask 'screenhero'                # Screen sharing / pair programming.
 cask 'daisydisk'                 # Disc space scanner.
 cask 'evernote'                  # Note management.
+cask 'obs'                       # Screen recording.
 
 # Fonts.
 tap 'caskroom/fonts'
