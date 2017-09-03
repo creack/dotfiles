@@ -1,34 +1,36 @@
-# Utils / helpers.
-brew 'zsh'                        # shell.
-brew 'git'                        # vcs.
-brew 'tmux'                       # temrinal multiplexer.
-brew 'reattach-to-user-namespace' # allow for pbcopy/pbpaste in tmux.
-brew 'wget'                       # alternative to curl.
-brew 'binutils'                   # gold, nm, objdump.
-brew 'most'                       # nicer pager than less.
-brew 'htop-osx'                   # process viewer.
-brew 'jq'                         # json parsing from shell.
-brew 'mobile-shell'               # mosh, better ssh.
-brew 'watch'                      # shell util to watch a command.
-brew 'tree'                       # nice tool to dump diectory tree.
-brew 'unrar'                      # unrar tool.
-brew 'terraform'                  # infrastructure from files.
+# System.
+brew 'zsh'                        # Shell.
+brew 'git'                        # Vcs.
+brew 'git-flow-avh'               # Git-flow support.
+brew 'tmux'                       # Temrinal multiplexer.
+brew 'reattach-to-user-namespace' # Allow for pbcopy/pbpaste in tmux.
+brew 'binutils'                   # Gold, nm, objdump.
+brew 'most'                       # Nicer pager than less.
+brew 'htop-osx'                   # Process viewer.
+brew 'jq'                         # JSON parsing from shell.
+brew 'mobile-shell'               # Mosh, better ssh.
+brew 'watch'                      # Shell util to watch a command.
+brew 'tree'                       # Nice tool to dump diectory tree.
+brew 'wget'                       # Alternative to curl.
 brew 'siege'                      # HTTP benchmark tool.
 brew 'wrk'                        # HTTP benchmark tool.
-brew 'aria2'                      # torrent / file downloader/accelerator.
-brew 'remake'                     # makefile debugger.
+brew 'aria2'                      # Torrent / file downloader/accelerator.
+brew 'remake'                     # Makefile debugger.
 brew 'gcc'                        # Compiler.
-brew 'gdb'                        # debugger.
-brew 'unixodbc'                   # ODBC drivers.
-brew 'coreutils'                  # gdate & co.
-brew 'asciinema'                  # terminal recorder.
-brew 'xz'                         # compression tool.
+brew 'gdb'                        # Debugger.
+brew 'unixodbc'                   # Odbc drivers.
+brew 'coreutils'                  # Gdate & co.
+brew 'asciinema'                  # Terminal recorder.
+brew 'unrar'                      # Unrar tool.
+brew 'xz'                         # Compression tool.
+brew 'nmap'                       # Network scans.
 
 # 3rd part services.
-brew 'awscli'
-brew 'docker-cloud'
-brew 'rancher-cli'
-brew 'rancher-compose'
+brew 'terraform'       # Infrastructure from files.
+brew 'awscli'          # Amazon AWS.
+brew 'docker-cloud'    # Docker-cloud (formerly tutum).
+brew 'rancher-cli'     # Rancher.
+brew 'rancher-compose' # Rancher.
 
 # DB tools/cli.
 brew 'postgresql'
@@ -39,10 +41,11 @@ brew 'zookeeper'
 
 # Editor.
 brew 'emacs'
+brew 'ispell'
 
 # Golang.
 brew 'go'
-brew 'glide' # vendor manager.
+brew 'glide' # Vendor manager.
 
 # Other languages/vms.
 brew 'node'
@@ -56,28 +59,42 @@ brew 'docker-compose'
 
 # Applications.
 cask_args appdir: '/Applications'
-tap 'caskroom/cask'
+tap 'caskroom/cask'              # To install apps.
 tap 'caskroom/homebrew-versions' # For iterm2-nightly.
-cask 'google-chrome'
-cask 'virtualbox'
+cask 'google-chrome'             # Browser.
+cask 'firefox'                   # Browser.
+cask 'virtualbox'                # VM Supervisor.
+cask 'vagrant'                   # VM manager.
 cask 'iterm2-nightly'            # Nightly for ligature font support.
-cask 'slack'
-cask 'skype'
-cask 'gpgtools'
-cask 'vlc'
-cask 'dropbox'
-cask 'spotify'
-cask 'bettertouchtool'          # Requires a license ($6.5, https://sites.fastspring.com/boastr/product/bettertouchtool).
-cask 'istat-menus'              # Requires a license ($18, https://bjango.com/mac/istatmenus/)
+cask 'slack'                     # Chat client.
+cask 'skype'                     # Voip.
+cask 'gpgtools'                  # GPG support.
+cask 'vlc'                       # Media player.
+cask 'dropbox'                   # File sharing.
+cask 'google-drive'              # File sharing.
+cask 'spotify'                   # Music player.
+cask 'bettertouchtool'           # Window snap / macro management. Requires a license ($6.5, https://sites.fastspring.com/boastr/product/bettertouchtool).
+cask 'istat-menus'               # Network / Sensor stats in the menu. Requires a license ($18, https://bjango.com/mac/istatmenus/)
+cask 'tunnelblick'               # OpenVPN client.
+cask 'xquartz'                   # X11.
+cask 'sublime-text'              # Sublime text editor.
+cask 'visual-studio-code'        # Code IDE.
+cask 'handbrake'                 # Video encoding.
+cask 'transmission'              # Torrent client.
+cask 'screenhero'                # Screen sharing / pair programming.
+cask 'daisydisk'                 # Disc space scanner.
+cask 'evernote'                  # Note management.
 
 # Fonts.
 tap 'caskroom/fonts'
 cask 'font-fira-code'
+cask 'font-awesome-terminal-fonts'
 
-# Random
-cask 'java'
-cask 'keybase'
-brew 'xmlstarlet'
+# Random.
+cask 'java'       # Java suuport.
+cask 'keybase'    # Keybase client.
+brew 'xmlstarlet' # XML parsing on CLI.
+brew 'hugo'       # Blog engine.
 
 # Dependencies. (Optional, for `brew bundle cleanup`)
 brew 'autoconf'
