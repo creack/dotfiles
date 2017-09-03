@@ -4,7 +4,7 @@
 [user]
     email      = guillaume@charmes.net
     name       = Guillaume J. Charmes
-    signingkey = CB6E3FF3
+    signingkey = FCC4F9DE
 
 [github]
     user = creack

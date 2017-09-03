@@ -74,6 +74,7 @@ function dryrun_check() {
 	tput sc
 	echo "Loading docker-machine name from zshrc..."
 	export dockermachine_name=$(/usr/local/bin/zsh -c 'export ZSH_TMUX_AUTOSTART=false; source .zshrc >& /dev/null; echo $DOCKER_MACHINE_NAME')
+        [ -z "$dockermachine_name" ] && export dockermachine_name=default
 	tput rc; tput el
     fi
     export hasdockermachinedefault=false
