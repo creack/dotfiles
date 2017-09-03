@@ -8,10 +8,38 @@ function assert() {
     eval "$2" >& /dev/null && echo "[$fg_bold[green]OK$reset_color]" || echo "[$fg_bold[red]KO$reset_color]"
 }
 
+
+function update_go () {
+        packages="
+github.com/ajstarks/svgo/benchviz
+github.com/axw/gocov/gocov
+github.com/cespare/prettybench
+github.com/dougm/goflymake
+github.com/golang/lint/golint
+github.com/josharian/impl
+github.com/kisielk/errcheck
+github.com/kisielk/godepgraph
+github.com/nsf/gocode
+github.com/tools/godep
+github.com/rogpeppe/godef
+github.com/alecthomas/gometalinter
+golang.org/x/tools/cmd/...
+"
+	echo "Updating go packages.."
+        echo $packages | while read pkg
+        do
+	    if [ -n "$pkg" ]; then
+		echo "$pkg"
+		go get -u $pkg
+	    fi
+        done
+}
+
 function dryrun_check() {
+    export PIP=/usr/local/bin/pip2
     export hasbrew=$(hash brew >& /dev/null                                                                      && echo true || echo false)
     export haspython=$(hash python >& /dev/null                                                                  && echo true || echo false)
-    export haspip=$($haspython && [ -f /usr/local/bin/pip ]                                                      && echo true || echo false)
+    export haspip=$($haspython && [ -f $PIP ]                                                                    && echo true || echo false)
     export hasdockermachine=$(hash docker-machine >& /dev/null                                                   && echo true || echo false)
     export zshwhitelisted=$(cat /etc/shells | \grep /usr/local/bin/zsh >& /dev/null                              && echo true || echo false)
     export zshdefault=$([ "$(dscl . -read /Users/$(whoami) UserShell | sed 's/.*: //')" = "/usr/local/bin/zsh" ] && echo true || echo false)
@@ -21,8 +49,8 @@ function dryrun_check() {
     if $haspip; then
 	tput sc
 	echo "Checking pip versions..."
-	export pipfreeze=$(/usr/local/bin/pip freeze)
-	export pipoutdated=$(/usr/local/bin/pip list --outdated --format=columns)
+	export pipfreeze=$($PIP freeze)
+	export pipoutdated=$($PIP list --outdated --format=columns)
 	tput rc; tput el
     fi
 
@@ -77,8 +105,9 @@ function dryrun_out() {
       assert "│   └── Bundle"                                    "$hasbrewbundle"
       assert "│       └── Up to date"                            "$bundle_content"
       assert "├── Python"                                        "$haspython"
-      assert "│   └── Powerline"                                 "$haspowerline && $powerlineuptodate"
-      $haspowerline && assert "│       └── Up to date"           "$powerlineuptodate"
+      assert "│   └── Pip"                                       "$haspip"
+      $haspip && assert "│       └── Powerline"                  "$haspowerline"
+      $haspowerline && assert "│           └── Up to date"       "$powerlineuptodate"
       assert "├── Docker"                                        "$hasdockermachine && $hasdockermachinedefault"
       assert "│   └── Docker-machine binary"                     "$hasdockermachine"
       assert "│       └── Docker-machine '$dockermachine_name'"  "$hasdockermachinedefault"
@@ -157,11 +186,22 @@ if ! $haspython; then
     ret=1
 elif ! $bundle_content; then
     echo "Homebrew bundle not satisfied. Running bundle."
-    brew bundle --global
+    brew bundle --global -v
     bundle_content=true
     hasdockermachine=$(hash docker-machine >& /dev/null && echo true || echo false)
-    haspip=$([ -f /usr/local/bin/pip ] && echo true || echo false)
+    haspip=$([ -f $PIP ] && echo true || echo false)
 fi
+
+# Install go packages.
+update_go
+
+# Install node packages.
+## Completion tool for emacs.
+npm install -g tern
+## Linter for flycheck.
+npm install -g eslint eslint-config-airbnb eslint-plugin-react eslint-plugin-jsx-a11y eslint-plugin-import babel-eslint
+## npm tool to keep packages up to date.
+npm install -g npm-check-updates
 
 # Install powerline.
 if ! $haspip; then
@@ -169,12 +209,12 @@ if ! $haspip; then
     ret=1
 elif ! $haspowerline; then
     echo "Missing powerline-status and/or psutil. Installing them."
-    /usr/local/bin/pip install --upgrade powerline-status psutil powerline-gitstatus
+    $PIP install --upgrade powerline-status psutil powerline-gitstatus
     haspowerline=true
     powerlineuptodate=true
 elif ! $powerlineuptodate; then
     echo "Outdated powerline-status and/or psutil. Updating them."
-    /usr/local/bin/pip install --upgrade powerline-status psutil powerline-gitstatus
+    $PIP install --upgrade powerline-status psutil powerline-gitstatus
     powerlineuptodate=true
 fi
 
