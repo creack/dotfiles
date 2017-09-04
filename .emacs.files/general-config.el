@@ -163,7 +163,7 @@
  '(neo-theme (quote nerd))                 ;; Use arrows utf-8 instead of '+' sign.
  '(neo-smart-open t)                       ;; Update neotree buffer.
  '(neo-vc-integration (quote (face char))) ;; Enable VC integration.
- '(neo-show-hidden-files t)                ;; Show hidden files.
+ '(neo-show-hidden-files nil)              ;; Show hidden files.
  '(neo-window-position 'left))             ;; Use neotree on the left.
 
 ;; Refresh the tree each time we switch buffer.
@@ -182,3 +182,28 @@
 (global-set-key (kbd "M-p")         'mc/mark-previous-like-this)     ;; Add new cursor with matching region.
 (global-set-key (kbd "M-]")         'mc/mark-all-like-this)          ;; Add new cursor with matching region.
 (global-set-key (kbd "C-c SPC")     'set-rectangular-region-anchor)  ;; Rectangular region with many cursors.
+(global-set-key (kbd "M-SPC")       'set-rectangular-region-anchor)  ;; Rectangular region with many cursors.
+
+;;; Git gutter config. ;;;
+(global-git-gutter+-mode)
+
+(global-set-key (kbd "C-x g") 'git-gutter+-mode)        ; Turn on/off in the current buffer.
+(global-set-key (kbd "C-x G") 'global-git-gutter+-mode) ; Turn on/off globally.
+
+(eval-after-load 'git-gutter+
+  '(progn
+     ;;; Jump between hunks.
+     (define-key git-gutter+-mode-map (kbd "C-x n") 'git-gutter+-next-hunk)
+     (define-key git-gutter+-mode-map (kbd "C-x p") 'git-gutter+-previous-hunk)
+
+     ;;; Act on hunks.
+     (define-key git-gutter+-mode-map (kbd "C-x v =") 'git-gutter+-show-hunk)
+     (define-key git-gutter+-mode-map (kbd "C-x r")   'git-gutter+-revert-hunks)
+
+     ;; Stage hunk at point.
+     ;; If region is active, stage all hunk lines within the region.
+     (define-key git-gutter+-mode-map (kbd "C-x t")   'git-gutter+-stage-hunks)
+     (define-key git-gutter+-mode-map (kbd "C-x c")   'git-gutter+-commit)
+     (define-key git-gutter+-mode-map (kbd "C-x C")   'git-gutter+-stage-and-commit)
+     (define-key git-gutter+-mode-map (kbd "C-x C-y") 'git-gutter+-stage-and-commit-whole-buffer)
+     (define-key git-gutter+-mode-map (kbd "C-x U")   'git-gutter+-unstage-whole-buffer)))
