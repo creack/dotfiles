@@ -187,8 +187,7 @@
 ;;; Git gutter config. ;;;
 (global-git-gutter+-mode)
 
-(global-set-key (kbd "C-x g") 'git-gutter+-mode)        ; Turn on/off in the current buffer.
-(global-set-key (kbd "C-x G") 'global-git-gutter+-mode) ; Turn on/off globally.
+(global-set-key (kbd "C-x C-g") 'global-git-gutter+-mode) ; Turn on/off globally.
 
 (eval-after-load 'git-gutter+
   '(progn
@@ -207,3 +206,6 @@
      (define-key git-gutter+-mode-map (kbd "C-x C")   'git-gutter+-stage-and-commit)
      (define-key git-gutter+-mode-map (kbd "C-x C-y") 'git-gutter+-stage-and-commit-whole-buffer)
      (define-key git-gutter+-mode-map (kbd "C-x U")   'git-gutter+-unstage-whole-buffer)))
+
+;;; Magit config ;;;
+(global-set-key (kbd "C-x g") 'magit-status)
