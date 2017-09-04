@@ -42,5 +42,8 @@
 [push]
     default = simple
 
+[commit]
+    gpgsign = true
+
 [include]
     path = ~/.gitconfig.perso
