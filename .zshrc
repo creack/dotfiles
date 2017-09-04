@@ -80,7 +80,7 @@ function main() {
 	find ./${1} -name '*.test' -delete
     }
 
-    alias emacs="emacsclient -a ''  -ct"
+#    alias emacs="emacsclient -a ''  -ct"
     alias grep="grep --color=auto -n"
     alias rm="rm -v"
     alias a64="encode64"
