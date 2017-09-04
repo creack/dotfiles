@@ -27,6 +27,7 @@
         switch-buffer-functions ;; Add hook when switchin buffers.
 	git                     ;; Better vcs support for git.
 	git-gutter+             ;; Display / manage git changes.
+	magit                   ;; Git client.
 
         ;; For golang.
         go-mode         ;; Go major mode.
