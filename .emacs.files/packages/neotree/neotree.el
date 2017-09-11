@@ -1022,8 +1022,13 @@ parent directory."
         (setq r-path (substring r-path 0 -1)))
     (if (eq (length r-path) 0)
         (setq r-path "/"))
-    (directory-file-name
-     (file-name-directory r-path))))
+    (if (file-name-directory r-path)
+	(directory-file-name
+	 (file-name-directory r-path))
+      "~/"
+      )
+    )
+  )
 
 (defun neo-path--join (root &rest dirs)
   "Joins a series of directories together with ROOT and DIRS.
