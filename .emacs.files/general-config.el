@@ -170,9 +170,11 @@
 (add-hook 'switch-buffer-functions
           (lambda (prev cur)
             (interactive)
-	    (setq curbuf (current-buffer))
-            (neotree-refresh)
-	    (pop-to-buffer curbuf)
+	    (when (neo-global--window-exists-p)
+	      (setq curbuf (current-buffer))
+	      (neotree-refresh)
+	      (pop-to-buffer curbuf)
+	      )
             )
           )
 
