@@ -209,5 +209,12 @@
      (define-key git-gutter+-mode-map (kbd "C-x C-y") 'git-gutter+-stage-and-commit-whole-buffer)
      (define-key git-gutter+-mode-map (kbd "C-x U")   'git-gutter+-unstage-whole-buffer)))
 
-;;; Magit config ;;;
+;;; Magit config. ;;;
 (global-set-key (kbd "C-x g") 'magit-status)
+
+
+;;; Tmux integration. ;;;
+(global-set-key (kbd "C-x x") (lambda ()
+                            (interactive)
+                            (shell-command (concat "tmux split-window -v -p 20 -c " default-directory))
+			    ))
