@@ -171,12 +171,9 @@
           (lambda (prev cur)
             (interactive)
 	    (when (neo-global--window-exists-p)
-	      (setq curbuf (current-buffer))
-	      (neotree-refresh)
-	      (pop-to-buffer curbuf)
-	      )
-            )
-          )
+	      (save-selected-window
+		(neotree-refresh)
+		))))
 
 ;;; Multiple cursor config. ;;;
 (global-set-key (kbd "S-<mouse-1>") 'mc/add-cursor-on-click)         ;; Add new cursor with shift-click.
