@@ -1345,11 +1345,13 @@ PATH is value."
       (set-text-properties start (point) '(face neo-header-face)))
     (neo-buffer--newline-and-begin))
   (neo-buffer--node-list-set nil node)
+  (if (string-match (getenv "HOME") node)
+      (setq node (replace-match "~" t t node)))
   (cond
    ((eq neo-cwd-line-style 'button)
     (neo-path--insert-header-buttonized node))
    (t
-    (neo-buffer--insert-with-face (neo-path--shorten node (window-body-width))
+    (neo-buffer--insert-with-face (neo-path--shorten node (window-body-width (get-buffer-window neo-buffer-name)))
                                   'neo-root-dir-face)))
   (neo-buffer--newline-and-begin))
 
@@ -2043,7 +2045,9 @@ If the current node is the first node then the last node is selected."
   (neo-global--with-window
     (if (neo-window--minimize-p)
         (neo-window--zoom 'maximize)
-      (neo-window--zoom 'minimize))))
+      (neo-window--zoom 'minimize)))
+  (neotree-refresh)
+  )
 
 ;;;###autoload
 (defun neotree-projectile-action ()
