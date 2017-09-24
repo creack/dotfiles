@@ -1429,6 +1429,7 @@ PATH is value."
     (" M" '(?E neo-vc-edited-face))
     ("A " '(?+ neo-vc-added-face))
     (" D" '(?- neo-vc-removed-face))
+    ("D " '(?- neo-vc-missing-face))
     ("??" '(?? neo-vc-unregistered-face))
     ("!!" '(?! neo-vc-ignored-face))
     (status '(?\s neo-vc-up-to-date-face))
