@@ -5,7 +5,7 @@
 ;; Author: jaypei <jaypei97159@gmail.com>
 ;; URL: https://github.com/jaypei/emacs-neotree
 ;; Version: 0.5
-;; Package-Requires: ((cl-lib "0.5"))
+;; Package-Requires: ((cl-lib "0.5") (magit "2.11.0"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'magit)
 
 ;;
 ;; Constants
@@ -1424,6 +1425,16 @@ PATH is value."
     (neo-buffer--newline-and-begin)))
 
 (defun neo-vc-for-node (node)
+  (pcase (concat "" (nthcdr 2 (car (magit-file-status "--ignored" node))))
+    (" M" '(?E neo-vc-edited-face))
+    ("A " '(?+ neo-vc-added-face))
+    (" D" '(?- neo-vc-removed-face))
+    ("??" '(?? neo-vc-unregistered-face))
+    ("!!" '(?! neo-vc-ignored-face))
+    (status '(?\s neo-vc-up-to-date-face))
+    ))
+
+(defun neo-vc-for-node--old (node)
   (let* ((backend  (ignore-errors
                     (vc-responsible-backend node)))
          (vc-state (when backend (vc-state node backend))))
