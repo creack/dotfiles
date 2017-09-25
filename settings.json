@@ -1,0 +1,12 @@
+{
+    "terminal.integrated.env.osx": {
+        "PATH":"$PATH:/usr/local/bin:/Users/guillaume/go/bin",
+        "ZSH_TMUX_AUTOSTART":"false"
+    },
+    "go.goroot": "/usr/local/opt/go/libexec",
+    "go.gopath": "/Users/guillaume/go",
+    "go.docsTool": "gogetdoc",
+    "editor.fontFamily": "Fira Code",
+    "editor.fontLigatures": true,
+    "window.zoomLevel": 0
+}
