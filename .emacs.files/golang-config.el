@@ -1,18 +1,18 @@
 ;;; golang.el --- Golang configuration for emacs. ;;; -*- mode: lisp -*-
 
 (defun go-save-and-compile-program()
-        "Save any unsaved buffers and compile."
-        (interactive)
-        (save-some-buffers t)
-        (compile "sh -c 'go install && go build -o /tmp/a.out && /tmp/a.out'")
-	)
+  "Save any unsaved buffers and compile."
+  (interactive)
+  (save-some-buffers t)
+  (compile "sh -c 'go install && go build -o /tmp/a.out && /tmp/a.out'")
+  )
 
 (defun go-save-and-test-program()
-        "Save any unsaved buffers and compile."
-        (interactive)
-        (save-some-buffers t)
-        (compile "go test -v -cover -coverprofile=/tmp/coverprofile -covermode=count")
-	)
+  "Save any unsaved buffers and compile."
+  (interactive)
+  (save-some-buffers t)
+  (compile "go test -v -cover -coverprofile=/tmp/coverprofile -covermode=count")
+  )
 (setq compilation-scroll-output t)
 
 
@@ -31,7 +31,7 @@
 	    (global-set-key (kbd "C-c C-u") 'uncomment-region) ;; Uncomment region.
 
 	    ;;; Compilation key bindings.
-	    (global-set-key (kbd "C-c f")   'go-save-and-compile-program)
+	    (global-set-key (kbd "C-c f") 'go-save-and-compile-program)
 	    (global-set-key (kbd "C-c t") 'go-save-and-test-program)
 
 	    ;; Call coverage binding.
@@ -43,6 +43,23 @@
 
 	    (go-eldoc-setup)             ;; Init eldoc.
 	    (go-guru-hl-identifier-mode) ;; Enable symbol highlight.
+
+	    ;; Make a lighter godoc-at-point using popup.
+	    ;; TODO: Pass buffer content via stdin to make it work with edited buffer.
+	    ;; TODO: Handle errors.
+	    (global-set-key (kbd "C-c s")
+			    (lambda ()
+			      (interactive)
+			      (setq rawdoc (shell-command-to-string
+					    (concat "gogetdoc -json -pos "
+						    buffer-file-name ":#"
+						    (format "%s" (point)))))
+			      (let* ((json-object-type 'hash-table)
+				     (json-array-type 'list)
+				     (json-key-type 'string)
+				     (json (json-read-from-string rawdoc)))
+				(popup-tip (concat "\n" (gethash "doc" json)))
+				)))
             ))
 
 (with-eval-after-load 'go-mode

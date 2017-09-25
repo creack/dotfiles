@@ -20,7 +20,9 @@ github.com/kisielk/godepgraph
 github.com/nsf/gocode
 github.com/tools/godep
 github.com/rogpeppe/godef
+github.com/zmb3/gogetdoc
 golang.org/x/tools/cmd/...
+sourcegraph.com/sqs/goreturns
 "
     echo $packages | while read pkg; do
         echo "$pkg"
