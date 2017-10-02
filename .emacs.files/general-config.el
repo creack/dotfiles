@@ -196,7 +196,7 @@
 
      ;;; Act on hunks.
      (define-key git-gutter+-mode-map (kbd "C-x v =") 'git-gutter+-show-hunk)
-     (define-key git-gutter+-mode-map (kbd "C-x r")   'git-gutter+-revert-hunks)
+     (define-key git-gutter+-mode-map (kbd "C-x w")   'git-gutter+-revert-hunks)
 
      ;; Stage hunk at point.
      ;; If region is active, stage all hunk lines within the region.
@@ -218,3 +218,9 @@
 ;;; ielm config. ;;;
 (define-key comint-mode-map (kbd "<up>") 'comint-previous-input)
 (define-key comint-mode-map (kbd "<down>") 'comint-next-input)
+
+;;; Hightlight long lines ;;;
+(require 'whitespace)
+(setq whitespace-line-column 100)
+(setq whitespace-style '(face empty tabs lines-tail trailing))
+(global-whitespace-mode t)
