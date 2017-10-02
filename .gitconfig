@@ -47,3 +47,10 @@
 
 [include]
     path = ~/.gitconfig.perso
+[url "git@bitbucket.org:"]
+	insteadOf = https://bitbucket.org/
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true

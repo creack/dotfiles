@@ -2,9 +2,9 @@
     ci = commit -s -S
 
 [user]
-    email      = guillaume@charmes.net
+    email      = gcharmes@magicleap.com
     name       = Guillaume J. Charmes
-    signingkey = FCC4F9DE
+    signingkey = 019A1092
 
 [github]
     user = creack
