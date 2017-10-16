@@ -36,13 +36,6 @@ function main() {
     # Disable shared history.
     unsetopt share_history
 
-    # Customize the prompt a little.
-#    source ~/.zsh_git_prompt
-#    PROMPT='
-#(%{$fg_bold[blue]%}%n%{$reset_color%}@%{$fg_bold[green]%}%m%{$reset_color%}):<%{$fg_bold[cyan]%}%(5~|%-1~/…/%3~|%4~)%{$reset_color%}>
-    #[%{$fg_bold[red]%}%D{%a %b %d %r}%{$reset_color%}]$(git_super_status)%{$reset_color%}%% '
-    source /usr/local/lib/python2.7/site-packages/powerline/bindings/zsh/powerline.zsh
-
     # Set host metadata.
     [ -z "$LANG" ]     && export LANG=en_US.UTF-8
     [ -z "$HOSTTYPE" ] && export HOSTTYPE=$(uname -s)
@@ -80,21 +73,12 @@ function main() {
 	find ./${1} -name '*.test' -delete
     }
 
-#    alias emacs="emacsclient -a ''  -ct"
+    alias emacs="emacsclient -a ''  -ct"
     alias grep="grep --color=auto -n"
     alias rm="rm -v"
     alias a64="encode64"
     alias d64="decode64"
     alias bc="bc -l $HOME/.bcrc"
-
-    # Load docker-machine "plugin".
-    [ -f "$HOME/.zsh_docker" ] && source $HOME/.zsh_docker
-
-    # Load golang config.
-    [ -f "$HOME/.zsh_golang" ] && source $HOME/.zsh_golang
-
-    # Load private config if exists.
-    [ -f "$HOME/.zsh_priv_config" ] && source $HOME/.zsh_priv_config
 }
 
 # Helper to fetch current time with ms.
@@ -103,21 +87,39 @@ function mstime() {
     echo "$(gdate +%s.%N | sed 's/......$//')" | \bc
 }
 
+function timed() {
+    name=$1
+    shift
+    cmd=$1
+    shift
+    echo "[$name] Loading..."
+    a=$(mstime)
+    $cmd $@
+    b=$(mstime)
+    echo "[$name] Loaded in $(echo "($b - $a)" | \bc) ms"
+}
+
 # Save cursor position.
 tput sc
 echo
 
-echo "Loading oh-my-sh..."
-a=$(mstime)
-source $ZSH/oh-my-zsh.sh
-b=$(mstime)
-echo "Loaded in $(echo "($b - $a)" | \bc) ms"
+# Load oh-my-zsh.
+timed "oh-my-zsh" source $ZSH/oh-my-zsh.sh
 
-echo "Loading user config..."
-a=$(mstime)
-main
-b=$(mstime)
-echo "Loaded in $(echo "($b - $a)" | \bc) ms"
+# Load powerline.
+timed "powerline" source /usr/local/lib/python2.7/site-packages/powerline/bindings/zsh/powerline.zsh
+
+# Load main user config.
+timed "user config" main
+
+# Load docker-machine "plugin".
+[ -f "$HOME/.zsh_docker" ] && timed "docker config" source $HOME/.zsh_docker
+
+# Load golang config.
+[ -f "$HOME/.zsh_golang" ] && timed "golang config" source $HOME/.zsh_golang
+
+# Load private config if exists.
+[ -f "$HOME/.zsh_priv_config" ] && timed "local user config" source $HOME/.zsh_priv_config
 
 # Restore cursor & clear line.
 tput rc; tput el

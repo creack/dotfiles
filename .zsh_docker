@@ -14,7 +14,6 @@ function _loaddocker() {
 }
 
 function loaddocker() {
-    echo "Loading docker config..."
     _loaddocker $@
 }
 
