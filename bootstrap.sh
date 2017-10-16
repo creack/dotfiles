@@ -44,6 +44,7 @@ function dryrun_check() {
     export zshwhitelisted=$(cat /etc/shells | \grep /usr/local/bin/zsh >& /dev/null                              && echo true || echo false)
     export zshdefault=$([ "$(dscl . -read /Users/$(whoami) UserShell | sed 's/.*: //')" = "/usr/local/bin/zsh" ] && echo true || echo false)
     export dotfilesuptodate=$(make --dry-run install_dotfiles | \grep "Nothing to be done" >& /dev/null          && echo true || echo false)
+    export dotemacs=$([ -e ~/.emacs ]                                                                            && echo true || echo false)
     export hassshdir=$([ -d "/Users/$(whoami)/.ssh" ]                                                            && echo true || echo false)
 
     if $haspip; then
@@ -97,6 +98,7 @@ function dryrun_out() {
       echo "---------\t------"
       echo ".\t"
       assert "├── Dotfiles"                                      '$dotfilesuptodate'
+      assert "├── Emacs config"                                  '$dotemacs'
       assert "├── SSH Dir"                                       "$hassshdir"
       assert "├── ZSH"                                           "$zshwhitelisted && $zshdefault"
       assert "│   ├── Whitelisted"                               "$zshwhitelisted"
@@ -149,6 +151,13 @@ if ! $dotfilesuptodate; then
     dotfilesuptodate=true
 fi
 
+# Create .emacs.
+if ! $dotemacs; then
+    echo "Creating .emacs ."
+    echo '(load-file "~/.emacs.files/general-config.el")' > ~/.emacs
+    dotemacs=$([ -e ~/.emacs ] && echo true || echo false)
+fi
+
 # Create ssh dir.
 if ! $hassshdir; then
     mkdir /Users/$(whoami)/.ssh
@@ -193,6 +202,9 @@ elif ! $bundle_content; then
     haspip=$([ -f $PIP ] && echo true || echo false)
 fi
 
+
+## TODO: Make this proper function / checks.
+
 # Install go packages.
 update_go
 
@@ -203,6 +215,8 @@ npm install -g tern
 npm install -g eslint eslint-config-airbnb eslint-plugin-react eslint-plugin-jsx-a11y eslint-plugin-import babel-eslint
 ## npm tool to keep packages up to date.
 npm install -g npm-check-updates
+## npm alternative
+npm install -g yarn
 
 # Install powerline.
 if ! $haspip; then

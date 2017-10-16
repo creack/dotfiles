@@ -3,6 +3,9 @@
 ;;; Debug mode. ;;;
 ;(setq debug-on-error t)
 
+;;; Init package manager. ;;;
+(load-file "~/.emacs.files/init-packages.el")
+
 ;;; Enable mouse support. ;;;
 (xterm-mouse-mode t)
 
