@@ -6,11 +6,14 @@
 ;;; Code:
 
 
+;; Activate package management to have the package-archives variable available.
+(package-initialize)
+
 ;; Add melpa sources to the package manager.
 (add-to-list 'package-archives
              '("melpa-stable" . "https://stable.melpa.org/packages/") t)
 
-;; Activate package management.
+;; Refresh package management.
 (package-initialize)
 
 (require 'package)

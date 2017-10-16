@@ -3,7 +3,6 @@ PWD            ?= $(shell pwd)
 SRCS            = .Brewfile         \
                   .bcrc             \
                   .dockercloudorg   \
-                  .emacs            \
                   .emacs.files      \
                   .config           \
                   .gitconfig        \
