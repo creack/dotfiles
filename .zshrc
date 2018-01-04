@@ -79,6 +79,10 @@ function main() {
     alias a64="encode64"
     alias d64="decode64"
     alias bc="bc -l $HOME/.bcrc"
+    alias e64='encode64'
+    alias d64='decode64'
+    alias vfgrep="fgrep --exclude-dir .git --exclude-dir vendor -R"
+    alias vgrep="grep --exclude-dir .git --exclude-dir vendor -R"
 }
 
 # Helper to fetch current time with ms.
@@ -103,6 +107,9 @@ function timed() {
 tput sc
 echo
 
+# Load private config if exists.
+[ -f "$HOME/.zsh_priv_config" ] && timed "local user config" source $HOME/.zsh_priv_config
+
 # Load oh-my-zsh.
 timed "oh-my-zsh" source $ZSH/oh-my-zsh.sh
 
@@ -117,9 +124,7 @@ timed "user config" main
 
 # Load golang config.
 [ -f "$HOME/.zsh_golang" ] && timed "golang config" source $HOME/.zsh_golang
-
-# Load private config if exists.
-[ -f "$HOME/.zsh_priv_config" ] && timed "local user config" source $HOME/.zsh_priv_config
+echo "4>> $DOCKER_MACHINE_NAME"
 
 # Restore cursor & clear line.
 tput rc; tput el
@@ -127,3 +132,27 @@ tput rc; tput el
 function igo() {
     tmp=$(mktemp); mv $tmp $tmp.go; echo "package main\nfunc main() {" > $tmp.go; cat >> $tmp.go; echo "}" >> $tmp.go; goimports -w $tmp.go; go run $tmp.go; \rm $tmp.go
 }
+
+>function encode64() {
+    if [[ $# -eq 0 ]]; then
+        cat | base64
+    else
+        printf '%s' $1 | base64
+    fi
+}
+
+function decode64() {
+    if [[ $# -eq 0 ]]; then
+        cat | base64 --decode
+    else
+        printf '%s' $1 | base64 --decode
+    fi
+}
+
+export TERM=xterm-256color
+
+autoload -U +X bashcompinit && bashcompinit
+complete -o nospace -C /Users/gcharmes/go/bin/gocomplete go
+
+complete -o nospace -C /Users/gcharmes/go/src/test/comp/comp self
+complete -C $HOME/go/bin/swapexcomplete swapex
