@@ -224,6 +224,71 @@
 
 ;;; Hightlight long lines ;;;
 (require 'whitespace)
-(setq whitespace-line-column 100)
+(setq whitespace-line-column 120)
 (setq whitespace-style '(face empty tabs lines-tail trailing))
 (global-whitespace-mode t)
+
+(projectile-global-mode)
+
+(defun setup-flycheck-clang-project-path ()
+  (let ((root (ignore-errors (projectile-project-root))))
+    (setq flycheck-clang-language-standard "c++14")
+    (add-to-list 'flycheck-clang-include-path "/usr/local/Cellar/openssl/1.0.2l/include/")
+    (add-to-list 'flycheck-clang-definitions "LOG_TAG=\"cloud-client-core\"")
+    (when root
+      (add-to-list
+       (make-variable-buffer-local 'flycheck-clang-include-path)
+       root))
+    (when root
+      (add-to-list
+       (make-variable-buffer-local 'flycheck-clang-include-path)
+       (concat root "/core/include")))
+    )
+)
+
+(add-hook 'c++-mode-hook 'setup-flycheck-clang-project-path)
+(add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
+
+(defun cpp-format ()
+  (setq-default c-basic-offset 2)
+  (c-set-offset 'access-label -2)
+  (c-set-offset 'inclass 4)
+  (c-set-offset 'innamespace 0)
+  )
+(add-hook 'c++-mode-hook 'cpp-format)
+
+
+(require 'ggtags)
+(add-hook 'c-mode-common-hook
+          (lambda ()
+            (when (derived-mode-p 'c-mode 'c++-mode 'java-mode 'asm-mode)
+              (ggtags-mode 1))))
+
+(setq
+ helm-gtags-ignore-case t
+ helm-gtags-auto-update t
+ helm-gtags-use-input-at-cursor t
+ helm-gtags-pulse-at-cursor t
+ helm-gtags-prefix-key "\C-cg"
+ helm-gtags-suggested-key-mapping t
+ )
+
+(require 'helm-gtags)
+;; Enable helm-gtags-mode
+(add-hook 'dired-mode-hook 'helm-gtags-mode)
+(add-hook 'eshell-mode-hook 'helm-gtags-mode)
+(add-hook 'c-mode-hook 'helm-gtags-mode)
+(add-hook 'c++-mode-hook 'helm-gtags-mode)
+(add-hook 'asm-mode-hook 'helm-gtags-mode)
+
+(define-key helm-gtags-mode-map (kbd "C-c g a") 'helm-gtags-tags-in-this-function)
+(define-key helm-gtags-mode-map (kbd "C-j") 'helm-gtags-select)
+(define-key helm-gtags-mode-map (kbd "M-.") 'helm-gtags-dwim)
+(define-key helm-gtags-mode-map (kbd "M-,") 'helm-gtags-pop-stack)
+(define-key helm-gtags-mode-map (kbd "C-c <") 'helm-gtags-previous-history)
+(define-key helm-gtags-mode-map (kbd "C-c >") 'helm-gtags-next-history)
+
+
+;(setq indent-tabs-mode nil)
+
+(editorconfig-mode 1)

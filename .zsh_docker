@@ -3,7 +3,7 @@
 # Small helper to configure docker.
 function _loaddocker() {
     if [ ! -f /tmp/.dockercache ]; then
-	echo "Starting docker machine..."
+	echo "Starting docker machine $DOCKER_MACHINE_NAME..."
 	docker-machine start $DOCKER_MACHINE_NAME
 	echo "Docker Started."
 	docker-machine env   $DOCKER_MACHINE_NAME > /tmp/.dockercache
