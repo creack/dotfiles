@@ -21,8 +21,11 @@ function dockerclear {
     \rm -f /tmp/.dockercache /tmp/.dockerip
     loaddocker
 }
-
+echo "D1>> $DOCKER_MACHINE_NAME"
 # Default to "default" as docker-machine name.
 [ -z "$DOCKER_MACHINE_NAME" ] && export DOCKER_MACHINE_NAME="default"
+echo "D2>> $DOCKER_MACHINE_NAME"
 # If requested, auto start the docker-machine
 [ "$DOCKER_MACHINE_AUTOSTART" = true ] && loaddocker
+
+echo "D3>> $DOCKER_MACHINE_NAME"

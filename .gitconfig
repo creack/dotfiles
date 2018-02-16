@@ -1,20 +1,11 @@
-[branch]
-    # When creating a new branch off a remote branch, always set it up to
-    # track the remote branch so that we can pull from there.
-    autosetupmerge = always
-    mergeoptions   = --no-commit --no-ff
-
 [alias]
-    ci      = commit
     co      = checkout
+    ci      = commit
     st      = status -sb
-    b       = branch
-    merge   = merge --no-ff --no-commit
     lg1     = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(bold white)— %an%C(reset)%C(bold yellow)%d%C(reset)' --abbrev-commit --date=relative
     lg2     = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(bold white)— %an%C(reset)' --abbrev-commit
     lg3     = !"git log --show-signature"
     lg      = !"git lg1"
-    pull    = pull --rebase
     change  = codereview change
     gofmt   = codereview gofmt
     mail    = codereview mail
@@ -45,12 +36,9 @@
 [commit]
     gpgsign = true
 
+[core]
+    excludesfile = ~/.gitignore
+
 [include]
     path = ~/.gitconfig.perso
-[url "git@bitbucket.org:"]
-	insteadOf = https://bitbucket.org/
-[filter "lfs"]
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
-	required = true
+    path = ~/.gitconfig.private

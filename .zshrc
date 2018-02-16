@@ -11,21 +11,18 @@ CASE_SENSITIVE="true"
 # Disable auto-correct.
 DISABLE_CORRECTION="true"
 # Autostart tmux.
-[ -z "$ZSH_TMUX_AUTOSTART" ] && ZSH_TMUX_AUTOSTART="true"
+[ -z "$ZSH_TMUX_AUTOSTART" ] && ZSH_TMUX_AUTOSTART="false"
 # Autostart docker-machine default.
 DOCKER_MACHINE_AUTOSTART="true"
 DOCKER_MACHINE_NAME="default"
 
 plugins=(
-    encode64
+    ssh-agent
     git
     gnu-utils
     golang
-    gpg-agent
     mosh
     rsync
-    ssh-agent
-    sudo
     tmux
 )
 
@@ -124,7 +121,6 @@ timed "user config" main
 
 # Load golang config.
 [ -f "$HOME/.zsh_golang" ] && timed "golang config" source $HOME/.zsh_golang
-echo "4>> $DOCKER_MACHINE_NAME"
 
 # Restore cursor & clear line.
 tput rc; tput el
@@ -152,7 +148,23 @@ function decode64() {
 export TERM=xterm-256color
 
 autoload -U +X bashcompinit && bashcompinit
-complete -o nospace -C /Users/gcharmes/go/bin/gocomplete go
 
-complete -o nospace -C /Users/gcharmes/go/src/test/comp/comp self
+complete -o nospace -C /Users/gcharmes/go/bin/gocomplete go
 complete -C $HOME/go/bin/swapexcomplete swapex
+
+function jwt() { echo $(ret=$(cat | sed 's/\(.*\)\..*/\1/');  echo '{"header":'; echo -n $ret | sed 's/\(.*\)\..*/\1/' | d64; echo ', "payload":';echo $ret | sed 's/.*\.//' | d64 ; echo '"}}') | jq . }
+
+function prettybyte() {
+    n=$1;
+    [ -z "$n" ] && n=$(cat);
+    [ -z "$BASE" ] && base=1024 || base=$BASE
+    [ "$n" -ge "$(echo $base ^ 5 | bc)" ] && echo $(echo "$n / ($base ^ 5)" | bc)Tb && return;
+    [ "$n" -ge "$(echo $base ^ 4 | bc)" ] && echo $(echo "$n / ($base ^ 4)" | bc)Tb && return;
+    [ "$n" -ge "$(echo $base ^ 3 | bc)" ] && echo $(echo "$n / ($base ^ 3)" | bc)Gb && return;
+    [ "$n" -ge "$(echo $base ^ 2 | bc)" ] && echo $(echo "$n / ($base ^ 2)" | bc)Mb && return;
+    [ "$n" -ge "$(echo $base ^ 1 | bc)" ] && echo $(echo "$n / ($base ^ 1)" | bc)Kb && return;
+    [ "$n" -lt "$(echo $base ^ 1 | bc)" ] && echo $(echo "$n / ($base ^ 0)" | bc)b  && return;
+}
+
+
+export GPG_TTY=$(tty)
