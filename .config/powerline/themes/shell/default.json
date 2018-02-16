@@ -85,13 +85,13 @@
 	    }
 	],
 	"right": [
-	    {
+	    {"disabled":{
 		"function": "powerline_gitstatus.gitstatus",
 		"priority": 40,
 		"args": {
 		    "show_tag": true
 		}
-	    }
+	    }}
 	]
     }
 }
