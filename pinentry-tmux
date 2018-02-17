@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+rm -rf /tmp/inpipe /tmp/outpipe >& /dev/null
+mkfifo /tmp/inpipe /tmp/outpipe
+
+# Create a dedicated pane for pinentry.
+pane=$(tmux new-window -P -d bash -c 'while read l < /tmp/inpipe; do [ "$l" = "EOF" ] && break; echo $l; done | pinentry > /tmp/outpipe')
+tty=$(tmux list-panes -t $pane -F '#{pane_tty}')
+
+tmux select-window -t $pane
+
+# Pipe the output of pinenetry to stdout.
+cat /tmp/outpipe&
+
+# Pipe stdin to pinentry.
+while read l; do
+    # Monkey patch the proper tty.
+    echo $l | sed "s#ttyname=.*#ttyname=$tty#" > /tmp/inpipe
+done
+
+tmux select-window -l
+echo EOF > /tmp/inpipe
+rm -rf /tmp/inpipe /tmp/outpipe >& /dev/null
