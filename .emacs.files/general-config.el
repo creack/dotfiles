@@ -58,16 +58,15 @@
 (setq create-lockfiles nil)
 
 ;;; Helm config. ;;;
-(helm-mode 1)                                       ;; Enable helm major mode.
-(global-set-key (kbd "M-x")   'helm-M-x)            ;; Use helm for M-x.
-(global-set-key (kbd "C-x b") 'helm-mini)           ;; Use helm for buffer switch.
-(global-set-key (kbd "M-y")   'helm-show-kill-ring) ;; Use heml for kill ring.
+;; (helm-mode 1)                                       ;; Enable helm major mode.
+;; (global-set-key (kbd "M-x")   'helm-M-x)            ;; Use helm for M-x.
+;; (global-set-key (kbd "C-x b") 'helm-mini)           ;; Use helm for buffer switch.
+;; (global-set-key (kbd "M-y")   'helm-show-kill-ring) ;; Use heml for kill ring.
 
 ;;; Load & configure themes. ;;;
 ;; Functions allow to easily switch between dark/light themes.
 (defun dark-theme()
   (interactive)                    ;; Allow function call from M-x.
-  (disable-theme 'solarized-light) ;; Disable light theme.
   (load-theme 'monokai t)          ;; Load Monokai.
   (enable-theme 'monokai)          ;; Enable Monokai.
   (powerline-default-theme)        ;; Powerline layout.
@@ -78,19 +77,6 @@
    '(flycheck-warning ((t (:background "#DEB542" :foreground "#7B6000" :underline t :weight bold)))) ;; Improve flycheck render.
    )
   )
-(defun light-theme()
-  (interactive)                    ;; Allow function call from M-x.
-  (disable-theme 'monokai)         ;; Disable dark theme.
-  (load-theme 'solarized-light t)  ;; Load Solarized.
-  (enable-theme 'solarized-light)  ;; Enable Solarized.
-  (powerline-default-theme)        ;; Powerline layout.
-  (custom-set-faces                ;; Reset default faces for solarized.
-   '(default ((t (:background "#FDF6E3"))))
-   '(flycheck-error   ((t (:background "#FF6E64" :foreground "#990A1B" :underline t :weight bold))))
-   '(flycheck-info    ((t (:background "#69B7F0" :foreground "#00629D" :underline t :weight bold))))
-   '(flycheck-warning ((t (:background "#DEB542" :foreground "#7B6000" :underline t :weight bold))))
-   )
-  )
 ;; Default to dark theme.
 (dark-theme)
 
@@ -98,7 +84,7 @@
 (load-file "~/.emacs.files/golang-config.el")
 
 ;;; JS configuration. ;;;
-(load-file "~/.emacs.files/js-config.el")
+;; (load-file "~/.emacs.files/js-config.el")
 
 ;;; Ediff config. ;;;
 (setq-default ediff-highlight-all-diffs 'nil) ;; Only hilight current diff:
@@ -115,7 +101,7 @@
 (require 'auto-complete)
 (require 'auto-complete-config)
 (ac-config-default)
-(setq ac-delay 0.1)
+;;(setq ac-delay 0.1)
 
 ;;; Key bindings. ;;;
 (global-set-key (kbd "C-c C-k") 'kill-compilation) ;; Kill compilation buffer.
@@ -144,40 +130,6 @@
 ;; Key binding for recompile.
 (global-set-key (kbd "C-c r") 'recompile-scroll)
 
-;;; Neotree config. ;;;
-(add-to-list 'load-path "~/.emacs.files/packages/neotree")
-(require 'neotree)
-
-;; Start neotree with emacs.
-(defun neotree-startup ()
-  (interactive)
-  (neotree-show)
-  (call-interactively 'other-window))
-(if (daemonp)
-    (add-hook 'server-switch-hook #'neotree-startup)
-  (add-hook 'after-init-hook #'neotree-startup)
-)
-
-;; Key binding to toggle neotree.
-(global-set-key (kbd "C-c /") 'neotree-toggle)
-
-;; Customize neotree.
-(custom-set-variables
- '(neo-theme (quote nerd))                 ;; Use arrows utf-8 instead of '+' sign.
- '(neo-smart-open t)                       ;; Update neotree buffer.
- '(neo-vc-integration (quote (face char))) ;; Enable VC integration.
- '(neo-show-hidden-files nil)              ;; Show hidden files.
- '(neo-window-position 'left))             ;; Use neotree on the left.
-
-;; Refresh the tree each time we switch buffer.
-(add-hook 'switch-buffer-functions
-          (lambda (prev cur)
-            (interactive)
-	    (when (neo-global--window-exists-p)
-	      (save-selected-window
-		(neotree-refresh)
-		))))
-
 ;;; Multiple cursor config. ;;;
 (global-set-key (kbd "S-<mouse-1>") 'mc/add-cursor-on-click)         ;; Add new cursor with shift-click.
 (global-set-key (kbd "M-n")         'mc/mark-next-like-this)         ;; Add new cursor with matching region.
@@ -185,42 +137,19 @@
 (global-set-key (kbd "M-]")         'mc/mark-all-like-this)          ;; Add new cursor with matching region.
 (global-set-key (kbd "C-c SPC")     'set-rectangular-region-anchor)  ;; Rectangular region with many cursors.
 (global-set-key (kbd "M-SPC")       'set-rectangular-region-anchor)  ;; Rectangular region with many cursors.
-
-;;; Git gutter config. ;;;
-(global-git-gutter+-mode)
-
-(global-set-key (kbd "C-x C-g") 'global-git-gutter+-mode) ; Turn on/off globally.
-
-(eval-after-load 'git-gutter+
-  '(progn
-     ;;; Jump between hunks.
-     (define-key git-gutter+-mode-map (kbd "C-x n") 'git-gutter+-next-hunk)
-     (define-key git-gutter+-mode-map (kbd "C-x p") 'git-gutter+-previous-hunk)
-
-     ;;; Act on hunks.
-     (define-key git-gutter+-mode-map (kbd "C-x v =") 'git-gutter+-show-hunk)
-     (define-key git-gutter+-mode-map (kbd "C-x w")   'git-gutter+-revert-hunks)
-
-     ;; Stage hunk at point.
-     ;; If region is active, stage all hunk lines within the region.
-     (define-key git-gutter+-mode-map (kbd "C-x t")   'git-gutter+-stage-hunks)
-     (define-key git-gutter+-mode-map (kbd "C-x c")   'git-gutter+-commit)
-     (define-key git-gutter+-mode-map (kbd "C-x C")   'git-gutter+-stage-and-commit)
-     (define-key git-gutter+-mode-map (kbd "C-x C-y") 'git-gutter+-stage-and-commit-whole-buffer)
-     (define-key git-gutter+-mode-map (kbd "C-x U")   'git-gutter+-unstage-whole-buffer)))
-
-;;; Magit config. ;;;
-(global-set-key (kbd "C-x g") 'magit-status)
-
+(setq mc/cmds-to-run-for-all
+      '(
+	backward-delete-char
+	backward-delete-char-untabify
+	yaml-backspace-function
+	yaml-electric-backspace
+        ))
 
 ;;; Tmux integration. ;;;
 (global-set-key (kbd "C-x x") (lambda ()
                             (interactive)
                             (shell-command (concat "tmux split-window -v -p 20 -c " default-directory))
 			    ))
-;;; ielm config. ;;;
-(define-key comint-mode-map (kbd "<up>") 'comint-previous-input)
-(define-key comint-mode-map (kbd "<down>") 'comint-next-input)
 
 ;;; Hightlight long lines ;;;
 (require 'whitespace)
@@ -228,27 +157,8 @@
 (setq whitespace-style '(face empty tabs lines-tail trailing))
 (global-whitespace-mode t)
 
-(projectile-global-mode)
 
-(defun setup-flycheck-clang-project-path ()
-  (let ((root (ignore-errors (projectile-project-root))))
-    (setq flycheck-clang-language-standard "c++14")
-    (add-to-list 'flycheck-clang-include-path "/usr/local/Cellar/openssl/1.0.2l/include/")
-    (add-to-list 'flycheck-clang-definitions "LOG_TAG=\"cloud-client-core\"")
-    (when root
-      (add-to-list
-       (make-variable-buffer-local 'flycheck-clang-include-path)
-       root))
-    (when root
-      (add-to-list
-       (make-variable-buffer-local 'flycheck-clang-include-path)
-       (concat root "/core/include")))
-    )
-)
-
-(add-hook 'c++-mode-hook 'setup-flycheck-clang-project-path)
 (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
-
 (defun cpp-format ()
   (setq-default c-basic-offset 2)
   (c-set-offset 'access-label -2)
@@ -257,38 +167,11 @@
   )
 (add-hook 'c++-mode-hook 'cpp-format)
 
-
-(require 'ggtags)
-(add-hook 'c-mode-common-hook
-          (lambda ()
-            (when (derived-mode-p 'c-mode 'c++-mode 'java-mode 'asm-mode)
-              (ggtags-mode 1))))
-
-(setq
- helm-gtags-ignore-case t
- helm-gtags-auto-update t
- helm-gtags-use-input-at-cursor t
- helm-gtags-pulse-at-cursor t
- helm-gtags-prefix-key "\C-cg"
- helm-gtags-suggested-key-mapping t
- )
-
-(require 'helm-gtags)
-;; Enable helm-gtags-mode
-(add-hook 'dired-mode-hook 'helm-gtags-mode)
-(add-hook 'eshell-mode-hook 'helm-gtags-mode)
-(add-hook 'c-mode-hook 'helm-gtags-mode)
-(add-hook 'c++-mode-hook 'helm-gtags-mode)
-(add-hook 'asm-mode-hook 'helm-gtags-mode)
-
-(define-key helm-gtags-mode-map (kbd "C-c g a") 'helm-gtags-tags-in-this-function)
-(define-key helm-gtags-mode-map (kbd "C-j") 'helm-gtags-select)
-(define-key helm-gtags-mode-map (kbd "M-.") 'helm-gtags-dwim)
-(define-key helm-gtags-mode-map (kbd "M-,") 'helm-gtags-pop-stack)
-(define-key helm-gtags-mode-map (kbd "C-c <") 'helm-gtags-previous-history)
-(define-key helm-gtags-mode-map (kbd "C-c >") 'helm-gtags-next-history)
-
-
-;(setq indent-tabs-mode nil)
-
+;; Enable editormode.
 (editorconfig-mode 1)
+
+;; Load .puml files in plantuml-mode.
+(add-to-list 'auto-mode-alist '("\\.puml\\'" . plantuml-mode))
+
+;; Skip prompt when opening links.
+(setq vc-follow-symlinks t)

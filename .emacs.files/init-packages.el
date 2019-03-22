@@ -11,13 +11,10 @@
 
 ;; Add melpa sources to the package manager.
 (add-to-list 'package-archives
-             '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+             '("melpa-" . "https://melpa.org/packages/") t)
 
 ;; Refresh package management.
 (package-initialize)
-
-(add-to-list 'package-archives
-             '("melpa" . "https://melpa.org/packages/") t)
 
 (require 'package)
 
@@ -25,43 +22,39 @@
 (defvar package-list)
 (setq package-list
       '(
-        ;;; General. ;;;
-        flycheck                ;; Linter.
-        yasnippet               ;; Snippet management.
-        auto-complete           ;; Auto completion.
-        multiple-cursors        ;; Multi cursor.
-        switch-buffer-functions ;; Add hook when switchin buffers.
-	git                     ;; Better vcs support for git.
-	git-gutter+             ;; Display / manage git changes.
-	magit                   ;; Git client.
+	;; General.
+	editorconfig     ;; .editorconfig support.
+	multiple-cursors ;; Multiple cursor support.
+	auto-complete    ;; auto-complete support.
+	yasnippet        ;; snippet completion support.
+	popup            ;; Lib to enable popup in terminal.
 
-        ;; For golang.
-        go-mode         ;; Go major mode.
-        go-eldoc        ;; Doc at point in minibuffer.
-        go-autocomplete ;; Autocomplete mode for golang.
-        go-errcheck     ;; Enforce errcheck.
-        go-guru         ;; Guru integration.
-        go-rename       ;; go-rename integration.
-        ; flycheck-gometalinter ;; Stricter Go linter module for flycheck.
+	;; Major modes.
+	feature-mode    ;; Gherkin (cucumber) test formats.
+	plantuml-mode   ;; PlantUML diagrams.
+	terraform-mode  ;; Terraform.
+	json-mode       ;; Json.
+	yaml-mode       ;; Yaml.
+	markdown-mode   ;; Markdown.
+	dockerfile-mode ;; Dockerfiles.
+	go-mode         ;; Golang.
 
-        ;;; For javascript ;;;
-        web-mode
-        tern
-        tern-auto-complete
+	;; Themes.
+	monokai-theme ;; Main theme.
+	powerline     ;; Powerline style statusbar.
 
-        ;;; Helm. ;;;
-        helm
+	;; Linters.
+	flycheck-yamllint      ;; Yaml via flycheck
+	flycheck-golangci-lint ;; Golang.
+	flycheck-popup-tip     ;; Show the lint errors in popup.
 
-        ;;; Themes. ;;;
-        monokai-theme
-        solarized-theme
-        powerline
-
-        ;;; Various modes. ;;;
-        dockerfile-mode
-        markdown-mode
-        yaml-mode
-        json-mode
+	;; Golang.
+	go-guru         ;; Static analysis with guru (formerly known as go-oracle).
+	go-eldoc        ;; Show godoc while typing function calls.
+	go-tag          ;; Autocreate tags for structs.
+	go-rename       ;; Refactoring tool with go-rename.
+	go-snippets     ;; Go specific snippets completion.
+	go-autocomplete ;; Completion support.
 ))
 
 ;; Fetch the list of packages available.
@@ -72,4 +65,3 @@
 (dolist (package package-list)
   (unless (package-installed-p package)
     (package-install package)))
-
