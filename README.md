@@ -36,3 +36,9 @@ cd ~/.dotfiles
 
 ## Add better touch tool license.
 ## Add iStatMenu license.
+
+# True colors
+
+```
+tic -x -o ~/.terminfo xterm-truecolor.terminfo
+```

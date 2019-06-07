@@ -1,28 +1,40 @@
 # -*- mode: sh -*-
 
 # Environement.
-[ -d /usr/local/opt/go/libexec/ ] && export GOROOT=/usr/local/opt/go/libexec || export GOROOT=$(go env GOROOT)
-export GOPATH=~/go
-export GOBIN=$GOPATH/bin
-export PATH=$GOBIN:$PATH
+
+# Set goroot.
+export GOROOT=~/goroot
+export PATH=$GOROOT/bin:$PATH
+
+
+function setgoenv() {
+    local gopath=$1
+
+    # Remove GOBIN from PATH.
+    [ -n "$GOPATH" ] && export PATH=$(echo $PATH | sed -e "s|$GOBIN:*||g" -e 's/:$//')
+
+    # Set new Go env.
+    #export GOPATH=$gopath
+    export GOBIN=$gopath/bin
+    export PATH=$GOBIN:$PATH
+}
+
+function setdeployenv() {
+    setgoenv ~/go.deploy
+}
+
+#setgoenv ~/go
 
 # Helper to install common tools.
 function update_go() {
-    packages="
-github.com/ajstarks/svgo/benchviz
+    packages="github.com/ajstarks/svgo/benchviz
 github.com/axw/gocov/gocov
 github.com/cespare/prettybench
-github.com/dougm/goflymake
-github.com/golang/lint/golint
-github.com/josharian/impl
-github.com/kisielk/errcheck
-github.com/kisielk/godepgraph
-github.com/nsf/gocode
-github.com/tools/godep
+github.com/mdempsky/gocode
 github.com/rogpeppe/godef
 github.com/zmb3/gogetdoc
 golang.org/x/tools/cmd/...
-sourcegraph.com/sqs/goreturns
+github.com/fatih/gomodifytags
 "
     echo $packages | while read pkg; do
         echo "$pkg"
