@@ -25,9 +25,11 @@
 	;; General.
 	editorconfig     ;; .editorconfig support.
 	multiple-cursors ;; Multiple cursor support.
-	auto-complete    ;; auto-complete support.
+	;;company          ;; auto-complete support.
+	auto-complete
 	yasnippet        ;; snippet completion support.
 	popup            ;; Lib to enable popup in terminal.
+	projectile       ;; Workdir management.
 
 	;; Major modes.
 	feature-mode    ;; Gherkin (cucumber) test formats.
@@ -54,7 +56,19 @@
 	go-tag          ;; Autocreate tags for structs.
 	go-rename       ;; Refactoring tool with go-rename.
 	go-snippets     ;; Go specific snippets completion.
-	go-autocomplete ;; Completion support.
+	go-autocomplete
+
+	;; LSP.
+	lsp-mode
+	lsp-ui
+	;;company-lsp
+
+	;; Tests.
+	use-package
+	magit
+	treemacs
+	treemacs-projectile
+	treemacs-magit
 ))
 
 ;; Fetch the list of packages available.

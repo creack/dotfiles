@@ -40,7 +40,6 @@
 	    (yas-global-mode 1)
 
 	    ;; Linter.
-	    (setenv "GO111MODULE" "on")
 	    (setq flycheck-golangci-lint-fast t)
 	    (flycheck-golangci-lint-setup)
 
@@ -68,14 +67,32 @@
 (with-eval-after-load 'go-mode
   (require 'go-autocomplete))
 
-(with-eval-after-load 'flycheck
-  (add-hook 'flycheck-mode-hook #'flycheck-popup-tip-mode))
+;(with-eval-after-load 'flycheck
+;  (add-hook 'flycheck-mode-hook #'flycheck-popup-tip-mode))
 
-(with-eval-after-load 'flycheck
-  (custom-set-faces
-   '(popup-tip-face ((t (:background "color-100" :foreground "color-233" :weight bold))))
-   )
-  )
+;(with-eval-after-load 'flycheck
+;  (custom-set-faces
+;   '(popup-tip-face ((t (:background "color-100" :foreground "color-233" :weight bold))))
+;   )
+;  )
 
 (setq vc-follow-symlinks t)
 ;(setq-default flycheck-disabled-checkers '(go-vet))
+
+;; Snippets management.
+;(yas-global-mode 1)
+;(require 'lsp-mode)
+;(add-hook 'go-mode-hook #'lsp)
+;(require 'lsp-ui)
+;(add-hook 'lsp-mode-hook 'lsp-ui-mode)
+;(require 'company-lsp)
+;(push 'company-lsp company-backends)
+;(add-hook 'after-init-hook 'global-company-mode)
+;(add-hook 'go-mode-hook 'flycheck-mode)
+
+;(define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
+;(define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references)
+
+;(setq lsp-ui-peek-always-show t)
+
+;(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
