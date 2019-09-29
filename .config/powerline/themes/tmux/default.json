@@ -1,19 +1,19 @@
 {
     "segments": {
-        "left": [],
+        "left": [
+	    {
+		"before": "👤",
+		"function": "powerline.segments.tmux.attached_clients",
+		"priority": 10,
+		"args": {
+		    "minimum": 1
+		}
+	    },
+	    {
+		"function": "powerline.segments.common.env.user"
+	    }
+	],
         "right": [
-            {
-                "function": "powerline.segments.common.players.spotify",
-                "args": {
-                    "format": "{state_symbol} {artist} - {title}",
-		    "state_symbols": {
-			"fallback": "",
-			"pause": "⏸ ",
-			"stop": "⏹ ",
-			"play": "▶"
-		    }
-                }
-            },
             {
                 "function": "powerline.segments.common.sys.uptime",
                 "priority": 50
@@ -34,10 +34,10 @@
                 }
             },
             {
-                "function": "powerline.segments.common.bat.battery"
-            },
-            {
-                "function": "powerline.segments.common.net.hostname"
+                "function": "powerline.segments.common.net.hostname",
+		"args": {
+		    "exclude_domain": true
+		}
             }
         ]
     }

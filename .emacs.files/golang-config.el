@@ -1,66 +1,101 @@
-;;; golang.el --- Golang configuration for emacs. ;;; -*- mode: lisp -*-
+;;; golang.el --- Golang configuration for emacs. ;;; -*- mode: elisp -*-
 
-(defun go-save-and-compile-program()
-  "Save any unsaved buffers and compile."
-  (interactive)
-  (save-some-buffers t)
-  (compile "sh -c 'go install && go build -o /tmp/a.out && /tmp/a.out'")
+(use-package go-mode
+  :ensure-system-package
+  (gogetdoc . "cd /tmp && go get github.com/zmb3/gogetdoc")
+
+  :init
+  (use-package go-guru) ;; Load go-guru.
+
+  (global-unset-key (kbd "C-<mouse-1>")) ;; Unbind default ctrl-mouse so go-mode can use it for goto definition.
+
+  ;; Compilation helper funcs.
+  (defun go-save-and-compile-program()
+    "Save any unsaved buffers and compile."
+    (interactive)
+    (save-some-buffers t)
+    (compile "sh -c 'go build -o /tmp/a.out && /tmp/a.out'")
+    )
+  (defun go-save-and-test-program()
+    "Save any unsaved buffers and compile."
+    (interactive)
+    (save-some-buffers t)
+    (compile "go test -v -cover -coverprofile=/tmp/coverprofile -covermode=count")
+    )
+
+  :bind
+  (:map go-mode-map
+	("TAB"     . company-indent-or-complete-common)
+	("C-c C-c" . comment-region)
+	("C-c C-u" . uncomment-region)
+	("C-c e"   . lsp-rename)
+	("C-c f"   . go-save-and-compile-program)
+	("C-c t"   . go-save-and-test-program)
+	("C-c c"   . (lambda() (interactive) (go-coverage "/tmp/coverprofile")))
+	("C-c d"   . godoc-at-point)
+	([remap godef-describe]          . lsp-describe-thing-at-point)
+	([remap godef-jump]              . lsp-ui-peek-find-definitions)
+	([remap godef-jump-other-window] . go-guru-definition-other-window)
+	([remap go-rename]               . lsp-rename)
+	)
+
+  :config
+  (setq gofmt-command           "goimports"            ;; Use goimprots instead of gofmt.
+	gofmt-show-errors       nil                    ;; Don't show errors. Use LSP instead.
+	godoc-at-point-function (quote godoc-gogetdoc) ;; Use gogetdoc instead of godef for better docs.
+
+        lsp-clients-go-library-directories (quote ("~/go/pkg/mod" ;; Ignore stdlib, go mod cache and go path from LSP.
+						   "~/goroot"
+						   "~/go"
+						   "~/go/src/google.golang.org"
+						   "~/go/src/golang.org"
+						   "~/go/src/gopkg.in"
+						   ))
+        )
+
+  :hook
+  (go-mode     . smartparens-mode)     ;; Use smartparens.
+  (go-mode     . lsp)                  ;; Load LSP.
+  (before-save . lsp-format-buffer)    ;; Format the code with LSP before save.
+  (before-save . lsp-organize-imports) ;; Let LSP handle imports.
   )
 
-(defun go-save-and-test-program()
-  "Save any unsaved buffers and compile."
-  (interactive)
-  (save-some-buffers t)
-  (compile "go test -v -cover -coverprofile=/tmp/coverprofile -covermode=count")
+
+(use-package yasnippet
+  :ensure t
   )
-(setq compilation-scroll-output t)
 
+(use-package lsp-mode
+  :ensure t
+  :commands (lsp lsp-deferred)
+  :config
+  (setq
+   lsp-prefer-flymake nil ;; Disable flymake in favor of flycheck.
+   )
+  ;; Cleaner mode line.
+  :delight " LSP"
+  )
 
-(add-hook 'go-mode-hook ;; Scope config to go-mode.
-          (lambda()
-            ;;; Formatting.
-            (setq gofmt-command "goimports")                ;; Use goimports instead of gofmt.
-            (add-hook 'before-save-hook 'gofmt-before-save) ;; Trigger goimports when saving.
+;; Overlay UI components for LSP.
+(use-package lsp-ui
+  :ensure t
+  :commands lsp-ui-mode
+  :bind
+  ((:map lsp-ui-flycheck-list-mode-map ;; Fix the terminal mode bindings.
+	("RET"   . lsp-ui-flycheck-list--view)
+	("TAB"   . lsp-ui-flycheck-list--visit)
+	("C-c l" . lsp-ui-flycheck-list--quit)
+	)
+   (:map lsp-ui-mode-map
+	 ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
+	 ([remap xref-find-references]  . lsp-ui-peek-find-references)
+	 )
+   )
+  )
 
-            ;;; Useful key bindings.
-            (global-set-key (kbd "M-*")     'pop-tag-mark)     ;; Pop mark after jumping to definition.
-            (global-set-key (kbd "C-c C-i") 'go-goto-imports)  ;; Jump to import list.
-            (global-set-key (kbd "C-c C-e") 'go-rename)        ;; Call go-rename at point.
-            (global-set-key (kbd "C-c d")   'godoc-at-point)   ;; Open godoc from point in new pane.
-	    (global-set-key (kbd "C-c C-c") 'comment-region)   ;; Comment region.
-	    (global-set-key (kbd "C-c C-u") 'uncomment-region) ;; Uncomment region.
-
-	    ;;; Compilation key bindings.
-	    (global-set-key (kbd "C-c f") 'go-save-and-compile-program)
-	    (global-set-key (kbd "C-c t") 'go-save-and-test-program)
-
-	    ;; Call coverage binding.
-	    (global-set-key (kbd "C-c c") '(lambda() (interactive) (go-coverage "/tmp/coverprofile")))
-
-            ;; Snippets management.
-	    (yas-global-mode 1)
-	    (add-to-list 'yas-snippet-dirs "~/.emacs.files/yasnippet-go")
-
-	    (go-eldoc-setup)             ;; Init eldoc.
-	    (go-guru-hl-identifier-mode) ;; Enable symbol highlight.
-
-	    ;; Make a lighter godoc-at-point using popup.
-	    ;; TODO: Pass buffer content via stdin to make it work with edited buffer.
-	    ;; TODO: Handle errors.
-	    (global-set-key (kbd "C-c s")
-			    (lambda ()
-			      (interactive)
-			      (setq rawdoc (shell-command-to-string
-					    (concat "gogetdoc -json -pos "
-						    buffer-file-name ":#"
-						    (format "%s" (point)))))
-			      (let* ((json-object-type 'hash-table)
-				     (json-array-type 'list)
-				     (json-key-type 'string)
-				     (json (json-read-from-string rawdoc)))
-				(popup-tip (concat "\n" (gethash "doc" json)))
-				)))
-            ))
-
-(with-eval-after-load 'go-mode
-  (require 'go-autocomplete))
+;; Add LSP backend for company.
+(use-package company-lsp
+  :ensure t
+  :commands company-lsp
+  :defer
+  )
