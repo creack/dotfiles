@@ -61,12 +61,9 @@
   )
 
 
-(use-package yasnippet
-  :ensure t
-  )
+(use-package yasnippet)
 
 (use-package lsp-mode
-  :ensure t
   :commands (lsp lsp-deferred)
   :config
   (setq
@@ -78,7 +75,7 @@
 
 ;; Overlay UI components for LSP.
 (use-package lsp-ui
-  :ensure t
+  :after (flycheck)
   :commands lsp-ui-mode
   :bind
   ((:map lsp-ui-flycheck-list-mode-map ;; Fix the terminal mode bindings.
@@ -95,7 +92,6 @@
 
 ;; Add LSP backend for company.
 (use-package company-lsp
-  :ensure t
   :commands company-lsp
   :defer
   )

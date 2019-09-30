@@ -1,44 +1,8 @@
 ;;; .emacs --- Emacs configuration ;;; -*- mode: elisp -*-
 
 
-;;;; Load & configure themes. ;;;
-;;; Functions allow to easily switch between dark/light themes.
-;(defun dark-theme()
-;  (interactive)                    ;; Allow function call from M-x.
-;  (disable-theme 'solarized-light) ;; Disable light theme.
-;  (load-theme 'monokai t)          ;; Load Monokai.
-;  (enable-theme 'monokai)          ;; Enable Monokai.
-;  (powerline-center-theme)         ;; Powerline layout.
-;  (custom-set-faces                ;; Tweak faces.
-;   '(default ((t (:background "#101010"))))                                                          ;; Slightly increase contrast.
-;   '(flycheck-error   ((t (:background "#FF6E64" :foreground "#990A1B" :underline t :weight bold)))) ;; Improve flycheck render.
-;   '(flycheck-info    ((t (:background "#69B7F0" :foreground "#00629D" :underline t :weight bold)))) ;; Improve flycheck render.
-;   '(flycheck-warning ((t (:background "#DEB542" :foreground "#7B6000" :underline t :weight bold)))) ;; Improve flycheck render.
-;   )
-;  )
-;(defun light-theme()
-;  (interactive)                    ;; Allow function call from M-x.
-;  (disable-theme 'monokai)         ;; Disable dark theme.
-;  (load-theme 'solarized-light t)  ;; Load Solarized.
-;  (enable-theme 'solarized-light)  ;; Enable Solarized.
-;  (powerline-center-theme)         ;; Powerline layout.
-;  (custom-set-faces                ;; Reset default faces for solarized.
-;   '(default ((t (:background "#FDF6E3"))))
-;   '(flycheck-error   ((t (:background "#FF6E64" :foreground "#990A1B" :underline t :weight bold))))
-;   '(flycheck-info    ((t (:background "#69B7F0" :foreground "#00629D" :underline t :weight bold))))
-;   '(flycheck-warning ((t (:background "#DEB542" :foreground "#7B6000" :underline t :weight bold))))
-;   )
-;  )
-;;; Default to dark theme.
-;(dark-theme)
-
 ;;; Golang configuration. ;;;
 (load-file "~/.emacs.files/golang-config.el")
-
-;;; Ediff config. ;;;
-;(setq-default ediff-highlight-all-diffs 'nil) ;; Only hilight current diff:
-;(setq ediff-diff-options "-w")                ;; Turn off whitespace checking:
-;(setq ediff-show-clashes-only t)              ;; Default to conflict diff.
 
 (use-package multiple-cursors
   :bind
