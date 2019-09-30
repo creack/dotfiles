@@ -130,6 +130,9 @@
 
 ;; Keep track of recent files.
 (use-package recentf
+  :init
+  (setq recentf-exclude '("~/\\.emacs.d" "~/go/pkg/mod" "\\.log$")
+        )
   :config
   (recentf-mode 1)
   )
