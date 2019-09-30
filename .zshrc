@@ -1,127 +1,72 @@
-# -*- mode: sh -*-
+# User config.
 
-fpath=(/usr/local/share/zsh-completions $fpath)
+# Use 24bit term.
+export TERM=xterm-truecolor
 
-# Path to your oh-my-zsh installation.
-export ZSH=$HOME/.oh-my-zsh
+# Set the path for pip/golang.
+export PATH=~/.local/bin:~/go/bin:~/goroot/bin:/usr/local/bin:/snap/bin/:$PATH
+
+# Use most as pager (for things like man, git diff, etc).
+export PAGER=most
+
+# Use emacs as default editor.
+export EDITOR=emacs
+
+# Enable go mod.
+export GO111MODULE=on
+
+# Start emacs as a daemon.
+alias emacs="emacsclient -a ''  -c -t"
+
+# Docker compose shortcuts in addition to the docker-compose oh-my-zsh plugin.
+alias dcu='docker-compose up -d --build -t 1'
+alias dcd='docker-compose down -v -t 1'
+alias dcr='docker-compose restart -t 1'
+
+# Docker run with current user settings mounted in.
+alias udockerrun='docker run --rm --user $(id -u):$(id -g) -v $HOME:$HOME -w $(pwd) -e GOPATH=$HOME/go:/go'
+
+# Docker wrappers for common tools.
+alias swagger='udockerrun quay.io/goswagger/swagger'
+
+# Putty bindking for meta left/right
+bindkey '\e\eOD' backward-word
+bindkey '\e\eOC' forward-word
+
+# Set M-l as lowercase word.
+bindkey "^[l" down-case-word
+
+# Disable shared history so each term has it's own backlog.
+unsetopt share_history
+
+# Oh-my-zsh config.
 
 ZSH_THEME="simple"
-# Use case sensitive completion.
-CASE_SENSITIVE="true"
-# Disable auto-correct.
-DISABLE_CORRECTION="true"
-# Autostart tmux.
-[ -z "$ZSH_TMUX_AUTOSTART" ] && ZSH_TMUX_AUTOSTART="true"
-# Autostart docker-machine default.
-DOCKER_MACHINE_AUTOSTART="true"
-DOCKER_MACHINE_NAME="default"
-
 plugins=(
-    encode64
     git
-    gnu-utils
     golang
-    gpg-agent
-    mosh
-    rsync
     ssh-agent
-    sudo
     tmux
+    docker
+    docker-compose
 )
 
-## User configuration
-function main() {
-    # Set M-l as lowercase word.
-    bindkey "^[l" down-case-word
-    # Disable shared history.
-    unsetopt share_history
+# Set tmux autostart.
+ZSH_TMUX_AUTOSTART=true
 
-    # Customize the prompt a little.
-#    source ~/.zsh_git_prompt
-#    PROMPT='
-#(%{$fg_bold[blue]%}%n%{$reset_color%}@%{$fg_bold[green]%}%m%{$reset_color%}):<%{$fg_bold[cyan]%}%(5~|%-1~/…/%3~|%4~)%{$reset_color%}>
-    #[%{$fg_bold[red]%}%D{%a %b %d %r}%{$reset_color%}]$(git_super_status)%{$reset_color%}%% '
-    source /usr/local/lib/python2.7/site-packages/powerline/bindings/zsh/powerline.zsh
+# Allow agent-forwarding.
+zstyle :omz:plugins:ssh-agent agent-forwarding on
 
-    # Set host metadata.
-    [ -z "$LANG" ]     && export LANG=en_US.UTF-8
-    [ -z "$HOSTTYPE" ] && export HOSTTYPE=$(uname -s)
-    [ -z "$HOST" ]     && export HOST=$(uname -n)
-    [ -z "$SHELL" ]    && export SHELL=$(which zsh)
-
-    # Set GPGKEY if exists.
-    [ -f $HOME/.gpgkey ] && export GPGKEY=$(cat $HOME/.gpgkey)
-
-    # Set docker-cloud namespace if exists.
-    [ -f $HOME/.dockercloudorg ] && export DOCKERCLOUD_NAMESPACE=$(cat $HOME/.dockercloudorg)
-
-    if [ "$HOSTTYPE" = "Darwin" ]; then
-	export MANPATH="/usr/local/man:$MANPATH"
-	export LSCOLORS="ExFxCxDxBxegedabagacad"
-    fi
-
-    # Use "most" as pager. Better than "less" or "more".
-    export PAGER="most"
-    # Set editor to emacs.
-    export EDITOR="emacs"
-
-    # Helper funciton to delete all temporary / cache files.
-    # Usage: clean [path]
-    function clean {
-	foreach tildefile (./${1}/*~(.N) ./${1}/.*~(.N) ./${1}/\#*\#(.N) ./${1}/.\#*\#(.N) ./${1}/a.out(.N))
-	rm -vf ${tildefile} | sed 's/\/\//\//'
-	end
-
-	find ./${1} -name 'flymake_*.go' -delete
-	find ./${1} -name '.flymake_*.go' -delete
-	find ./${1} -name '.\#*' -delete
-	find ./${1} -name '*~' -delete
-	find ./${1} -name '*.orig' -delete
-	find ./${1} -name '*.test' -delete
-    }
-
-#    alias emacs="emacsclient -a ''  -ct"
-    alias grep="grep --color=auto -n"
-    alias rm="rm -v"
-    alias a64="encode64"
-    alias d64="decode64"
-    alias bc="bc -l $HOME/.bcrc"
-
-    # Load docker-machine "plugin".
-    [ -f "$HOME/.zsh_docker" ] && source $HOME/.zsh_docker
-
-    # Load golang config.
-    [ -f "$HOME/.zsh_golang" ] && source $HOME/.zsh_golang
-
-    # Load private config if exists.
-    [ -f "$HOME/.zsh_priv_config" ] && source $HOME/.zsh_priv_config
-}
-
-# Helper to fetch current time with ms.
-function mstime() {
-    # Get the time in "ns" and trim down the last 6 digits.
-    echo "$(gdate +%s.%N | sed 's/......$//')" | \bc
-}
-
-# Save cursor position.
-tput sc
-echo
-
-echo "Loading oh-my-sh..."
-a=$(mstime)
+# Load oh-my-zsh.
+export ZSH="/home/creack/.oh-my-zsh"
 source $ZSH/oh-my-zsh.sh
-b=$(mstime)
-echo "Loaded in $(echo "($b - $a)" | \bc) ms"
 
-echo "Loading user config..."
-a=$(mstime)
-main
-b=$(mstime)
-echo "Loaded in $(echo "($b - $a)" | \bc) ms"
+# Tell git to use the current tty for gpg passphrase prompt (needs to be at the end so the tty is within tmux, not out).
+export GPG_TTY=$(tty)
 
-# Restore cursor & clear line.
-tput rc; tput el
-
-function igo() {
-    tmp=$(mktemp); mv $tmp $tmp.go; echo "package main\nfunc main() {" > $tmp.go; cat >> $tmp.go; echo "}" >> $tmp.go; goimports -w $tmp.go; go run $tmp.go; \rm $tmp.go
+# Init nvm in a function so it doesn't run each time (very slow).
+function loadnvm() {
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 }

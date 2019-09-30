@@ -7,7 +7,7 @@
 
 
 ;; Add melpa sources to the package manager.
-(setq package-archives '(("gnu" . "~/elpaclone")
+(setq package-archives '(("gnu" . "~/.dotfiles/elpaclone")
                          ("melpa" . "https://melpa.org/packages/")))
 
 ;; Activate package management.
