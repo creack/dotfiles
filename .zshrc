@@ -3,8 +3,8 @@
 # Use 24bit term.
 export TERM=xterm-truecolor
 
-# Set the path for pip/golang.
-export PATH=~/.local/bin:~/go/bin:~/goroot/bin:/usr/local/bin:/snap/bin/:$PATH
+# Set the path for pip/yarn/golang.
+export PATH=~/.local/bin:~/go/bin:~/goroot/bin:/usr/local/bin:/snap/bin/:~/.yarn/bin:$PATH
 
 # Use most as pager (for things like man, git diff, etc).
 export PAGER=most
@@ -58,7 +58,7 @@ ZSH_TMUX_AUTOSTART=true
 zstyle :omz:plugins:ssh-agent agent-forwarding on
 
 # Load oh-my-zsh.
-export ZSH="/home/creack/.oh-my-zsh"
+export ZSH=~/.oh-my-zsh
 source $ZSH/oh-my-zsh.sh
 
 # Tell git to use the current tty for gpg passphrase prompt (needs to be at the end so the tty is within tmux, not out).
