@@ -13,6 +13,16 @@
   ("M-SPC"       . set-rectangular-region-anchor)  ;; Rectangular region with many cursors.
   )
 
+(use-package ansi-color
+  :init
+  (defun colorize-compilation-buffer ()
+    (toggle-read-only)
+    (ansi-color-apply-on-region compilation-filter-start (point))
+    (toggle-read-only))
+  :hook
+  (compilation-filter . colorize-compilation-buffer)
+  )
+
 (use-package flycheck
   :bind
   ("C-c <up>"   . flycheck-next-error)     ;; Ctrl-up   to go to next error.

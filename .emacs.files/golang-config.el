@@ -77,6 +77,8 @@
 (use-package lsp-ui
   :after (flycheck)
   :commands lsp-ui-mode
+  :init
+  (setq lsp-ui-doc-position (quote at-point))
   :bind
   ((:map lsp-ui-flycheck-list-mode-map ;; Fix the terminal mode bindings.
 	("RET"   . lsp-ui-flycheck-list--view)

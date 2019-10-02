@@ -29,6 +29,9 @@ alias udockerrun='docker run --rm --user $(id -u):$(id -g) -v $HOME:$HOME -w $(p
 # Docker wrappers for common tools.
 alias swagger='udockerrun quay.io/goswagger/swagger'
 
+# Recursive grep go file.
+alias fggrep="fgrep -R --exclude-dir=vendor --color --include='*.go'"
+
 # Putty bindking for meta left/right
 bindkey '\e\eOD' backward-word
 bindkey '\e\eOC' forward-word
@@ -70,3 +73,5 @@ function loadnvm() {
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 }
+
+[ -f "$HOME/.zshrc_priv_config" ] && source "$HOME/.zshrc_priv_config"
