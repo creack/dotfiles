@@ -56,7 +56,7 @@
    font-lock-maximum-decoration t ;; Improve syntax highlight.
 
    ;; Store temp file outside current dir.
-   temporary-file-directory "~/.emacs.d/"
+   temporary-file-directory       "~/.emacs.d/"
    backup-directory-alist         `((".*" . , temporary-file-directory))
    auto-save-file-name-transforms `((".*" , temporary-file-directory t))
    create-lockfiles nil
@@ -188,11 +188,38 @@
   )
 
 (use-package dockerfile-mode
-  :mode "Dockerfile" "\\'Dockerfile.")
+  :mode "Dockerfile" "\\'Dockerfile."
+  :hook
+  (dockerfile-mode . set-fci-mode)
+  (dockerfile-mode . highlight-indent-guides-mode)
+  (dockerfile-mode . display-line-numbers-mode)
+  )
+
+(use-package makefile-mode
+  :ensure nil
+  :mode "Makefile" "\\.mk\\'"
+  :hook
+  (makefile-mode . set-fci-mode)
+  (makefile-mode . highlight-indent-guides-mode)
+  (makefile-mode . display-line-numbers-mode)
+  )
 
 (use-package markdown-mode)
-(use-package yaml-mode)
 (use-package json-mode)
 (use-package feature-mode)
 (use-package terraform-mode)
-(use-package protobuf-mode)
+
+(use-package protobuf-mode
+  :hook
+  (protobuf-mode . (lambda() (c-add-style "pbstyle" '((c-basic-offset . 2) (indent-tabs-mode . nil)) t)))
+  (protobuf-mode . set-fci-mode)
+  (protobuf-mode . highlight-indent-guides-mode)
+  (protobuf-mode . display-line-numbers-mode)
+  )
+
+(use-package yaml-mode
+  :hook
+  (yaml-mode . set-fci-mode)
+  (yaml-mode . highlight-indent-guides-mode)
+  (yaml-mode . display-line-numbers-mode)
+  )
