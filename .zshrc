@@ -28,6 +28,19 @@ alias udockerrun='docker run --rm --user $(id -u):$(id -g) -v $HOME:$HOME -w $(p
 
 # Docker wrappers for common tools.
 alias swagger='udockerrun quay.io/goswagger/swagger'
+alias protoc='udockerrun creack/grpc:go1.13-protobuf3.9.0-grpc1.24.0-protocgengo1.3.2'
+
+# Protobuf Go generation.
+alias gprotoc='protoc --go_out=plugins=grpc:.'
+
+# Protobuf Go Validations generation.
+alias gvprotoc='gprotoc --validate_out=lang=go:.'
+
+# GRPC Gateway generation.
+alias gwprotoc='protoc --grpc-gateway_out="logtostderr=true:."'
+
+# Swagger generation.
+alias sprotoc='protoc --swagger_out="logtostderr=true:."'
 
 # Recursive grep go file.
 alias fggrep="fgrep -R --exclude-dir=vendor --color --include='*.go'"
@@ -38,9 +51,6 @@ bindkey '\e\eOC' forward-word
 
 # Set M-l as lowercase word.
 bindkey "^[l" down-case-word
-
-# Disable shared history so each term has it's own backlog.
-unsetopt share_history
 
 # Oh-my-zsh config.
 
@@ -63,6 +73,9 @@ zstyle :omz:plugins:ssh-agent agent-forwarding on
 # Load oh-my-zsh.
 export ZSH=~/.oh-my-zsh
 source $ZSH/oh-my-zsh.sh
+
+# Disable shared history so each term has it's own backlog.
+unsetopt share_history
 
 # Tell git to use the current tty for gpg passphrase prompt (needs to be at the end so the tty is within tmux, not out).
 export GPG_TTY=$(tty)

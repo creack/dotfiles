@@ -4,6 +4,45 @@
 ;;; Golang configuration. ;;;
 (load-file "~/.emacs.files/golang-config.el")
 
+;; Show the max-line-length.
+(use-package fill-column-indicator
+  :init
+  (defun set-fci-mode()
+    (if (eq 'fill-column 70) ;; 70 is the default value. Enable fci-mode only if set.
+      (print 'true)
+      (fci-mode)
+      )
+    )
+  )
+
+;; Briefly highlight cursor position when moving around.
+(use-package beacon
+  :init
+  (setq
+    beacon-blink-when-point-moves-vertically 1
+    beacon-blink-when-focused 1
+    )
+  :hook (after-init . beacon-mode)
+  )
+
+;; Show the line number on the side.
+(use-package display-line-numbers
+  :ensure nil
+  :bind ("C-c C-l" . display-line-numbers-mode)
+)
+
+;; Highlight the indentation whitespaces.
+(use-package highlight-indent-guides
+  :delight
+  :init
+  (setq
+    highlight-indent-guides-auto-enabled t
+    highlight-indent-guides-responsive   t
+    highlight-indent-guides-method       'character
+    )
+  )
+
+;; Enable multiple cursors.
 (use-package multiple-cursors
   :bind
   ("M-n"         . mc/mark-next-like-this)         ;; Add new cursor with matching region.
@@ -13,6 +52,7 @@
   ("M-SPC"       . set-rectangular-region-anchor)  ;; Rectangular region with many cursors.
   )
 
+;; Support ansi colors in compile-mode.
 (use-package ansi-color
   :init
   (defun colorize-compilation-buffer ()
@@ -23,7 +63,9 @@
   (compilation-filter . colorize-compilation-buffer)
   )
 
+;; On-the-fly linter.
 (use-package flycheck
+  :after (lsp-ui)
   :bind
   ("C-c <up>"   . flycheck-next-error)     ;; Ctrl-up   to go to next error.
   ("C-c <down>" . flycheck-previous-error) ;; Ctrl-down to go to previous error.
