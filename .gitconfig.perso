@@ -4,8 +4,8 @@
   gpgsign = true
 
 [alias]
-  ci  = commit -s -S
-  tag = tag -s
+  ci = commit -s -S
+  t  = tag -s
 
 [user]
   email      = git+guillaume@charmes.net

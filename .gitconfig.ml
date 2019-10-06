@@ -4,9 +4,8 @@
   gpgsign = true
 
 [alias]
-  ci  = commit -s -S
-  b   = branch
-  tag = tag -s
+  ci = commit -s -S
+  t  = tag -s
 
 [user]
   email      = gcharmes@magicleap.com
