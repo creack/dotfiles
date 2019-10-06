@@ -8,3 +8,4 @@ generated_completions
 .config/keybase
 .config/user-dirs.*
 .config/yarn
+.config/go
