@@ -193,6 +193,8 @@
   (dockerfile-mode . highlight-indent-guides-mode)
   (dockerfile-mode . display-line-numbers-mode)
   )
+(use-package docker-compose-mode)
+
 
 (use-package makefile-mode
   :ensure nil

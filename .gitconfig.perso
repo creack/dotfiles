@@ -1,10 +1,15 @@
+[commit]
+	gpgsign = true
+
 [alias]
-    ci = commit -s -S
+	ci  = commit -s -S
+	b   = branch
+  tag = tag -s
 
 [user]
-    email      = guillaume@charmes.net
-    name       = Guillaume J. Charmes
-    signingkey = FCC4F9DE
+	email      = guillaume+github@charmes.net
+	name       = Guillaume J. Charmes
+  signingKey = B5FC451EAA6443D2
 
 [github]
-    user = creack
+  user = creack

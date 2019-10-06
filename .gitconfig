@@ -1,9 +1,3 @@
-[branch]
-	# When creating a new branch off a remote branch, always set it up to
-	# track the remote branch so that we can pull from there.
-	autosetupmerge = always
-	mergeoptions   = --no-commit --no-ff
-
 [alias]
 	ci      = commit
 	co      = checkout
@@ -29,30 +23,5 @@
 	diff        = true
 	status      = true
 
-[mergetool.ediff]
-	cmd           = emacs --eval \"(progn (load-theme 'adwaita t) (message \\\"'adwaita loaded\\\")  (defun ediff-write-merge-buffer ()    (let ((file ediff-merge-store-file))      (set-buffer ediff-buffer-C)      (write-region (point-min) (point-max) file)      (message \\\"Merge buffer saved in: %s\\\" file)      (set-buffer-modified-p nil)      (sit-for 1)))  (setq ediff-quit-hook 'kill-emacs        ediff-quit-merge-hook 'ediff-write-merge-buffer)   (ediff-merge-files-with-ancestor \\\"$LOCAL\\\" \\\"$REMOTE\\\"                                   \\\"$BASE\\\" nil \\\"$MERGED\\\"))\"
-	trustExitCode = true
-
-[mergetool]
-	prompt = false
-
-[merge]
-	tool = ediff
-
-[push]
-	default = simple
-
-[commit]
-	gpgsign = true
-
-[alias]
-	ci = commit -s -S
-	b  = branch
-
-[user]
-	email      = guillaume@charmes.net
-	name       = Guillaume J. Charmes
-	signingkey = 69C896448884E62A
-
-[github]
-	user = creack
+[include]
+    path = ~/.gitconfig.perso
