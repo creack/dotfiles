@@ -1,44 +1,44 @@
 {
-    "segments": {
-        "left": [
+  "segments": {
+    "left": [
 	    {
-		"before": "👤",
-		"function": "powerline.segments.tmux.attached_clients",
-		"priority": 10,
-		"args": {
-		    "minimum": 1
-		}
+		    "before": "👤",
+		    "function": "powerline.segments.tmux.attached_clients",
+		    "priority": 10,
+		    "args": {
+		      "minimum": 1
+		    }
 	    },
 	    {
-		"function": "powerline.segments.common.env.user"
+		    "function": "powerline.segments.common.env.user"
 	    }
-	],
-        "right": [
-            {
-                "function": "powerline.segments.common.sys.uptime",
-                "priority": 50
-            },
-            {
-                "function": "powerline.segments.common.sys.system_load",
-                "priority": 50
-            },
-            {
-                "function": "powerline.segments.common.time.date"
-            },
-            {
-                "function": "powerline.segments.common.time.date",
-                "name": "time",
-                "args": {
-                    "format": "%H:%M",
-                    "istime": true
-                }
-            },
-            {
-                "function": "powerline.segments.common.net.hostname",
-		"args": {
-		    "exclude_domain": true
-		}
-            }
-        ]
-    }
+	  ],
+    "right": [
+      {
+        "function": "powerline.segments.common.sys.uptime",
+        "priority": 50
+      },
+      {
+        "function": "powerline.segments.common.sys.system_load",
+        "priority": 50
+      },
+      {
+        "function": "powerline.segments.common.time.date"
+      },
+      {
+        "function": "powerline.segments.common.time.date",
+        "name": "time",
+        "args": {
+          "format": "%H:%M",
+          "istime": true
+        }
+      },
+      {
+        "function": "powerline.segments.common.net.hostname",
+		    "args": {
+		      "exclude_domain": true
+		    }
+      }
+    ]
+  }
 }
