@@ -161,3 +161,26 @@ loadnvm
 nvm install --lts
 node --version
 ```
+
+## Elpa fail
+
+As of October 6th, 2019, elpa has been down for at least 2 weeks, preventing package installation from melpa.
+
+Self contain reproduction of the issue (and check if it is still an issue):
+
+```sh
+docker run -it --rm ubuntu:19.04 bash -c 'apt-get update && apt-get install -y ca-certificates emacs-nox && emacs --no-init-file --eval "(progn (package-initialize) (package-refresh-contents))"'
+```
+
+Temporaty fix:
+
+```sh
+mkdir -p ~/elpaclone && cd ~/elpaclone && curl -L https://elpa.gnu.org/packages/archive-contents | perl -pe 's/(^\(1|\n)//g' | perl -pe 's/\]\)/])\n/g' | perl -pe 's/^ *\(([a-z0-9A-Z-]*).*\[\(([0-9 ]*).*(single|tar).*/\1-\2.\3/g' | perl -pe 's/ /./g' | perl -pe 's/single/el/g' | perl -pe 's/\)//g' | xargs -I {} curl -L  -O https://elpa.gnu.org/packages/\{\} && curl -L -O https://elpa.gnu.org/packages/archive-contents
+```
+
+```lisp
+;; init-package.el
+
+(setq package-archives '(("gnu" . "~/elpaclone")
+                        ("melpa" . "https://melpa.org/packages/")))
+```
