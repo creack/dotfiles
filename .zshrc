@@ -24,11 +24,12 @@ alias dcd='docker-compose down -v -t 1'
 alias dcr='docker-compose restart -t 1'
 
 # Docker run with current user settings mounted in.
-alias udockerrun='docker run --rm --user $(id -u):$(id -g) -v $HOME:$HOME -w $(pwd) -e GOPATH=$HOME/go:/go'
+alias udockerrun='docker run --rm --user $(id -u):$(id -g) -e HOME -v $HOME:$HOME -w $(pwd) -e GOPATH=$HOME/go:/go'
 
 # Docker wrappers for common tools.
 alias swagger='udockerrun quay.io/goswagger/swagger'
 alias protoc='udockerrun creack/grpc:go1.13-protobuf3.9.0-grpc1.24.0-protocgengo1.3.2'
+alias prototool='udockerrun --entrypoint prototool creack/grpc:go1.13-protobuf3.9.0-grpc1.24.0-protocgengo1.3.2'
 
 # Protobuf Go generation.
 alias gprotoc='protoc --go_out=plugins=grpc:.'
