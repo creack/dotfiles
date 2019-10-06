@@ -4,4 +4,7 @@ fish_history
 generated_completions
 .config/configstore
 .emacs
-/.emacs.files/packages/neotree/TAGS
+.config/autostart
+.config/keybase
+.config/user-dirs.*
+.config/yarn
