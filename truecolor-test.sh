@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 function echo2() {
     echo $@ >&2
 }
@@ -17,3 +19,12 @@ function true-color() {
     echo2 "image test:"
 }
 
+# Run with:
+#   ./truecolor-test.sh
+# or
+#   source truecolor-test.sh && true-color
+
+# Setup with:
+#   tic -x -o ~/.terminfo ~/.dotfiles/xterm-truecolor.terminfo
+
+true-color

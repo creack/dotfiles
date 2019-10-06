@@ -9,3 +9,4 @@ generated_completions
 .config/user-dirs.*
 .config/yarn
 .config/go
+.config/htop/htoprc

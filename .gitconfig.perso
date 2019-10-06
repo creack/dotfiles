@@ -1,3 +1,5 @@
+# -*- mode: conf -*-
+
 [commit]
   gpgsign = true
 
