@@ -57,7 +57,6 @@
   (go-mode     . smartparens-mode)             ;; Use smartparens.
   (go-mode     . lsp)                          ;; Load LSP.
   (go-mode     . display-line-numbers-mode)    ;; Show line number side pane.
-  (go-mode     . set-fci-mode)                 ;; Show max line len bar.
   (go-mode     . highlight-indent-guides-mode) ;; Show indentation highlights.
   (before-save . lsp-format-buffer)            ;; Format the code with LSP before save.
   (before-save . lsp-organize-imports)         ;; Let LSP handle imports.
