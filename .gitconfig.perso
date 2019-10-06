@@ -5,11 +5,10 @@
 
 [alias]
   ci  = commit -s -S
-  b   = branch
   tag = tag -s
 
 [user]
-  email      = guillaume+github@charmes.net
+  email      = git+guillaume@charmes.net
   name       = Guillaume J. Charmes
   signingKey = B5FC451EAA6443D2
 
