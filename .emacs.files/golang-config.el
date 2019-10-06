@@ -2,7 +2,8 @@
 
 (use-package go-mode
   :ensure-system-package
-  (gogetdoc . "cd /tmp && GO111MODULE=on go get github.com/zmb3/gogetdoc@latest")
+  ((gogetdoc . "cd /tmp && GO111MODULE=on go get github.com/zmb3/gogetdoc@latest")
+  (gopls    . "cd /tmp && GO111MODULE=on go get golang.org/x/tools/gopls@latest"))
 
   :init
   (use-package go-guru) ;; Load go-guru.
