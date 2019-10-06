@@ -190,7 +190,6 @@
 (use-package dockerfile-mode
   :mode "Dockerfile" "\\'Dockerfile."
   :hook
-  (dockerfile-mode . set-fci-mode)
   (dockerfile-mode . highlight-indent-guides-mode)
   (dockerfile-mode . display-line-numbers-mode)
   )
@@ -199,7 +198,6 @@
   :ensure nil
   :mode "Makefile" "\\.mk\\'"
   :hook
-  (makefile-mode . set-fci-mode)
   (makefile-mode . highlight-indent-guides-mode)
   (makefile-mode . display-line-numbers-mode)
   )
@@ -212,14 +210,12 @@
 (use-package protobuf-mode
   :hook
   (protobuf-mode . (lambda() (c-add-style "pbstyle" '((c-basic-offset . 2) (indent-tabs-mode . nil)) t)))
-  (protobuf-mode . set-fci-mode)
   (protobuf-mode . highlight-indent-guides-mode)
   (protobuf-mode . display-line-numbers-mode)
   )
 
 (use-package yaml-mode
   :hook
-  (yaml-mode . set-fci-mode)
   (yaml-mode . highlight-indent-guides-mode)
   (yaml-mode . display-line-numbers-mode)
   )

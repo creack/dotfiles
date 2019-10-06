@@ -4,17 +4,6 @@
 ;;; Golang configuration. ;;;
 (load-file "~/.emacs.files/golang-config.el")
 
-;; Show the max-line-length.
-(use-package fill-column-indicator
-  :init
-  (defun set-fci-mode()
-    (if (eq 'fill-column 70) ;; 70 is the default value. Enable fci-mode only if set.
-      (print 'true)
-      (fci-mode)
-      )
-    )
-  )
-
 ;; Briefly highlight cursor position when moving around.
 (use-package beacon
   :init
