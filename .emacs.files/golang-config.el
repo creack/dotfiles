@@ -55,7 +55,6 @@
     )
 
   :hook
-  (go-mode     . smartparens-mode)             ;; Use smartparens.
   (go-mode     . lsp-deferred)                 ;; Load LSP.
   (go-mode     . display-line-numbers-mode)    ;; Show line number side pane.
   (go-mode     . highlight-indent-guides-mode) ;; Show indentation highlights.

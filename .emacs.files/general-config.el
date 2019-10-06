@@ -80,11 +80,6 @@
   :delight ;; Don't show the mode in the mode line.
   )
 
-;; Auto insert/replace parens.
-(use-package smartparens
-  :defer
-  )
-
 ;; Setup company mode for completion.
 (use-package company
   :delight ;; Don't show the mode in the mode line.
