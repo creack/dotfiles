@@ -66,7 +66,11 @@ plugins=(
 )
 
 # Set tmux autostart.
-ZSH_TMUX_AUTOSTART=true
+if [ -n "$VSCODE_IPC_HOOK_CLI" ]; then
+  ZSH_TMUX_AUTOSTART=false
+else
+  ZSH_TMUX_AUTOSTART=true
+fi
 
 # Allow agent-forwarding.
 zstyle :omz:plugins:ssh-agent agent-forwarding on
@@ -89,3 +93,8 @@ function loadnvm() {
 }
 
 [ -f "$HOME/.zshrc_priv_config" ] && source "$HOME/.zshrc_priv_config"
+
+VSCODE_IPC_HOOK_CLI=1
+if [ -n "$VSCODE_IPC_HOOK_CLI" ]; then
+  loadnvm
+fi
