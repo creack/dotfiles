@@ -71,7 +71,7 @@ ${HOME}/.local/bin/docker-compose: versions/docker-compose
 	@chmod +x $@
 clean_docker-compose:
 	rm -f ${HOME}/.local/bin/docker-compose
-	@rmdir --ignore-fail-on-non-empty ${HOME}/.local/bin ${HOME}/.local
+	@rmdir ${HOME}/.local/bin ${HOME}/.local 2> /dev/null || true
 
 # Install golangci-lint.
 install: ${HOME}/.local/bin/golangci-lint
@@ -81,7 +81,7 @@ ${HOME}/.local/bin/golangci-lint: versions/golangci-lint
 	curl -sfL "https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh" | sh -s -- -b $(dir $@) v$(shell cat $<)
 clean_golangci-lint:
 	rm -f ${HOME}/.local/bin/golangci-lint
-	@rmdir --ignore-fail-on-non-empty ${HOME}/.local/bin ${HOME}/.local
+	@rmdir ${HOME}/.local/bin ${HOME}/.local 2> /dev/null || true
 
 # Don't symlink .emacs as it gets rewritten all the time by emacs and only improts files from .emacs.file.
 install: ${HOME}/.emacs
@@ -110,16 +110,13 @@ clean_link_.ssh/config:
 	@[ -L ${HOME}/.ssh/config ] && rm ${HOME}/.ssh/config || true
 
 # Enable xterm-truecolor support.
-install: ${HOME}/.terminfo/x/xterm-truecolor
+install: ${HOME}/.terminfo
 clean:   clean_.terminfo
-${HOME}/.terminfo/x/xterm-truecolor: xterm-truecolor.terminfo
+${HOME}/.terminfo: xterm-truecolor.terminfo
 	tic -x -o ${HOME}/.terminfo $<
 # Remove .terminfo only if xterm-truecolor was the only entry.
-clean_.terminfo: clean_file_.terminfo/x/xterm-truecolor
-	@mkdir -p ${HOME}/.terminfo/x
-	@rmdir --ignore-fail-on-non-empty ${HOME}/.terminfo/x ${HOME}/.terminfo
-clean_file_.terminfo/x/xterm-truecolor:
-	rm -f ${HOME}/.terminfo/x/xterm-truecolor
+clean_.terminfo:
+	@rm -rf ${HOME}/.terminfo
 
 # Main targets.
 install:
