@@ -10,7 +10,7 @@
 [user]
   email      = git+guillaume@charmes.net
   name       = Guillaume J. Charmes
-  signingKey = B5FC451EAA6443D2
+  signingKey = A3E09CB1E79947FE
 
 [github]
   user = creack
