@@ -1,3 +1,5 @@
+#zmodload zsh/zprof
+
 # User config.
 
 # Use 24bit term.
@@ -55,10 +57,12 @@ bindkey "^[l" down-case-word
 
 # Oh-my-zsh config.
 
+# Disable completion security check as it is too slow. Don't manually add any completions before checking them.
+ZSH_DISABLE_COMPFIX=true
+
 ZSH_THEME="simple"
 plugins=(
     git
-    golang
     ssh-agent
     tmux
     docker
@@ -90,6 +94,7 @@ function loadnvm() {
     export NVM_DIR="$HOME/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+    [ -f .nvmrc ] && nvm use || nvm use 10
 }
 
 [ -f "$HOME/.zshrc_priv_config" ] && source "$HOME/.zshrc_priv_config"
@@ -98,3 +103,5 @@ function loadnvm() {
 if [ -n "$VSCODE_IPC_HOOK_CLI" ]; then
   loadnvm
 fi
+
+#zprof

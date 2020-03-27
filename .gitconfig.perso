@@ -7,8 +7,9 @@
   ci = commit -s -S
   t  = tag -s
 
+#  email      = git+guillaume@charmes.net
 [user]
-  email      = git+guillaume@charmes.net
+  email      = gcharmes@magicleap.com
   name       = Guillaume J. Charmes
   signingKey = A3E09CB1E79947FE
 
