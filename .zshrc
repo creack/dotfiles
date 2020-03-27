@@ -94,7 +94,7 @@ function loadnvm() {
 
 [ -f "$HOME/.zshrc_priv_config" ] && source "$HOME/.zshrc_priv_config"
 
-VSCODE_IPC_HOOK_CLI=1
+#VSCODE_IPC_HOOK_CLI=1
 if [ -n "$VSCODE_IPC_HOOK_CLI" ]; then
   loadnvm
 fi
