@@ -94,7 +94,7 @@ function loadnvm() {
     export NVM_DIR="$HOME/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-    [ -f .nvmrc ] && nvm use || nvm use 10
+    [ -f .nvmrc ] && nvm use || nvm use --lts
 }
 
 [ -f "$HOME/.zshrc_priv_config" ] && source "$HOME/.zshrc_priv_config"
