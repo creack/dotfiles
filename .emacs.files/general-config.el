@@ -75,9 +75,6 @@
 
 ;; Show current prefix / possible next action in minibuffer.
 (use-package which-key
-  :config
-  (which-key-mode 1)
-  :delight ;; Don't show the mode in the mode line.
   )
 
 ;; Setup company mode for completion.

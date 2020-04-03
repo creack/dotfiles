@@ -1,13 +1,13 @@
 ;;; golang.el --- Golang configuration for emacs. ;;; -*- mode: elisp -*-
 
+(use-package go-guru)
+
 (use-package go-mode
   :ensure-system-package
   ((gogetdoc . "cd /tmp && GO111MODULE=on go get github.com/zmb3/gogetdoc@latest")
   (gopls    . "cd /tmp && GO111MODULE=on go get golang.org/x/tools/gopls@latest"))
 
   :init
-  (use-package go-guru) ;; Load go-guru.
-
   (global-unset-key (kbd "C-<mouse-1>")) ;; Unbind default ctrl-mouse so go-mode can use it for goto definition.
 
   ;; Compilation helper funcs.
@@ -76,7 +76,6 @@
   :hook
   (go-mode     . lsp-deferred)                 ;; Load LSP.
   (go-mode     . display-line-numbers-mode)    ;; Show line number side pane.
-  (go-mode     . highlight-indent-guides-mode) ;; Show indentation highlights.
   (go-mode     . yas-minor-mode)               ;; Enable yas.
   (before-save . lsp-format-buffer)            ;; Format the code with LSP before save.
   (before-save . lsp-organize-imports)         ;; Let LSP handle imports.
@@ -116,5 +115,4 @@
 ;; Add LSP backend for company.
 (use-package company-lsp
   :commands company-lsp
-  :defer
   )
