@@ -114,11 +114,6 @@
 
 ;; Better undo.
 (use-package undo-tree
-  :init
-  ;; Autosave the undo-tree history.
-  (setq undo-tree-history-directory-alist `((".*" . ,temporary-file-directory))
-        undo-tree-auto-save-history t
-        )
   :config
   (global-undo-tree-mode)
   )
@@ -141,8 +136,6 @@
 
 ;; Enable ivy.
 (use-package ivy
-  :bind
-  ("C-s" . swiper)
   :init
   (setq ivy-use-virtual-buffers t   ;; Load recent files in the buffer list.
         ivy-extra-directories   nil ;; Hide . and .. in file list.
@@ -192,7 +185,6 @@
 (use-package dockerfile-mode
   :mode "Dockerfile" "\\'Dockerfile."
   :hook
-  (dockerfile-mode . highlight-indent-guides-mode)
   (dockerfile-mode . display-line-numbers-mode)
   )
 (use-package docker-compose-mode)
@@ -202,7 +194,6 @@
   :ensure nil
   :mode "Makefile" "\\.mk\\'"
   :hook
-  (makefile-mode . highlight-indent-guides-mode)
   (makefile-mode . display-line-numbers-mode)
   )
 
@@ -214,13 +205,11 @@
 (use-package protobuf-mode
   :hook
   (protobuf-mode . (lambda() (c-add-style "pbstyle" '((c-basic-offset . 2) (indent-tabs-mode . nil)) t)))
-  (protobuf-mode . highlight-indent-guides-mode)
   (protobuf-mode . display-line-numbers-mode)
   )
 
 (use-package yaml-mode
   :hook
-  (yaml-mode . highlight-indent-guides-mode)
   (yaml-mode . display-line-numbers-mode)
   )
 
