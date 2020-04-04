@@ -60,10 +60,10 @@
     )
 
   :config
-  (setq gofmt-command           "goimports"            ;; Use goimprots instead of gofmt.
+  (setq
+    gofmt-command           "goimports"            ;; Use goimprots instead of gofmt.
     gofmt-show-errors       nil                    ;; Don't show errors. Use LSP instead.
     godoc-at-point-function (quote godoc-gogetdoc) ;; Use gogetdoc instead of godef for better docs.
-
     lsp-clients-go-library-directories (quote ("~/go/pkg/mod" ;; Ignore stdlib, go mod cache and go path from LSP.
                                                 "~/goroot"
                                                 "~/go"
@@ -83,10 +83,26 @@
 
 (use-package lsp-mode
   :commands (lsp lsp-deferred)
+  :init
+  (setq lsp-file-watch-ignored
+    (quote (
+             "[/\\\\].git$"
+             "[/\\\\]infrastructure$"
+             "[/\\\\]infrastructure$"
+             "[/\\\\]vendor$"
+             "[/\\\\]cli$"
+             "[/\\\\]internal$"
+             "[/\\\\]e2e$"
+             "[/\\\\]functions[/\\\\]migrations$"
+             "[/\\\\]tests[/\\\\]mocks$"
+             "[/\\\\]\\.gocache$"
+             )))
   :config
-  (setq
-    lsp-prefer-flymake nil ;; Disable flymake in favor of flycheck.
-    )
+  (lsp-register-custom-settings '(
+                                   ("gopls.completeUnimported" t t)
+                                   ("gopls.staticcheck" t t)
+                                   ))
+  (setq lsp-prefer-flymake nil)        ;; Disable flymake in favor of flycheck.
   ;; Cleaner mode line.
   :delight " LSP"
   )
