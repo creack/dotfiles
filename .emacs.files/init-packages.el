@@ -171,5 +171,10 @@
   )
 
 ;; Enable snippets
-(use-package yasnippet)
+(use-package yasnippet
+  :config
+  (add-to-list 'yas-snippet-dirs "~/.dotfiles/.emacs.files/yasnippet")
+  (yas-reload-all)
+  )
+
 (use-package yasnippet-snippets)

@@ -2,7 +2,7 @@
 # name: type
 # key: type
 # --
-// $1
+// $1 ${3:.}
 type $1 $2 {
   $0
 }
