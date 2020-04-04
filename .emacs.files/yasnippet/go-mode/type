@@ -3,6 +3,6 @@
 # key: type
 # --
 // $1 ${3:.}
-type $1 $2 {
+type ${1:name} ${2:struct$$(yas-choose-value '("struct" "interface"))} {
   $0
 }

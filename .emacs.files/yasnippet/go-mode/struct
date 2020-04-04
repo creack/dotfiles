@@ -3,6 +3,6 @@
 # key: struct
 # --
 // $1 ${2:.}
-type $1 struct {
+type ${1:name} struct {
 	$0
 }
