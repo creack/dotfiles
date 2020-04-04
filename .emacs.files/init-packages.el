@@ -5,10 +5,10 @@
 
 ;;; Code:
 
-
 ;; Add melpa sources to the package manager.
-(setq package-archives '(("gnu" . "~/elpaclone")
-                        ("melpa" . "https://melpa.org/packages/")))
+(setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
+(setq package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
+                          ("melpa" . "https://melpa.org/packages/")))
 
 ;; Activate package management.
 (package-initialize)
@@ -39,28 +39,29 @@
     (setq show-trailing-whitespace nil))
 
   ;; Global defaults.
-  (setq-default indent-tabs-mode         nil ;; Don't use tabs to indent.
-		tab-width                8   ;; But maintain correct appearance.
-		show-trailing-whitespace t   ;; Show trailing spaces.
-		truncate-lines           t   ;; Disable line wrapping.
-		)
+  (setq-default
+    indent-tabs-mode         nil ;; Don't use tabs to indent.
+    tab-width                8   ;; But maintain correct appearance.
+    show-trailing-whitespace t   ;; Show trailing spaces.
+    truncate-lines           t   ;; Disable line wrapping.
+    )
 
   ;; Common settings.
   (setq
-   ring-bell-function      'ignore ;; Disable the bell.
-   initial-scratch-message nil     ;; Remove the default text within the scratch buffer.
-   require-final-newline   t       ;; Enforce end of file new line.
-   inhibit-startup-message t       ;; Disable the splash screen.
-   vc-follow-symlinks      t       ;; Skip yes/no prompt when opening symlinks.
+    ring-bell-function      'ignore ;; Disable the bell.
+    initial-scratch-message nil     ;; Remove the default text within the scratch buffer.
+    require-final-newline   t       ;; Enforce end of file new line.
+    inhibit-startup-message t       ;; Disable the splash screen.
+    vc-follow-symlinks      t       ;; Skip yes/no prompt when opening symlinks.
 
-   font-lock-maximum-decoration t ;; Improve syntax highlight.
+    font-lock-maximum-decoration t ;; Improve syntax highlight.
 
-   ;; Store temp file outside current dir.
-   temporary-file-directory       "~/.emacs.d/"
-   backup-directory-alist         `((".*" . , temporary-file-directory))
-   auto-save-file-name-transforms `((".*" , temporary-file-directory t))
-   create-lockfiles nil
-  )
+    ;; Store temp file outside current dir.
+    temporary-file-directory       "~/.emacs.d/"
+    backup-directory-alist         `((".*" . , temporary-file-directory))
+    auto-save-file-name-transforms `((".*" , temporary-file-directory t))
+    create-lockfiles nil
+    )
 
   :bind
   ([mouse-4] . (lambda() (interactive) (scroll-down 5))) ;; Mouse wheel suuport.
@@ -70,7 +71,7 @@
 
   :config
   (global-font-lock-mode 1) ;; Enable syntax colors.
-  (xterm-mouse-mode      1) ;; Enable nouse support.
+  (xterm-mouse-mode      1) ;; Enable mouse support.
   (column-number-mode    1) ;; Display current line/column.
   (line-number-mode      1) ;; Display current line/column.
   (menu-bar-mode         0) ;; Disbale the menu bar.
@@ -102,9 +103,9 @@
 
   :init
   (setq
-   compilation-always-kill   t ;; Don't ask about killing current process before restarting.
-   compilation-scroll-output t ;; Autoscroll compilation buffer.
-   )
+    compilation-always-kill   t ;; Don't ask about killing current process before restarting.
+    compilation-scroll-output t ;; Autoscroll compilation buffer.
+    )
   )
 
 ;; Enable winner to manage window layouts.
@@ -129,116 +130,46 @@
 (use-package recentf
   :init
   (setq recentf-exclude '("~/\\.emacs.d" "~/go/pkg/mod" "\\.log$")
-        )
+    )
   :config
   (recentf-mode 1)
   )
 
-;; Enable ivy.
+;; Enable ivy, a better ido mode. File/buffer browsing and more.
 (use-package ivy
   :init
   (setq ivy-use-virtual-buffers t   ;; Load recent files in the buffer list.
-        ivy-extra-directories   nil ;; Hide . and .. in file list.
-        swiper-action-recenter  t   ;; Keep the cusor centered when searching.
-        )
+    ivy-extra-directories   nil ;; Hide . and .. in file list.
+    swiper-action-recenter  t   ;; Keep the cusor centered when searching.
+    )
   :bind
   (:map ivy-minibuffer-map
-        ("RET" . ivy-alt-done) ;; Navigate to subdir rather than open the directory.
-        )
+    ("RET" . ivy-alt-done) ;; Navigate to subdir rather than open the directory.
+    )
 
   :config
   (ivy-mode 1)
   )
 
+;; Counsel makes for a better M-x.
 (use-package counsel
   :init
   (setq counsel-yank-pop-separator "\n────────\n" ;; Add a clear separation between yanks.
-        )
+    )
   :config
   (counsel-mode 1)
   )
 
+;; Extends ivy with more details.
 (use-package ivy-rich
   :after (ivy counsel)
   :init
   (setq ivy-rich-path-style    'abbrev
-        ivy-virtual-abbreviate 'full)
+    ivy-virtual-abbreviate 'full)
   :config
   (ivy-rich-mode 1)
   )
 
-;; Major modes.
-
-;; Use conf-space for .conf and .setup files.
-(use-package conf-mode
-  :mode (("\\.conf\\'"    . conf-space-mode)
-         ("\\.setup.*\\'" . conf-space-mode))
-  )
-
-(use-package plantuml-mode ;; TODO: Autodownload plantuml.jar.
-  :defer
-  :config
-  (setq plantuml-jar-path "~/.emacs.d/plantuml.jar")
-  :mode "\\.puml\\'" "\\.uml\\'"
-  )
-
-(use-package dockerfile-mode
-  :mode "Dockerfile" "\\'Dockerfile."
-  :hook
-  (dockerfile-mode . display-line-numbers-mode)
-  )
-(use-package docker-compose-mode)
-
-
-(use-package makefile-mode
-  :ensure nil
-  :mode "Makefile" "\\.mk\\'"
-  :hook
-  (makefile-mode . display-line-numbers-mode)
-  )
-
-(use-package markdown-mode)
-(use-package json-mode)
-(use-package feature-mode)
-(use-package terraform-mode)
-
-(use-package protobuf-mode
-  :hook
-  (protobuf-mode . (lambda() (c-add-style "pbstyle" '((c-basic-offset . 2) (indent-tabs-mode . nil)) t)))
-  (protobuf-mode . display-line-numbers-mode)
-  )
-
-(use-package yaml-mode
-  :hook
-  (yaml-mode . display-line-numbers-mode)
-  )
-
-(use-package rjsx-mode
-  :mode "\\.js\\'" "\\.jsx\\'"
-  )
-
-(use-package typescript-mode)
-
-
-(use-package tide
-  :after (typescript-mode company flycheck)
-  :hook ((typescript-mode . tide-setup)
-          (typescript-mode . tide-hl-identifier-mode)
-          (before-save . tide-format-before-save))
-  :bind
-  ("C-c <up>"   . flycheck-next-error)     ;; Ctrl-up   to go to next error.
-  ("C-c <down>" . flycheck-previous-error) ;; Ctrl-down to go to previous error.
-  ("C-c l"      . flycheck-list-errors)    ;; Ctrl-l    to display error list.
-  ("C-c e"      . tide-rename-symbol)    ;; Ctrl-l    to display error list.
-  ("M-?"        . tide-references)         ;; M-?       to display the references.
-  ("<backtab>"  . company-complete)
-  :init
-  (flycheck-add-mode 'javascript-eslint 'web-mode)
-  (flycheck-mode)
-  ;(flycheck-select-checker 'javascript-eslint)
-  )
-
-(use-package web-mode
-  :mode "\\.tsx\\'"
-  :hook (web-mode . tide-setup)
-  )
+;; Enable snippets
+(use-package yasnippet)
+(use-package yasnippet-snippets)

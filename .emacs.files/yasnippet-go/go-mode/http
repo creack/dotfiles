@@ -1,0 +1,4 @@
+// $1
+func ${1:name}(w http.ResponseWriter, req *http.Request) ${2:error} {
+  $0${3:return nil}
+}

@@ -1,0 +1,4 @@
+if $1err != nil {
+        return $3fmt.Errorf("${2:errorContext}: %w", err)
+}
+$0
