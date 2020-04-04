@@ -1,5 +1,7 @@
 ;;; .emacs --- Emacs configuration ;;; -*- mode: elisp -*-
 
+;;; Major/minor mode configuration. ;;;
+(load-file "~/.emacs.files/modes-config.el")
 
 ;;; Golang configuration. ;;;
 (load-file "~/.emacs.files/golang-config.el")
@@ -18,7 +20,7 @@
 (use-package display-line-numbers
   :ensure nil
   :bind ("C-c C-l" . display-line-numbers-mode)
-)
+  )
 
 ;; Highlight the indentation whitespaces.
 (use-package highlight-indent-guides
@@ -84,8 +86,8 @@
   :init (global-company-mode)
   :config
   (setq
-   company-tooltip-align-annotations t ;; Align the completion popu.
-   company-show-numbers t              ;; Easy navigation to candidates with M-<n>.
-   company-dabbrev-downcase nil        ;; Don't worry about case.
-   )
+    company-tooltip-align-annotations t ;; Align the completion popu.
+    company-show-numbers t              ;; Easy navigation to candidates with M-<n>.
+    company-dabbrev-downcase nil        ;; Don't worry about case.
+    )
   )

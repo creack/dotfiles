@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: type
+# key: type
+# --
+// $1
+type $1 $2 {
+  $0
+}
