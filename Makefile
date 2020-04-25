@@ -16,6 +16,7 @@ LINKS_SRCS    = .editorconfig     \
                 .gitconfig.perso  \
                 .tmux.conf        \
                 .zshrc            \
+                .Xresources       \
                 .ssh/config
 LINKS_TARGETS = ${LINKS_SRCS:%=${HOME}/%}
 LINKS_CLEAN   = ${LINKS_SRCS:%=clean_link_%}

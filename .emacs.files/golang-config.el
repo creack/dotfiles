@@ -4,8 +4,7 @@
 
 (use-package go-mode
   :ensure-system-package
-  ((gogetdoc . "cd /tmp && GO111MODULE=on go get github.com/zmb3/gogetdoc@latest")
-    (gopls   . "cd /tmp && GO111MODULE=on go get golang.org/x/tools/gopls@latest"))
+  (gopls   . "cd /tmp && GO111MODULE=on go get golang.org/x/tools/gopls@latest")
 
   :init
   (global-unset-key (kbd "C-<mouse-1>")) ;; Unbind default ctrl-mouse so go-mode can use it for goto definition.
@@ -42,8 +41,6 @@
   :bind
   (:map go-mode-map
     ("TAB"     . company-indent-or-complete-common)
-    ("C-c C-c" . comment-region)
-    ("C-c C-u" . uncomment-region)
     ("C-c e"   . lsp-rename)
     ("C-c f"   . go-save-and-compile-program)
     ("C-c g"   . go-save-and-go-generate)
@@ -52,9 +49,8 @@
     ("C-c i"   . gofmt)
     ("C-c t"   . go-save-and-test-program)
     ("C-c c"   . (lambda() (interactive) (go-coverage "/tmp/coverprofile")))
-    ("C-c d"   . godoc-at-point)
     ([remap godef-describe]          . lsp-describe-thing-at-point)
-    ([remap godef-jump]              . lsp-ui-peek-find-definitions)
+    ([remap godef-jump]              . lsp-ui-peek-find-implementation)
     ([remap godef-jump-other-window] . go-guru-definition-other-window)
     ([remap go-rename]               . lsp-rename)
     )
@@ -63,7 +59,6 @@
   (setq
     gofmt-command           "goimports"            ;; Use goimprots instead of gofmt.
     gofmt-show-errors       nil                    ;; Don't show errors. Use LSP instead.
-    godoc-at-point-function (quote godoc-gogetdoc) ;; Use gogetdoc instead of godef for better docs.
     lsp-clients-go-library-directories (quote ("~/go/pkg/mod" ;; Ignore stdlib, go mod cache and go path from LSP.
                                                 "~/goroot"
                                                 "~/go"

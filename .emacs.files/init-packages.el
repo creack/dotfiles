@@ -64,18 +64,19 @@
     )
 
   :bind
-  ([mouse-4] . (lambda() (interactive) (scroll-down 5))) ;; Mouse wheel suuport.
-  ([mouse-5] . (lambda() (interactive) (scroll-up 5)))   ;; Mouse wheel suuport.
+  ;([mouse-4] . (lambda() (interactive) (scroll-down 5))) ;; Mouse wheel suuport.
+  ;([mouse-5] . (lambda() (interactive) (scroll-up 5)))   ;; Mouse wheel suuport.
   ("C-c C-c" . comment-region)
   ("C-c C-u" . uncomment-region)
 
   :config
   (global-font-lock-mode 1) ;; Enable syntax colors.
-  (xterm-mouse-mode      1) ;; Enable mouse support.
+  ;(xterm-mouse-mode      1) ;; Enable mouse support.
   (column-number-mode    1) ;; Display current line/column.
   (line-number-mode      1) ;; Display current line/column.
   (menu-bar-mode         0) ;; Disbale the menu bar.
-
+  (tool-bar-mode         0) ;; Disable the tool bar.
+  (scroll-bar-mode       0) ;; Disable the scroll bar.
   (fset 'yes-or-no-p 'y-or-n-p) ; Yes/No shortcut.
 
   :hook
@@ -178,3 +179,9 @@
   )
 
 (use-package yasnippet-snippets)
+
+(use-package exec-path-from-shell
+  :if (memq window-system '(mac ns x))
+  :config
+  (setq exec-path-from-shell-variables '("PATH" "GOROOT"))
+  (exec-path-from-shell-initialize))

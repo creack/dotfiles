@@ -5,7 +5,19 @@
 # --
 package main
 
+import (
+	"context"
+)
+
+func test(ctx context.Context) error {
+  $0
+	return nil
+}
+
 func main() {
-  println("Hello World!")
-	$0
+	if err := test(context.Background()); err != nil {
+		println("Fail:", err.Error())
+		return
+	}
+	println("success")
 }
