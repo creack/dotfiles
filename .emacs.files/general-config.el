@@ -86,6 +86,7 @@
   :init (global-company-mode)
   :config
   (setq
+    company-idle-delay 0
     company-tooltip-align-annotations t ;; Align the completion popu.
     company-show-numbers t              ;; Easy navigation to candidates with M-<n>.
     company-dabbrev-downcase nil        ;; Don't worry about case.

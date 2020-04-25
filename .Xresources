@@ -1,0 +1,13 @@
+*customization: -color
+Xft.dpi:        96
+
+xterm*faceName: Fira Code
+xterm*faceSize: 10
+xterm*renderFont: true
+
+xterm*loginShell: true
+xterm*termName: xterm-direct
+
+xterm*VT100.Translations: #override \
+                 Mod4 <Key>V:    insert-selection(CLIPBOARD) \n\
+                 Mod4 <Key>C:    copy-selection(CLIPBOARD)
