@@ -3,7 +3,7 @@
 # User config.
 
 # Use 24bit term.
-export TERM=xterm-truecolor
+#export TERM=xterm-truecolor
 
 # Set the path for pip/yarn/golang.
 export PATH=~/.local/bin:~/go/bin:~/goroot/bin:/usr/local/bin:/usr/local/sbin:/snap/bin/:~/.yarn/bin:$PATH
