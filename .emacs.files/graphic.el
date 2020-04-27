@@ -1,8 +1,7 @@
 (use-package fira-code-mode
-  :when window-system
   :init
   (set-frame-font "Fira Code-11")                         ;; Set Fira Code font.
-  (add-to-list 'default-frame-alist '(cursor-type . bar)) ;; Use a bar as a cusor.
+  (add-to-list 'default-frame-alist '(cursor-type . hbar)) ;; Use a bar as a cusor.
   (unbind-key "C-z")                                      ;; Disable suspend.
   :hook prog-mode
   )
@@ -29,7 +28,6 @@
 ;; Show ivy frame using posframe.
 (use-package ivy-posframe
   :delight
-  :when window-system
 
   :custom
   (ivy-posframe-parameters
@@ -192,7 +190,6 @@
 
 (use-package which-key
   :delight
-  :when window-system
   :hook (after-init . which-key-mode)
   :config
   (use-package which-key-posframe
@@ -200,7 +197,6 @@
   )
 
 (use-package doom-modeline
-  :when window-system
   :custom
   (doom-modeline-buffer-file-name-style 'truncate-with-project)
   (doom-modeline-icon t)
@@ -210,8 +206,7 @@
   (after-init . doom-modeline-mode)
   )
 
-(use-package major-mode-icons
-  :when window-system
+(use-package mode-icons
   :config
   (mode-icons-mode)
   )
@@ -225,3 +220,17 @@
 ;  :config
 ;  (load-theme 'zerodark t nil)
 ;  (zerodark-setup-modeline-format))
+
+(use-package dired
+  :ensure nil
+  :hook
+  (dired-mode . dired-hide-details-mode)
+  :config
+  (use-package dired-git-info
+    :bind
+    (:map dired-mode-map
+      (")" . dired-git-info-mode))
+    :hook
+    (dired-after-readin . dired-git-info-auto-enable)
+    )
+  )

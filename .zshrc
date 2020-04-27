@@ -63,10 +63,10 @@ plugins=(
 )
 
 # Set tmux autostart.
-if [ -n "$VSCODE_IPC_HOOK_CLI" ]; then
+if [ -n "$VSCODE_IPC_HOOK_CLI" ] || [ "$TERM" = "dumb" ] || [ -z "$TERM" ]; then
   ZSH_TMUX_AUTOSTART=false
 else
-  ZSH_TMUX_AUTOSTART=false
+  ZSH_TMUX_AUTOSTART=true
 fi
 
 # Allow agent-forwarding.

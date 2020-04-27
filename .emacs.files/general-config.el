@@ -37,13 +37,11 @@
 
 ;; On-the-fly linter.
 (use-package flycheck
-  :after (lsp-ui)
+  :after lsp-ui
   :bind
   ("C-c <up>"   . flycheck-next-error)     ;; Ctrl-up   to go to next error.
   ("C-c <down>" . flycheck-previous-error) ;; Ctrl-down to go to previous error.
   ("C-c l"      . lsp-ui-flycheck-list)    ;; Ctrl-l    to display error list.
-  :config
-  (setq flycheck-highlighting-mode (quote lines))
   )
 
 ;; Projectile for workspace management.

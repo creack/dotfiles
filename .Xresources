@@ -2,7 +2,7 @@
 Xft.dpi:        96
 
 xterm*faceName: Fira Code
-xterm*faceSize: 10
+xterm*faceSize: 11
 xterm*renderFont: true
 
 xterm*loginShell: true
