@@ -7,6 +7,7 @@ xterm*renderFont: true
 
 xterm*loginShell: true
 xterm*termName: xterm-direct
+xterm*metaSendsEscape: true
 
 xterm*VT100.Translations: #override \
                  Mod4 <Key>V:    insert-selection(CLIPBOARD) \n\

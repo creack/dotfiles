@@ -38,6 +38,16 @@
   (defun disable-trailing-whitespace()
     (setq show-trailing-whitespace nil))
 
+  (defun reload-ssh-agent()
+    (interactive)
+    (setenv "SSH_AUTH_SOCK" (substring (shell-command-to-string "tmux show-environment -t agent | \grep SSH_AUTH_SOCK | sed 's/.*=//'") 0 -1))
+    (message (format "Reloaded SSH_AUTH_SOCK: %s" (getenv "SSH_AUTH_SOCK")))
+    )
+
+  ;; Reload ssh agent now and env every 10 minutes.
+  (reload-ssh-agent)
+  (run-with-timer 0 (* 60 10) 'reload-ssh-agent)
+
   ;; Global defaults.
   (setq-default
     indent-tabs-mode         nil ;; Don't use tabs to indent.
@@ -68,6 +78,10 @@
   ;([mouse-5] . (lambda() (interactive) (scroll-up 5)))   ;; Mouse wheel suuport.
   ("C-c C-c" . comment-region)
   ("C-c C-u" . uncomment-region)
+  ("s-x" . kill-region)
+  ("s-c" . kill-ring-save)
+  ("s-v" . yank)
+  ("s-z" . undo)
 
   :config
   (global-font-lock-mode 1) ;; Enable syntax colors.
@@ -116,12 +130,14 @@
 
 ;; Better undo.
 (use-package undo-tree
+  :delight
   :config
   (global-undo-tree-mode)
   )
 
 ;; Enable editorconofig.
 (use-package editorconfig
+  :delight
   :config
   (editorconfig-mode 1)
   )
@@ -136,43 +152,44 @@
   (recentf-mode 1)
   )
 
-;; Enable ivy, a better ido mode. File/buffer browsing and more.
-(use-package ivy
-  :init
-  (setq ivy-use-virtual-buffers t   ;; Load recent files in the buffer list.
-    ivy-extra-directories   nil ;; Hide . and .. in file list.
-    swiper-action-recenter  t   ;; Keep the cusor centered when searching.
-    )
-  :bind
-  (:map ivy-minibuffer-map
-    ("RET" . ivy-alt-done) ;; Navigate to subdir rather than open the directory.
-    )
+;; ;; Enable ivy, a better ido mode. File/buffer browsing and more.
+;; (use-package ivy
+;;   :init
+;;   (setq ivy-use-virtual-buffers t   ;; Load recent files in the buffer list.
+;;     ivy-extra-directories   nil ;; Hide . and .. in file list.
+;;     swiper-action-recenter  t   ;; Keep the cusor centered when searching.
+;;     )
+;;   :bind
+;;   (:map ivy-minibuffer-map
+;;     ("RET" . ivy-alt-done) ;; Navigate to subdir rather than open the directory.
+;;     )
 
-  :config
-  (ivy-mode 1)
-  )
+;;   :config
+;;   (ivy-mode 1)
+;;   )
 
-;; Counsel makes for a better M-x.
-(use-package counsel
-  :init
-  (setq counsel-yank-pop-separator "\n────────\n" ;; Add a clear separation between yanks.
-    )
-  :config
-  (counsel-mode 1)
-  )
+;; ;; Counsel makes for a better M-x.
+;; (use-package counsel
+;;   :init
+;;   (setq counsel-yank-pop-separator "\n────────\n" ;; Add a clear separation between yanks.
+;;     )
+;;   :config
+;;   (counsel-mode 1)
+;;   )
 
-;; Extends ivy with more details.
-(use-package ivy-rich
-  :after (ivy counsel)
-  :init
-  (setq ivy-rich-path-style    'abbrev
-    ivy-virtual-abbreviate 'full)
-  :config
-  (ivy-rich-mode 1)
-  )
+;; ;; Extends ivy with more details.
+;; (use-package ivy-rich
+;;   :after (ivy counsel)
+;;   :init
+;;   (setq ivy-rich-path-style    'abbrev
+;;     ivy-virtual-abbreviate 'full)
+;;   :config
+;;   (ivy-rich-mode 1)
+;;   )
 
 ;; Enable snippets
 (use-package yasnippet
+  :delight yas-minor-mode
   :config
   (add-to-list 'yas-snippet-dirs "~/.dotfiles/.emacs.files/yasnippet")
   (yas-reload-all)
@@ -180,8 +197,14 @@
 
 (use-package yasnippet-snippets)
 
+;; Pull the path from zshrc when in Graphical mode.
 (use-package exec-path-from-shell
   :if (memq window-system '(mac ns x))
   :config
   (setq exec-path-from-shell-variables '("PATH" "GOROOT"))
   (exec-path-from-shell-initialize))
+
+(use-package hydra)
+
+(use-package ivy-hydra
+  :after (ivy hydra))
