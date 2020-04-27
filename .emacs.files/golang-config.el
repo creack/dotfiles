@@ -67,7 +67,7 @@
     )
 
   :hook
-  (go-mode     . lsp-deferred)                 ;; Load LSP.
+  (go-mode     . lsp)                 ;; Load LSP.
   (go-mode     . display-line-numbers-mode)    ;; Show line number side pane.
   (go-mode     . yas-minor-mode)               ;; Enable yas.
   (before-save . lsp-format-buffer)            ;; Format the code with LSP before save.
@@ -75,10 +75,10 @@
   )
 
 (use-package lsp-mode
-  :commands (lsp lsp-deferred)
-  :init
-  (setq lsp-file-watch-ignored
-    (quote (
+  ;; Cleaner mode line.
+  :delight " LSP"
+  :custom
+  (lsp-file-watch-ignored '(
              "[/\\\\].git$"
              "[/\\\\]infrastructure$"
              "[/\\\\]vendor$"
@@ -89,36 +89,30 @@
              "[/\\\\]tests[/\\\\]mocks$"
              "[/\\\\]\\.gocache$"
              "[/\\\\]_archives$"
-             )))
+             ))
+  (lsp-prefer-flymake nil)                     ;; Disable flymake in favor of flycheck.
+  (lsp-gopls-build-flags ["-tags=wireinject"]) ;; Use wire build tag.
   :config
   (lsp-register-custom-settings '(
                                    ("gopls.completeUnimported" t t)
                                    ("gopls.staticcheck" t t)
                                    ))
-  (setq lsp-prefer-flymake nil)                     ;; Disable flymake in favor of flycheck.
-  (setq lsp-gopls-build-flags ["-tags=wireinject"]) ;; Use wire build tag.
+  (use-package lsp-ui ;; Overlay UI components for LSP.
+    :custom
+    (lsp-ui-doc-position 'top)
+    (lsp-ui-doc-header nil)
+    (lsp-ui-doc-use-childframe t)
 
-  ;; Cleaner mode line.
-  :delight " LSP"
-  )
-
-;; Overlay UI components for LSP.
-(use-package lsp-ui
-  :commands lsp-ui-mode
-  :custom
-  (lsp-ui-doc-position 'top)
-  (lsp-ui-doc-header nil)
-  (lsp-ui-doc-use-childframe t)
-
-  :bind
-  ((:map lsp-ui-flycheck-list-mode-map ;; Fix the terminal mode bindings.
-     ("RET"   . lsp-ui-flycheck-list--view)
-     ("TAB"   . lsp-ui-flycheck-list--visit)
-     ("C-c l" . lsp-ui-flycheck-list--quit)
-     )
-    (:map lsp-ui-mode-map
-      ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
-      ([remap xref-find-references]  . lsp-ui-peek-find-references)
+    :bind
+    ((:map lsp-ui-flycheck-list-mode-map ;; Fix the terminal mode bindings.
+       ("RET"   . lsp-ui-flycheck-list--view)
+       ("TAB"   . lsp-ui-flycheck-list--visit)
+       ("C-c l" . lsp-ui-flycheck-list--quit)
+       )
+      (:map lsp-ui-mode-map
+        ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
+        ([remap xref-find-references]  . lsp-ui-peek-find-references)
+        )
       )
     )
   )

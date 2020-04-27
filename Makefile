@@ -17,7 +17,8 @@ LINKS_SRCS    = .editorconfig     \
                 .tmux.conf        \
                 .zshrc            \
                 .Xresources       \
-                .ssh/config
+                .ssh/config       \
+                .fluxbox/keys
 LINKS_TARGETS = ${LINKS_SRCS:%=${HOME}/%}
 LINKS_CLEAN   = ${LINKS_SRCS:%=clean_link_%}
 
@@ -109,6 +110,13 @@ ${HOME}/.ssh/config: ${PWD}/.ssh/config
 	ln -f -s $< $@
 clean_link_.ssh/config:
 	@[ -L ${HOME}/.ssh/config ] && rm ${HOME}/.ssh/config || true
+
+${HOME}/.fluxbox/keys: ${PWD}/.fluxbox/keys
+	@mkdir -p $(dir $@)
+	ln -f -s $< $@
+clean_link_.fluxbox/keys:
+	@[ -L ${HOME}/.fluxbox/keys ] && rm ${HOME}/.fluxbox/keys || true
+
 
 # Enable xterm-truecolor support.
 install: ${HOME}/.terminfo

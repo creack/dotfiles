@@ -74,7 +74,7 @@
   :after treemacs projectile)
 
 (use-package treemacs-icons-dired
-  :after treemacs dired
+  :after dired
   :config (treemacs-icons-dired-mode))
 
 (use-package treemacs-magit
