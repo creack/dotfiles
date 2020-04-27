@@ -48,13 +48,6 @@ alias sprotoc='protoc --swagger_out="logtostderr=true:."'
 # Recursive grep go file.
 alias fggrep="fgrep -R --exclude-dir=vendor --color --include='*.go'"
 
-# Putty bindking for meta left/right
-bindkey '\e\eOD' backward-word
-bindkey '\e\eOC' forward-word
-
-# Set M-l as lowercase word.
-bindkey "^[l" down-case-word
-
 # Oh-my-zsh config.
 
 # Disable completion security check as it is too slow. Don't manually add any completions before checking them.
@@ -73,7 +66,7 @@ plugins=(
 if [ -n "$VSCODE_IPC_HOOK_CLI" ]; then
   ZSH_TMUX_AUTOSTART=false
 else
-  ZSH_TMUX_AUTOSTART=true
+  ZSH_TMUX_AUTOSTART=false
 fi
 
 # Allow agent-forwarding.
@@ -103,5 +96,24 @@ function loadnvm() {
 if [ -n "$VSCODE_IPC_HOOK_CLI" ]; then
   loadnvm
 fi
+
+function rl () {
+  eval "$(tmux show-environment -s -t agent)"
+
+  for k in  SSH_AUTH_SOCK SSH_CLIENT SSH_CONNECTION SSH_TTY; do
+    tmux set-environment $k "${(P)k}"
+  done
+}
+
+# Putty bindings for meta left/right
+bindkey '\e\eOD' backward-word
+bindkey '\e\eOC' forward-word
+
+# Xterm bindings for meta left/right.
+bindkey "^[[1;3D" backward-word
+bindkey "^[[1;3C" forward-word
+
+# Set M-l as lowercase word.
+bindkey "^[l" down-case-word
 
 #zprof

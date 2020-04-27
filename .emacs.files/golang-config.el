@@ -4,11 +4,9 @@
 
 (use-package go-mode
   :ensure-system-package
-  (gopls   . "cd /tmp && GO111MODULE=on go get golang.org/x/tools/gopls@latest")
+  (gopls . "cd /tmp && GO111MODULE=on go get golang.org/x/tools/gopls@latest")
 
   :init
-  (global-unset-key (kbd "C-<mouse-1>")) ;; Unbind default ctrl-mouse so go-mode can use it for goto definition.
-
   ;; Compilation helper funcs.
   (defun go-save-and-compile-program()
     "Save any unsaved buffers and compile."
@@ -45,7 +43,6 @@
     ("C-c f"   . go-save-and-compile-program)
     ("C-c g"   . go-save-and-go-generate)
     ("C-c w"   . go-save-and-wire)
-    ("C-c v"   . go-save-and-vendor)
     ("C-c i"   . gofmt)
     ("C-c t"   . go-save-and-test-program)
     ("C-c c"   . (lambda() (interactive) (go-coverage "/tmp/coverprofile")))
@@ -58,6 +55,7 @@
   :config
   (setq
     gofmt-command           "goimports"            ;; Use goimprots instead of gofmt.
+    gofmt-args              (quote ("-local=bitbucket.org/mlcloud,github.magicleap.com"))
     gofmt-show-errors       nil                    ;; Don't show errors. Use LSP instead.
     lsp-clients-go-library-directories (quote ("~/go/pkg/mod" ;; Ignore stdlib, go mod cache and go path from LSP.
                                                 "~/goroot"
@@ -83,7 +81,6 @@
     (quote (
              "[/\\\\].git$"
              "[/\\\\]infrastructure$"
-             "[/\\\\]infrastructure$"
              "[/\\\\]vendor$"
              "[/\\\\]cli$"
              "[/\\\\]internal$"
@@ -91,13 +88,16 @@
              "[/\\\\]functions[/\\\\]migrations$"
              "[/\\\\]tests[/\\\\]mocks$"
              "[/\\\\]\\.gocache$"
+             "[/\\\\]_archives$"
              )))
   :config
   (lsp-register-custom-settings '(
                                    ("gopls.completeUnimported" t t)
                                    ("gopls.staticcheck" t t)
                                    ))
-  (setq lsp-prefer-flymake nil)        ;; Disable flymake in favor of flycheck.
+  (setq lsp-prefer-flymake nil)                     ;; Disable flymake in favor of flycheck.
+  (setq lsp-gopls-build-flags ["-tags=wireinject"]) ;; Use wire build tag.
+
   ;; Cleaner mode line.
   :delight " LSP"
   )
@@ -105,8 +105,11 @@
 ;; Overlay UI components for LSP.
 (use-package lsp-ui
   :commands lsp-ui-mode
-  :init
-  (setq lsp-ui-doc-position (quote at-point))
+  :custom
+  (lsp-ui-doc-position 'top)
+  (lsp-ui-doc-header nil)
+  (lsp-ui-doc-use-childframe t)
+
   :bind
   ((:map lsp-ui-flycheck-list-mode-map ;; Fix the terminal mode bindings.
      ("RET"   . lsp-ui-flycheck-list--view)
@@ -120,7 +123,7 @@
     )
   )
 
-;; Add LSP backend for company.
-(use-package company-lsp
-  :commands company-lsp
-  )
+;; ;; Add LSP backend for company.
+;; (use-package company-lsp
+;;   :commands company-lsp
+;;   )
