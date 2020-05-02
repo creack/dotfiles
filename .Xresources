@@ -2,11 +2,8 @@
 Xft.dpi:        96
 
 xterm*faceName: Fira Code
-xterm*faceSize: 11
-xterm*renderFont: true
-
 xterm*loginShell: true
-xterm*termName: xterm-direct
+xterm*termName: xterm-truecolor
 xterm*metaSendsEscape: true
 
 xterm*VT100.Translations: #override \

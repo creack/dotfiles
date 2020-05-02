@@ -17,6 +17,8 @@ LINKS_SRCS    = .editorconfig     \
                 .tmux.conf        \
                 .zshrc            \
                 .Xresources       \
+                .aspell.en.pws    \
+                .aspell.en.prepl  \
                 .ssh/config       \
                 .fluxbox/keys
 LINKS_TARGETS = ${LINKS_SRCS:%=${HOME}/%}

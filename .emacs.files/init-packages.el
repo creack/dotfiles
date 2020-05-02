@@ -40,7 +40,7 @@
 
   (defun reload-ssh-agent()
     (interactive)
-    (setenv "SSH_AUTH_SOCK" (substring (shell-command-to-string "tmux show-environment -t agent | \grep SSH_AUTH_SOCK | sed 's/.*=//'") 0 -1))
+    (setenv "SSH_AUTH_SOCK" (substring (shell-command-to-string "tmux -S /tmp/.tmux-agent show-environment -t agent | \grep SSH_AUTH_SOCK | sed 's/.*=//'") 0 -1))
     (message (format "Reloaded SSH_AUTH_SOCK: %s" (getenv "SSH_AUTH_SOCK")))
     )
 
@@ -91,16 +91,13 @@
   (menu-bar-mode         0) ;; Disbale the menu bar.
   (tool-bar-mode         0) ;; Disable the tool bar.
   (scroll-bar-mode       0) ;; Disable the scroll bar.
+  (transient-mark-mode   1) ;; Enable highlight region.
   (fset 'yes-or-no-p 'y-or-n-p) ; Yes/No shortcut.
 
   :hook
   (minibuffer-setup . disable-trailing-whitespace)
   (compilation-mode . disable-trailing-whitespace)
   )
-
-(use-package monokai-theme
-  :config
-  (load-theme 'monokai t))
 
 ;;
 
@@ -128,13 +125,6 @@
   :config
   (winner-mode 1))
 
-;; Better undo.
-(use-package undo-tree
-  :delight
-  :config
-  (global-undo-tree-mode)
-  )
-
 ;; Enable editorconofig.
 (use-package editorconfig
   :delight
@@ -151,41 +141,6 @@
   :config
   (recentf-mode 1)
   )
-
-;; ;; Enable ivy, a better ido mode. File/buffer browsing and more.
-;; (use-package ivy
-;;   :init
-;;   (setq ivy-use-virtual-buffers t   ;; Load recent files in the buffer list.
-;;     ivy-extra-directories   nil ;; Hide . and .. in file list.
-;;     swiper-action-recenter  t   ;; Keep the cusor centered when searching.
-;;     )
-;;   :bind
-;;   (:map ivy-minibuffer-map
-;;     ("RET" . ivy-alt-done) ;; Navigate to subdir rather than open the directory.
-;;     )
-
-;;   :config
-;;   (ivy-mode 1)
-;;   )
-
-;; ;; Counsel makes for a better M-x.
-;; (use-package counsel
-;;   :init
-;;   (setq counsel-yank-pop-separator "\n────────\n" ;; Add a clear separation between yanks.
-;;     )
-;;   :config
-;;   (counsel-mode 1)
-;;   )
-
-;; ;; Extends ivy with more details.
-;; (use-package ivy-rich
-;;   :after (ivy counsel)
-;;   :init
-;;   (setq ivy-rich-path-style    'abbrev
-;;     ivy-virtual-abbreviate 'full)
-;;   :config
-;;   (ivy-rich-mode 1)
-;;   )
 
 ;; Enable snippets
 (use-package yasnippet
