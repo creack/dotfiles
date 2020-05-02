@@ -7,16 +7,19 @@
 (load-file "~/.emacs.files/golang-config.el")
 
 ;;; Graphical mode configuration. ;;;
-(load-file "~/.emacs.files/graphic.el")
+;(load-file "~/.emacs.files/graphic.el")
 
 (load-file "~/.emacs.files/multiple-cursors.el")
 (load-file "~/.emacs.files/git.el")
-(load-file "~/.emacs.files/ivy.el")
+;(load-file "~/.emacs.files/ivy.el")
 (load-file "~/.emacs.files/treemacs.el")
 (load-file "~/.emacs.files/flyspell.el")
 (load-file "~/.emacs.files/smerge.el")
+(load-file "~/.emacs.files/theme.el")
+(load-file "~/.emacs.files/paradox.el")
+(load-file "~/.emacs.files/undo-tree.el")
+(load-file "~/.emacs.files/org.el")
 ;(load-file "~/.emacs.files/perspective.el")
-
 
 ;; Show the line number on the side.
 (use-package display-line-numbers
@@ -53,12 +56,6 @@
   ;; Cleaner mode line.
   :delight '(:eval (concat " <" (projectile-project-name) ">"))
   )
-
-;; Smarter ctrl-a/ctrl-e.
-(use-package mwim
-  :bind
-  ("C-a" . mwim-beginning-of-code-or-line)
-  ("C-e" . mwim-end-of-code-or-line))
 
 ;; ;; Setup company mode for completion.
 ;; (use-package company

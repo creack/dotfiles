@@ -28,9 +28,10 @@
     ("C-h" . ivy-backward-delete-char))
   :custom
   ;(ivy-use-selectable-prompt t)
-  (ivy-use-virtual-buffers t)
-  (ivy-on-del-error-function nil)
-  (swiper-action-recenter t)
+  (ivy-use-virtual-buffers t)     ; Add recent files and window layouts to the switch buffer list.
+  (ivy-on-del-error-function nil) ; Don't yield and error when deleting readonly part of the prompt.
+  (ivy-extra-directories   nil)   ; Hide . and .. in file list.
+  (swiper-action-recenter t)      ; Keep swiper centered.
   (counsel-grep-base-command "ag -S --noheading --nocolor --nofilename --numbers '%s' %s")
   :config
   (use-package flx)         ;; Enhance fuzzy matching
@@ -43,10 +44,9 @@
 ;; Extends ivy with more details.
 (use-package ivy-rich
   :after (ivy counsel)
-  :init
-  (setq
-    ivy-rich-path-style    'abbrev
-    ivy-virtual-abbreviate 'full)
+  :custom
+  (ivy-rich-path-style    'abbrev)
+  (ivy-virtual-abbreviate 'full)
   :config
   (ivy-rich-mode)
   (all-the-icons-ivy-setup)

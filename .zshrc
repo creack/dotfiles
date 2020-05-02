@@ -98,7 +98,7 @@ if [ -n "$VSCODE_IPC_HOOK_CLI" ]; then
 fi
 
 function rl () {
-  eval "$(tmux show-environment -s -t agent)"
+  eval "$(tmux -S /tmp/.tmux-agent show-environment -s -t agent)"
 
   for k in  SSH_AUTH_SOCK SSH_CLIENT SSH_CONNECTION SSH_TTY; do
     tmux set-environment $k "${(P)k}"

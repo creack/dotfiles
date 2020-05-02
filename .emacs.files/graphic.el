@@ -1,17 +1,30 @@
 (use-package fira-code-mode
+  :custom
+  (fira-code-mode-disabled-ligatures '(":" "[]" "#{" "#(" "#_" "#_(" "x")) ;; List of ligatures to turn off
+  :preface
+  (defun creack/set-fonts ()
+    (set-face-attribute 'default nil :font "Fira Code-12")
+    (set-face-attribute 'mode-line nil :font "DejaVu Sans Mono-8")
+    )
+  (add-hook 'after-make-frame-functions
+    (lambda (frame)
+      (select-frame frame)
+      (when (display-graphic-p frame) (creack/set-fonts))))
   :init
-  (set-frame-font "Fira Code-11")                         ;; Set Fira Code font.
+  ; (set-frame-font "Fira Code-11")                         ;; Set Fira Code font.
   (add-to-list 'default-frame-alist '(cursor-type . hbar)) ;; Use a bar as a cusor.
   (unbind-key "C-z")                                      ;; Disable suspend.
-  :hook prog-mode
+  :hook
+  (prog-mode . fira-code-mode)
   )
 
 ;; Install graphical icons.
 (use-package all-the-icons
   :config
-  (when (not (member "all-the-icons" (font-family-list)))
-    (all-the-icons-install-fonts t)
-    )
+  (when window-system
+    (when (not (member "all-the-icons" (font-family-list)))
+      (all-the-icons-install-fonts t)
+      ))
   )
 (use-package all-the-icons-dired)
 
@@ -25,17 +38,17 @@
   )
 
 
-;; Show ivy frame using posframe.
-(use-package ivy-posframe
-  :delight
+;; ;; Show ivy frame using posframe.
+;; (use-package ivy-posframe
+;;   :delight
 
-  :custom
-  (ivy-posframe-parameters
-    '((left-fringe . 5)
-       (right-fringe . 5)))
-  :hook
-  (ivy-mode . ivy-posframe-enable)
-  )
+;;   :custom
+;;   (ivy-posframe-parameters
+;;     '((left-fringe . 5)
+;;        (right-fringe . 5)))
+;;   :hook
+;;   (ivy-mode . ivy-posframe-enable)
+;;   )
 
 ;; Show company using posframe.
 (use-package company-posframe
@@ -121,7 +134,6 @@
   (defun spacer() (propertize "." 'face `(:foreground "#282a36")))
   :config
   (use-package rotate
-    :load-path "~/Developments/src/github.com/Ladicle/dotfiles/common/emacs.d/elisp/emacs-rotate"
     :bind
     ("M-o SPC" . rotate-layout))
   (with-eval-after-load 'hydra
@@ -195,31 +207,6 @@
   (use-package which-key-posframe
     :config (which-key-posframe-mode))
   )
-
-(use-package doom-modeline
-  :custom
-  (doom-modeline-buffer-file-name-style 'truncate-with-project)
-  (doom-modeline-icon t)
-  (doom-modeline-major-mode-icon t)
-  (doom-modeline-minor-modes nil)
-  :hook
-  (after-init . doom-modeline-mode)
-  )
-
-(use-package mode-icons
-  :config
-  (mode-icons-mode)
-  )
-
-(use-package hide-mode-line
-  :hook
-  ((treemacs-mode imenu-list-minor-mode) . hide-mode-line-mode))
-
-;(use-package zerodark-theme
-;  :ensure t
-;  :config
-;  (load-theme 'zerodark t nil)
-;  (zerodark-setup-modeline-format))
 
 (use-package dired
   :ensure nil

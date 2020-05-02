@@ -6,7 +6,7 @@
   :ensure-system-package
   (gopls . "cd /tmp && GO111MODULE=on go get golang.org/x/tools/gopls@latest")
 
-  :init
+  :preface
   ;; Compilation helper funcs.
   (defun go-save-and-compile-program()
     "Save any unsaved buffers and compile."
@@ -38,6 +38,8 @@
 
   :bind
   (:map go-mode-map
+    ([mouse-8] . xref-pop-marker-stack)
+    ([mouse-9] . godef-jump)
     ("TAB"     . company-indent-or-complete-common)
     ("C-c e"   . lsp-rename)
     ("C-c f"   . go-save-and-compile-program)
@@ -67,8 +69,7 @@
     )
 
   :hook
-  (go-mode     . lsp)                 ;; Load LSP.
-  (go-mode     . display-line-numbers-mode)    ;; Show line number side pane.
+  (go-mode     . lsp)                          ;; Load LSP.
   (go-mode     . yas-minor-mode)               ;; Enable yas.
   (before-save . lsp-format-buffer)            ;; Format the code with LSP before save.
   (before-save . lsp-organize-imports)         ;; Let LSP handle imports.
@@ -91,6 +92,7 @@
              "[/\\\\]_archives$"
              ))
   (lsp-prefer-flymake nil)                     ;; Disable flymake in favor of flycheck.
+  (lsp-eldoc-enable-hover nil)                 ;; Disable eldoc. Redundant with lsp-ui-doc.
   (lsp-gopls-build-flags ["-tags=wireinject"]) ;; Use wire build tag.
   :config
   (lsp-register-custom-settings '(
@@ -98,26 +100,41 @@
                                    ("gopls.staticcheck" t t)
                                    ))
   (use-package lsp-ui ;; Overlay UI components for LSP.
+    :preface
+    (defun creack/toggle-lsp-ui-doc ()
+      (interactive)
+      (if lsp-ui-doc-mode
+        (progn
+          (lsp-ui-doc-mode -1)
+          (lsp-ui-doc--hide-frame))
+        (lsp-ui-doc-mode 1)))
+
     :custom
-    (lsp-ui-doc-position 'top)
-    (lsp-ui-doc-header nil)
+    (lsp-ui-doc-position       'top)
+    (lsp-ui-doc-header         nil)
     (lsp-ui-doc-use-childframe t)
+    (lsp-ui-doc-enable         t)
 
     :bind
-    ((:map lsp-ui-flycheck-list-mode-map ;; Fix the terminal mode bindings.
-       ("RET"   . lsp-ui-flycheck-list--view)
-       ("TAB"   . lsp-ui-flycheck-list--visit)
-       ("C-c l" . lsp-ui-flycheck-list--quit)
-       )
-      (:map lsp-ui-mode-map
-        ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
-        ([remap xref-find-references]  . lsp-ui-peek-find-references)
-        )
+    (:map lsp-ui-flycheck-list-mode-map ;; Fix the terminal mode bindings.
+      ("RET"     . lsp-ui-flycheck-list--view)
+      ("TAB"     . lsp-ui-flycheck-list--visit)
+      ("C-c l"   . lsp-ui-flycheck-list--quit)
+      )
+    (:map lsp-ui-mode-map
+      ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
+      ([remap xref-find-references]  . lsp-ui-peek-find-references)
+      ("C-c d"   . creack/toggle-lsp-ui-doc)
+      ("C-c C-d" . creack/toggle-lsp-ui-doc)
       )
     )
   )
 
-;; ;; Add LSP backend for company.
-;; (use-package company-lsp
-;;   :commands company-lsp
-;;   )
+(use-package flycheck-golangci-lint
+  :hook (go-mode . flycheck-golangci-lint-setup)
+  :config
+  (flycheck-add-next-checker 'lsp 'golangci-lint)
+  )
+
+
+;(flycheck-add-next-checker 'lsp 'golangci-lint)
