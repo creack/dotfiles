@@ -5,7 +5,7 @@ xterm*faceName: Fira Code
 xterm*loginShell: true
 xterm*termName: xterm-truecolor
 xterm*metaSendsEscape: true
-
+xterm*VT100*selectToClipboard: true
 xterm*VT100.Translations: #override \
                  Mod4 <Key>V:    insert-selection(CLIPBOARD) \n\
                  Mod4 <Key>C:    copy-selection(CLIPBOARD)
