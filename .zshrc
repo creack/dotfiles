@@ -2,21 +2,6 @@
 
 # User config.
 
-# Use 24bit term.
-#export TERM=xterm-truecolor
-
-# Set the path for pip/yarn/golang.
-export PATH=~/.local/bin:~/go/bin:~/goroot/bin:/usr/local/bin:/usr/local/sbin:/snap/bin/:~/.yarn/bin:$PATH
-
-# Use most as pager (for things like man, git diff, etc).
-export PAGER=most
-
-# Use emacs as default editor.
-export EDITOR=emacs
-
-# Enable go mod.
-export GO111MODULE=on
-
 # Start emacs as a daemon.
 alias emacs="emacsclient -a ''  -c -t"
 
@@ -56,11 +41,11 @@ ZSH_DISABLE_COMPFIX=true
 ZSH_THEME="simple"
 plugins=(
     git
-    ssh-agent
     tmux
     docker
     docker-compose
 )
+
 
 # Set tmux autostart.
 if [ -n "$VSCODE_IPC_HOOK_CLI" ] || [ "$TERM" = "dumb" ] || [ -z "$TERM" ]; then
@@ -69,8 +54,9 @@ else
   ZSH_TMUX_AUTOSTART=true
 fi
 
+# TODO: Add ssh-agent plugin when not in remote server.
 # Allow agent-forwarding.
-zstyle :omz:plugins:ssh-agent agent-forwarding on
+#zstyle :omz:plugins:ssh-agent agent-forwarding on
 
 # Load oh-my-zsh.
 export ZSH=~/.oh-my-zsh
@@ -97,13 +83,20 @@ if [ -n "$VSCODE_IPC_HOOK_CLI" ]; then
   loadnvm
 fi
 
-function rl () {
-  eval "$(tmux -S /tmp/.tmux-agent show-environment -s -t agent)"
-
-  for k in  SSH_AUTH_SOCK SSH_CLIENT SSH_CONNECTION SSH_TTY; do
-    tmux set-environment $k "${(P)k}"
-  done
+function rl() {
+  local ssh_auth_sock=$(ls -t $(find /tmp/ssh-* -group $USER -name 'agent.*' 2> /dev/null) | head -1)
+  if [ -S "${ssh_auth_sock}" ]; then
+    echo2 "Refreshed ssh agent socket."
+    export SSH_AUTH_SOCK=${ssh_auth_sock}
+    # If within tmux, update the session env as well.
+    [ -n "$TMUX" ] && tmux set-environment SSH_AUTH_SOCK ${SSH_AUTH_SOCK}
+  fi
 }
+
+# If the ssh agent socket is not set or expired, reload it.
+if [ -z "$SSH_AUTH_SOCK" ] || [ ! -S "$SSH_AUTH_SOCK" ]; then
+  rl
+fi
 
 # Putty bindings for meta left/right
 bindkey '\e\eOD' backward-word

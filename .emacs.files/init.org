@@ -1,0 +1,692 @@
+#+TITLE: Emacs Config
+#+AUTHOR: Guillaume J. Charmes
+#+TOC: true
+#+DATE: [2020-05-02 Sat]
+
+* Bootstrap
+
+Initial steps to bootstrap the config.
+
+** Configure package sources
+
+Add repositories from which we'll load packages.
+Setting =package-enable-at-startup= to =nil= prevents a second package load and slightly improves startup time.
+Setting the TLS version is needed in emacs 26 to be able to pull from the gnu.org repo.
+
+#+begin_src emacs-lisp :tangle yes
+  (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
+  (setq package-enable-at-startup nil)
+  (setq package-archives '(("gnu"   . "https://elpa.gnu.org/packages/")
+                           ("melpa" . "https://melpa.org/packages/")
+                           ("org"   . "https://orgmode.org/elpa/")))
+#+end_src
+
+** Setup use-package
+
+If =use-package= is not installed, install it.
+
+#+begin_src emacs-lisp :tangle yes
+  (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package)
+    (eval-when-compile (require 'use-package)))
+#+end_src
+
+Set ensure by default to install packages from the remote repositories. This is equivalent to setting =:ensure t= on each call to =use-package=.
+To disable set =:ensure nil= or =:load-path=.
+
+#+begin_src emacs-lisp :tangle yes
+  (setq use-package-always-ensure t)
+#+end_src
+
+** Benchmark Init
+
+=benchmark-init= records startup time by package so we can debug.
+It only records things after it's initialised, so put as early in config as possible.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package benchmark-init
+    :hook
+    ;; Stop the benchmark and print result after the init.
+    (after-init . (lambda ()
+                    (benchmark-init/deactivate)
+                    (message "Loaded in %s" (emacs-init-time))
+                    )))
+#+end_src
+
+** Extend use-package
+
+Refresh the package list if needed.
+
+#+begin_src emacs-lisp :tangle yes
+  (unless package-archive-contents
+    (package-refresh-contents))
+  #+end_src
+
+Let use define an external binary as dependency with =:ensure-system-package=.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package use-package-ensure-system-package)
+#+end_src
+
+Manage the mode-line with =:delight=
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package delight)
+#+end_src
+
+
+* Global settings
+
+Adjust Emacs default behavior. No packages involved.
+
+** Default layout
+
+Don't display the help screen on startup and disable default scratch message.
+
+#+begin_src emacs-lisp :tangle yes
+  (setq inhibit-startup-screen  t
+        initial-scratch-message nil)
+#+end_src
+
+Disable GUI window decorations.
+
+#+begin_src emacs-lisp :tangle yes
+  (tool-bar-mode   -1)
+  (menu-bar-mode   1) ; Keep the menu bar while getting familiar with org mode.
+  (scroll-bar-mode -1)
+#+end_src
+
+Disable the bell.
+
+#+begin_src emacs-lisp :tangle yes
+  (setq ring-bell-function 'ignore)
+#+end_src
+
+Show trailing whitespaces expect for some modes.
+
+#+begin_src emacs-lisp :tangle yes
+  (setq-default show-trailing-whitespace t
+                truncate-lines           t
+                require-final-newline    t)
+
+  (add-hook 'minibuffer-setup-hook '(lambda() (setq show-trailing-whitespace nil)))
+  (add-hook 'compilation-mode-hook '(lambda() (setq show-trailing-whitespace nil)))
+
+#+end_src
+
+Truncate long tines instead of wrapping and ensure the final newline.
+
+#+begin_src emacs-lisp :tangle yes
+  (setq-default truncate-lines        t
+                require-final-newline t)
+#+end_src
+
+Define sane indentation.
+
+#+begin_src emacs-lisp :tangle yes
+  (setq-default indent-tabs-mode nil
+                tab-width        8)
+#+end_src
+
+Enable syntax highlight and highlight parens.
+
+#+begin_src emacs-lisp :tangle yes
+  (setq font-lock-maximum-decoration t)
+  (global-font-lock-mode t)
+  (show-paren-mode t)
+#+end_src
+
+Show line/column in the mode-line.
+
+#+begin_src emacs-lisp :tangle yes
+  (column-number-mode t)
+  (line-number-mode t)
+#+end_src
+
+Create a region when creating a mark.
+
+#+begin_src emacs-lisp :tangle yes
+  (transient-mark-mode t)
+#+end_src
+
+Enable the mouse support in the terminal.
+
+#+begin_src emacs-lisp :tangle yes
+  (xterm-mouse-mode t)
+#+end_src
+
+Keep track of the window layouts.
+
+#+begin_src emacs-lisp :tangle yes
+  (winner-mode t)
+#+end_src
+
+Don't automatically enable eldoc.
+
+#+begin_src emacs-lisp :tangle yes
+  (global-eldoc-mode -1)
+#+end_src
+
+*** Bindings                                                     :bindings:
+
+Use =super= for copy/paste and undo to make for a better integration with windows/OSX.
+
+#+begin_src emacs-lisp :tangle yes
+  (bind-key "s-x" 'kill-region)
+  (bind-key "s-c" 'kill-ring-save)
+  (bind-key "s-v" 'yank)
+  (bind-key "s-z" 'undo)
+#+end_src
+
+Set globally comment/uncomment.
+
+#+begin_src emacs-lisp :tangle yes
+  (bind-key "C-c C-c" 'comment-region)
+  (bind-key "C-c C-u" 'uncomment-region)
+#+end_src
+
+Quickly toggle the line numbers in the margin.
+
+#+begin_src emacs-lisp :tangle yes
+  (bind-key "C-c C-l" 'display-line-numbers-mode)
+#+end_src
+
+** Backup / History
+
+Store all backup and temporary files in =~/.emacs.d/.tmp= instead of polluting the current directory.
+
+Define the target directories and create them if they don't exist.
+
+#+begin_src emacs-lisp :tangle yes
+  (setq backup-dir     "~/.emacs.d/.tmp/backup"
+        auto-saves-dir "~/.emacs.d/.tmp/auto-saves/")
+  (dolist (dir (list backup-dir auto-saves-dir))
+    (when (not (file-directory-p dir))
+      (make-directory dir t)))
+#+end_src
+
+Tell emacs to use those directories instead of the local one.
+
+#+begin_src emacs-lisp :tangle yes
+  (setq backup-directory-alist         `(("." . ,backup-dir))
+        auto-save-file-name-transforms `((".*" ,auto-saves-dir t))
+        auto-save-list-file-prefix     (concat auto-saves-dir ".saves-")
+        tramp-backup-directory-alist   `((".*" . ,backup-dir))
+        tramp-auto-save-directory      auto-saves-dir)
+#+end_src
+
+Define how to hanlde automatic bakcups / open files.
+
+#+begin_src emacs-lisp :tangle yes
+  (setq create-lockfiles nil           ; Don't create lockfiles when editing a file.
+        backup-by-copying t            ; Don't delink hardlinks.
+        delete-old-versions t          ; Clean up the backups.
+        version-control t              ; Use version numbers on backups.
+        kept-new-versions 5            ; Keep some new versions
+        kept-old-versions 2)           ; and some old ones, too.
+#+end_src
+
+Keep track of recent files.
+
+#+begin_src emacs-lisp :tangle yes
+  (setq recentf-exclude '(".*/.emacs.d/.*" ".*/go/pkg/mod/.*"))
+  (recentf-mode t)
+#+end_src
+
+** Disable customize settings outside config file
+
+Create a file in =~/.emacs.d= with the customization done outside the config file instead of overwriting =~/.emacs=.
+This result in any customization to be ephemeral, even with "save for future sessions".
+
+#+begin_src emacs-lisp :tangle yes
+  (setq custom-file "~/.emacs.d/custom.el")
+  (when (file-exists-p custom-file)
+    (load custom-file))
+#+end_src
+
+** Prompts shortcuts
+
+Allow to use y/n instead of "yes"/"no".
+
+#+begin_src emacs-lisp :tangle yes
+  (fset 'yes-or-no-p 'y-or-n-p)
+#+end_src
+
+Skip the prompt when opening symlinks.
+
+#+begin_src emacs-lisp :tangle yes
+  (setq vc-follow-symlinks t)
+#+end_src
+
+
+* Editing
+
+Setup the general edit config.
+
+** EditorConfig
+
+Use editor config to handle basic settings like encoding, line lengths, etc. See [[file:../.editorconfig][global editorconfig]] for more details.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package editorconfig
+    :delight
+    :config
+    (editorconfig-mode t))
+#+end_src
+
+** Undo tree
+
+=undo-tree= visualises undo history as a tree for easy navigation.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package undo-tree
+    :delight
+    :custom
+    (undo-tree-auto-save-history t)
+    (undo-tree-history-directory-alist '((".*" . "~/.emacs.d/.tmp")))
+    :config
+    (global-undo-tree-mode t))
+#+end_src
+
+** Which Key
+
+Show the available next key bindings.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package which-key
+    :delight
+    :config
+    (which-key-mode t))
+#+end_src
+
+** Ivy
+
+=ivy= is a generic completion framework which uses the minibuffer. Turning on =ivy-mode= enables replacement of lots of built in =ido= functionality.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package ivy
+    :delight
+    :custom
+    (ivy-use-virtual-buffers t "Add recent files and window layouts to the switch buffer list.")
+
+    :config
+    (ivy-mode t))
+#+end_src
+
+Disable the default =^= prefix.
+
+#+begin_src emacs-lisp :tangle yes
+  (setq ivy-initial-inputs-alist nil)
+#+end_src
+
+=counsel= is a collection of =ivy= enhanced versions of common Emacs commands.
+
+#+begin_src emacs-lisp :tangle no
+  (use-package counsel
+    :delight
+    :bind (("M-x" . counsel-M-x)))
+#+end_src
+
+=prescient= sorts and filters candidate lists for avy/counsel.
+
+#+begin_src emacs-lisp :tangle no
+  (use-package prescient)
+  (use-package ivy-prescient
+    :config
+    (ivy-prescient-mode t))
+#+end_src
+
+=swiper= is an =ivy= enhanced version of isearch.
+
+#+begin_src emacs-lisp :tangle no
+  (use-package swiper
+    :bind (("M-s" . counsel-grep-or-swiper)))
+#+end_src
+
+
+* Appearance
+
+** Theme
+
+Install and enable the theme.
+
+#+begin_src emacs-lisp :tangle no
+  (use-package solarized-theme
+    :config
+    (load-theme 'solarized-light t))
+#+end_src
+
+** Font
+
+Using fira code for ligatures.
+
+Install the font on debian/ubuntu.
+
+#+begin_src sh :tangle no
+  sudo apt-get install fonts-firacode
+#+end_src
+
+Install the font on osx.
+
+#+begin_src sh :tangle no
+  brew tap homebrew/cask-fonts
+  brew cask install font-fira-code
+#+end_src
+
+Enable the font in emacs.
+
+#+begin_src emacs-lisp :tangle yes
+  (set-frame-font "Fira Code 12" nil t)
+#+end_src
+
+** Mode Line
+
+=feebleline= is a minimalist mode line replacement.
+
+#+begin_src emacs-lisp :tangle no
+  (use-package feebleline
+    :config
+    (feebleline-mode 't))
+#+end_src
+
+Add emoji support. This is useful when working with html.
+
+** TODO Misc
+
+#+begin_src emacs-lisp :tangle no
+  (use-package emojify)
+#+end_src
+
+Improve look and feel of titlebar on Macos. Set =ns-appearance= to =dark= for white title text and =nil= for black title text.
+
+#+begin_src emacs-lisp :tangle no
+  (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+  (add-to-list 'default-frame-alist '(ns-appearance . dark))
+#+end_src
+
+
+* Coding
+
+** Compilation
+
+Don't ask about killing current process before restarting and enable scrolling in the output buffer.
+
+#+begin_src emacs-lisp :tangle yes
+  (setq compilation-always-kill   t
+        compilation-scroll-output t)
+#+end_src
+
+Use proper ansi colors in the output buffer.
+
+#+begin_src emacs-lisp :tangle yes
+  (setq compilation-environment '("TERM=xterm-truecolor" "COLORTERM=truecolor"))
+#+end_src
+
+Use the =xterm-color= package to replace the native ansi.el to have better support for colors.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package xterm-color
+    :preface
+    (defun my/compilation-color (proc)
+      ;; We need to differentiate between compilation-mode buffers
+      ;; and running as part of comint.
+      (when (eq (process-filter proc) 'compilation-filter)
+        ;; This is a process associated with a compilation-mode buffer.
+        ;; We may call `xterm-color-filter' before its own filter function.
+        (set-process-filter
+         proc
+         (lambda (proc string)
+           (funcall 'compilation-filter proc
+                    (xterm-color-filter string))))))
+    :hook (compilation-start . my/compilation-color))
+#+end_src
+
+*** Bindings                                                     :bindings:
+
+Create bindings to quickly recompile and kill the running command.
+
+#+begin_src emacs-lisp :tangle yes
+  (bind-key "C-c r" '(lambda() (interactive) (save-some-buffers t) (recompile)))
+  (bind-key "C-c k" 'kill-compilation)
+#+end_src
+
+
+
+** Programming specific interface improvements
+
+When programming I like my editor to try to help me with keeping parentheses balanced.
+
+#+begin_src emacs-lisp :tangle no
+  (use-package smartparens
+    :config
+    (add-hook 'prog-mode-hook 'smartparens-mode))
+#+end_src
+
+Highlight parens etc. for improved readability.
+
+#+begin_src emacs-lisp :tangle no
+  (use-package rainbow-delimiters
+    :config
+    (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
+#+end_src
+
+Highlight strings which represent colours. I only want this in programming modes, and I don't want colour names to be highlighted (=x-colors=).
+
+#+begin_src emacs-lisp :tangle no
+  (use-package rainbow-mode
+    :config
+    (setq rainbow-x-colors nil)
+    (add-hook 'prog-mode-hook 'rainbow-mode))
+#+end_src
+
+Expand parentheses for me.
+
+#+begin_src emacs-lisp :tangle no
+  (add-hook 'prog-mode-hook 'electric-pair-mode)
+#+end_src
+** Git
+
+Magit is an awesome interface to git. Summon it with `C-x g`.
+
+#+begin_src emacs-lisp :tangle no
+  (use-package magit
+    :bind ("C-x g" . magit-status))
+#+end_src
+
+Display line changes in gutter based on git history. Enable it everywhere.
+
+#+begin_src emacs-lisp :tangle no
+  (use-package git-gutter
+    :config
+    (global-git-gutter-mode 't))
+#+end_src
+
+** Syntax checking
+
+=Flycheck= is a general syntax highlighting framework which other packages hook into. It's an improvment on the built in =flymake=.
+
+Setup is pretty simple - we just enable globally and turn on a custom eslint function, and also add a custom checker for proselint.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package flycheck
+    :config
+    (add-hook 'after-init-hook 'global-flycheck-mode)
+    (setq-default flycheck-highlighting-mode 'lines)
+    ;; Define fringe indicator / warning levels
+    (define-fringe-bitmap 'flycheck-fringe-bitmap-ball
+      (vector #b00000000
+              #b00000000
+              #b00000000
+              #b00000000
+              #b00000000
+              #b00000000
+              #b00000000
+              #b00011100
+              #b00111110
+              #b00111110
+              #b00111110
+              #b00011100
+              #b00000000
+              #b00000000
+              #b00000000
+              #b00000000
+              #b00000000))
+    (flycheck-define-error-level 'error
+      :severity 2
+      :overlay-category 'flycheck-error-overlay
+      :fringe-bitmap 'flycheck-fringe-bitmap-ball
+      :fringe-face 'flycheck-fringe-error)
+    (flycheck-define-error-level 'warning
+      :severity 1
+      :overlay-category 'flycheck-warning-overlay
+      :fringe-bitmap 'flycheck-fringe-bitmap-ball
+      :fringe-face 'flycheck-fringe-warning)
+    (flycheck-define-error-level 'info
+      :severity 0
+      :overlay-category 'flycheck-info-overlay
+      :fringe-bitmap 'flycheck-fringe-bitmap-ball
+      :fringe-face 'flycheck-fringe-info))
+    #+end_src
+
+
+** Autocomplete
+
+=Eglot= is a client to Language Server Protocol servers.
+
+#+begin_src emacs-lisp :tangle no
+  (use-package eglot
+    :commands eglot
+    :config
+    (add-to-list 'eglot-server-programs '(elm-mode . ("elm-language-server" "--stdio"))))
+#+end_src
+
+** Snippets
+
+Unlike autocomplete which suggests words / symbols, snippets are pre-prepared templates which you fill in.
+
+Type the shortcut and press =TAB= to complete, or =M-/= to autosuggest a snippet.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package yasnippet
+    :delight yas-minor-mode
+    :config
+    (add-to-list 'yas-snippet-dirs "~/.dotfiles/.emacs.files/yasnippet")
+    (yas-global-mode t))
+#+end_src
+
+Install the default snippets.
+
+#+begin_src emacs-lisp :tangle no
+  (use-package yasnippet-snippets)
+#+end_src
+
+
+** Markdown
+
+Markdown support isn't built into Emacs, add it with =markdown-mode=.
+
+#+begin_src emacs-lisp :tangle no
+  (use-package markdown-mode
+    :commands (markdown-mode gfm-mode)
+    :mode (("README\\.md\\'" . gfm-mode)
+           ("\\.md\\'" . markdown-mode)
+           ("\\.markdown\\'" . markdown-mode))
+    :init (setq markdown-command "multimarkdown"))
+#+end_src
+
+** Golang
+
+Go-mode provides basic language support, we call =gofmt= on each save to keep code tidy.
+
+#+begin_src emacs-lisp :tangle no
+  (use-package go-mode
+    :config
+    (add-hook 'before-save-hook 'gofmt-before-save))
+#+end_src
+
+
+* Org
+
+I should comment on these more...
+
+#+begin_src emacs-lisp :tangle no
+  (setq org-startup-indented 'f)
+  (setq org-directory "~/org")
+  (setq org-special-ctrl-a/e 't)
+  (setq org-default-notes-file (concat org-directory "/notes.org"))
+  (define-key global-map "\C-cc" 'org-capture)
+  (setq org-mobile-directory "~/Dropbox/Apps/MobileOrg")
+  (setq org-src-fontify-natively 't)
+  (setq org-src-tab-acts-natively t)
+  (setq org-src-window-setup 'current-window)
+#+end_src
+
+Customize appearance.
+
+#+begin_src emacs-lisp :tangle no
+(let*
+((base-font-color     (face-foreground 'default nil 'default))
+(headline           `(:foreground ,base-font-color)))
+
+    (custom-theme-set-faces 'user
+                            `(org-level-8 ((t (,@headline))))
+                            `(org-level-7 ((t (,@headline))))
+                            `(org-level-6 ((t (,@headline))))
+                            `(org-level-5 ((t (,@headline))))
+                            `(org-level-4 ((t (,@headline))))
+                            `(org-level-3 ((t (,@headline :height 1.3))))
+                            `(org-level-2 ((t (,@headline :height 1.3))))
+                            `(org-level-1 ((t (,@headline :height 1.3 ))))
+                            `(org-document-title ((t (,@headline :height 1))))))
+#+end_src
+
+
+* Extra
+** Record key frequency
+
+Keep track of what gets used so we can drop unused features.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package keyfreq
+
+    :commands keyfreq
+    :config
+    (keyfreq-mode t)
+    (keyfreq-autosave-mode t))
+#+end_src
+
+** SSH Agent
+
+From https://github.com/nhoffman/.emacs.d/blob/master/init.org
+
+Set the ssh-agent to the most recent socket in  =/tmp/ssh-*=.
+
+#+begin_src emacs-lisp :tangle yes
+  (defun my/ssh-refresh ()
+    "Reset the environment variable SSH_AUTH_SOCK"
+    (interactive)
+    (let (ssh-auth-sock-old (getenv "SSH_AUTH_SOCK"))
+      (setenv "SSH_AUTH_SOCK"
+              (car (split-string
+                    (shell-command-to-string
+                     "ls -t $(find /tmp/ssh-* -group $USER -name 'agent.*' 2> /dev/null) | head -1"))))
+      (message
+       (format "SSH_AUTH_SOCK %s --> %s"
+               ssh-auth-sock-old (getenv "SSH_AUTH_SOCK")))))
+#+end_src
+
+Reload ssh agent now and env every 10 minutes.
+
+#+begin_src emacs-lisp :tangle yes
+(run-with-timer 0 (* 60 10) 'my/ssh-refresh)
+#+end_src
+
+** TODO Emacs server
+
+#+begin_src emacs-lisp :tangle no
+(add-hook 'after-make-frame-functions
+          (lambda (frame)
+            (select-frame frame)
+            (my/setup-color-theme)))
+#+end_src

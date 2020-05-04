@@ -16,6 +16,7 @@ LINKS_SRCS    = .editorconfig     \
                 .gitconfig.perso  \
                 .tmux.conf        \
                 .zshrc            \
+                .zshenv           \
                 .Xresources       \
                 .aspell.en.pws    \
                 .aspell.en.prepl  \
@@ -27,7 +28,7 @@ LINKS_CLEAN   = ${LINKS_SRCS:%=clean_link_%}
 # List of file/dirs to nuke when calling 'make purge'.
 PURGE_LIST = .cache .emacs.d .yarn .npm .node-gyp .elinks .apex .terraform.d .parallel \
              .psql_history .python_history .wget-hsts .node_repl_history \
-             .yarnrc .zcompdump* .sudo_as_admin_successful \
+             .yarnrc $(wildcard .zcompdump*) .sudo_as_admin_successful \
              ${PWD}/.config/yarn
 
 # Default to install target.
