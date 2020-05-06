@@ -10,3 +10,4 @@ generated_completions
 .config/yarn
 .config/go
 .config/htop/htoprc
+.yas-compiled-snippets.el
