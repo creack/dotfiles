@@ -1,4 +1,4 @@
-#zmodload zsh/zprof
+[ -n "${ZPROF}" ] && zmodload zsh/zprof
 
 # User config.
 
@@ -44,6 +44,9 @@ plugins=(
     tmux
     docker
     docker-compose
+    zsh-autosuggestions
+    zsh-completions
+    zsh-syntax-highlighting
 )
 
 
@@ -109,4 +112,4 @@ bindkey "^[[1;3C" forward-word
 # Set M-l as lowercase word.
 bindkey "^[l" down-case-word
 
-#zprof
+[ -n "${ZPROF}" ] && zprof
