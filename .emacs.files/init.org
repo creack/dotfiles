@@ -4,7 +4,6 @@
 #+DATE: [2020-05-02 Sat]
 
 * Bootstrap
-
 Initial steps to bootstrap the config.
 
 ** Configure package sources
@@ -14,9 +13,9 @@ Setting =package-enable-at-startup= to =nil= prevents a second package load and 
 Setting the TLS version is needed in emacs 26 to be able to pull from the gnu.org repo.
 
 #+begin_src emacs-lisp :tangle yes
-  (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
-  (setq package-enable-at-startup nil)
-  (setq package-archives '(("gnu"   . "https://elpa.gnu.org/packages/")
+  (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3"
+        package-enable-at-startup nil
+        package-archives '(("gnu"   . "https://elpa.gnu.org/packages/")
                            ("melpa" . "https://melpa.org/packages/")
                            ("org"   . "https://orgmode.org/elpa/")))
 #+end_src
@@ -32,8 +31,8 @@ If =use-package= is not installed, install it.
     (eval-when-compile (require 'use-package)))
 #+end_src
 
-Set ensure by default to install packages from the remote repositories. This is equivalent to setting =:ensure t= on each call to =use-package=.
-To disable set =:ensure nil= or =:load-path=.
+Set =ensure= by default to install packages from the remote repositories. This is equivalent to setting =:ensure t= on each call to =use-package=.
+To disable, set =:ensure nil= or =:load-path=.
 
 #+begin_src emacs-lisp :tangle yes
   (setq use-package-always-ensure t)
@@ -45,10 +44,8 @@ To disable set =:ensure nil= or =:load-path=.
 It only records things after it's initialised, so put as early in config as possible.
 
 #+begin_src emacs-lisp :tangle yes
-  (use-package benchmark-init
-    :hook
-    ;; Stop the benchmark and print result after the init.
-    (after-init . (lambda ()
+  (use-package benchmark-init :demand
+    :hook (after-init . (lambda () ; Stop the benchmark and print result after the init.
                     (benchmark-init/deactivate)
                     (message "Loaded in %s" (emacs-init-time))
                     )))
@@ -61,7 +58,7 @@ Refresh the package list if needed.
 #+begin_src emacs-lisp :tangle yes
   (unless package-archive-contents
     (package-refresh-contents))
-  #+end_src
+#+end_src
 
 Let use define an external binary as dependency with =:ensure-system-package=.
 
@@ -69,15 +66,13 @@ Let use define an external binary as dependency with =:ensure-system-package=.
   (use-package use-package-ensure-system-package)
 #+end_src
 
-Manage the mode-line with =:delight=
+Manage the mode-line with =:delight=.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package delight)
 #+end_src
 
-
 * Global settings
-
 Adjust Emacs default behavior. No packages involved.
 
 ** Default layout
@@ -237,7 +232,6 @@ Keep track of recent files.
 ** Disable customize settings outside config file
 
 Create a file in =~/.emacs.d= with the customization done outside the config file instead of overwriting =~/.emacs=.
-This result in any customization to be ephemeral, even with "save for future sessions".
 
 #+begin_src emacs-lisp :tangle yes
   (setq custom-file "~/.emacs.d/custom.el")
@@ -259,102 +253,129 @@ Skip the prompt when opening symlinks.
   (setq vc-follow-symlinks t)
 #+end_src
 
-
 * Editing
-
 Setup the general edit config.
 
 ** EditorConfig
 
-Use editor config to handle basic settings like encoding, line lengths, etc. See [[file:../.editorconfig][global editorconfig]] for more details.
+Use editor config to handle basic settings like encoding, line lengths, etc.
+See [[file:../.editorconfig][global editorconfig]] for more details.
 
 #+begin_src emacs-lisp :tangle yes
-  (use-package editorconfig
-    :delight
-    :config
-    (editorconfig-mode t))
+  (use-package editorconfig :delight
+    :config (editorconfig-mode t))
 #+end_src
 
 ** Undo tree
 
 =undo-tree= visualises undo history as a tree for easy navigation.
 
+Enable undo history and store it in =~/.emacs=.
+
 #+begin_src emacs-lisp :tangle yes
-  (use-package undo-tree
-    :delight
-    :custom
-    (undo-tree-auto-save-history t)
-    (undo-tree-history-directory-alist '((".*" . "~/.emacs.d/.tmp")))
-    :config
-    (global-undo-tree-mode t))
+  (setq undo-tree-auto-save-history t
+        undo-tree-history-directory-alist '((".*" . "~/.emacs.d/.tmp")))
+#+end_src
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package undo-tree :delight
+    :config (global-undo-tree-mode t))
 #+end_src
 
 ** Which Key
-
 Show the available next key bindings.
 
 #+begin_src emacs-lisp :tangle yes
-  (use-package which-key
-    :delight
-    :config
-    (which-key-mode t))
+  (use-package which-key :delight
+    :config (which-key-mode t))
 #+end_src
 
+* Navigation
 ** Ivy
 
-=ivy= is a generic completion framework which uses the minibuffer. Turning on =ivy-mode= enables replacement of lots of built in =ido= functionality.
+=Ivy= is a generic completion framework which uses the minibuffer.
+Turning on =ivy-mode= enables replacement of lots of built in =ido= functionality.
+
+Add recent files and window layouts to the switch buffer list.
 
 #+begin_src emacs-lisp :tangle yes
-  (use-package ivy
-    :delight
-    :custom
-    (ivy-use-virtual-buffers t "Add recent files and window layouts to the switch buffer list.")
-
-    :config
-    (ivy-mode t))
+  (setq ivy-use-virtual-buffers t)
 #+end_src
 
-Disable the default =^= prefix.
+Hide . and .. in file list.
 
 #+begin_src emacs-lisp :tangle yes
-  (setq ivy-initial-inputs-alist nil)
+  (setq ivy-extra-directories nil)
+#+end_src
+
+Keep swiper centered.
+
+#+begin_src emacs-lisp :tangle yes
+  (setq swiper-action-recenter t)
+#+end_src
+
+Install =Ivy= and friends.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package ivy :delight
+    :config (ivy-mode t))
 #+end_src
 
 =counsel= is a collection of =ivy= enhanced versions of common Emacs commands.
 
-#+begin_src emacs-lisp :tangle no
-  (use-package counsel
-    :delight
-    :bind (("M-x" . counsel-M-x)))
+#+begin_src emacs-lisp :tangle yes
+  (use-package counsel :delight :after ivy
+    :config (counsel-mode t))
 #+end_src
 
-=prescient= sorts and filters candidate lists for avy/counsel.
+=ivy-rich= extends ivy and provides an interface with more details.
 
-#+begin_src emacs-lisp :tangle no
-  (use-package prescient)
-  (use-package ivy-prescient
-    :config
-    (ivy-prescient-mode t))
+#+begin_src emacs-lisp :tangle yes
+  (use-package ivy-rich :after ivy counsel
+    :custom
+    (ivy-rich-path-style    'abbrev)
+    (ivy-virtual-abbreviate 'full)
+    :config (ivy-rich-mode t))
+#+end_src
+
+=prescient= sorts and filters candidate lists for ivy/counsel.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package prescient :after ivy
+    :config (prescient-persist-mode t))
+  (use-package ivy-prescient :after prescient
+    :config (ivy-prescient-mode t))
 #+end_src
 
 =swiper= is an =ivy= enhanced version of isearch.
 
-#+begin_src emacs-lisp :tangle no
-  (use-package swiper
-    :bind (("M-s" . counsel-grep-or-swiper)))
+#+begin_src emacs-lisp :tangle yes
+  (use-package swiper)
 #+end_src
 
+*** Bindings                                                       :bindings:
+
+#+begin_src emacs-lisp :tangle yes
+  (bind-keys
+    ("C-c v p" . ivy-push-view)
+    ("C-c v o" . ivy-pop-view)
+    ("C-c v ." . ivy-switch-view)
+    ("C-s"     . counsel-grep-or-swiper))
+  (bind-keys :map ivy-minibuffer-map
+      ("C-j" . ivy-immediate-done)
+      ("RET" . ivy-alt-done))
+
+#+end_src
 
 * Appearance
-
 ** Theme
 
 Install and enable the theme.
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (use-package solarized-theme
     :config
-    (load-theme 'solarized-light t))
+    (load-theme 'solarized-dark t))
 #+end_src
 
 ** Font
@@ -390,24 +411,7 @@ Enable the font in emacs.
     (feebleline-mode 't))
 #+end_src
 
-Add emoji support. This is useful when working with html.
-
-** TODO Misc
-
-#+begin_src emacs-lisp :tangle no
-  (use-package emojify)
-#+end_src
-
-Improve look and feel of titlebar on Macos. Set =ns-appearance= to =dark= for white title text and =nil= for black title text.
-
-#+begin_src emacs-lisp :tangle no
-  (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
-  (add-to-list 'default-frame-alist '(ns-appearance . dark))
-#+end_src
-
-
 * Coding
-
 ** Compilation
 
 Don't ask about killing current process before restarting and enable scrolling in the output buffer.
@@ -451,8 +455,6 @@ Create bindings to quickly recompile and kill the running command.
   (bind-key "C-c k" 'kill-compilation)
 #+end_src
 
-
-
 ** Programming specific interface improvements
 
 When programming I like my editor to try to help me with keeping parentheses balanced.
@@ -465,7 +467,7 @@ When programming I like my editor to try to help me with keeping parentheses bal
 
 Highlight parens etc. for improved readability.
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (use-package rainbow-delimiters
     :config
     (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
@@ -473,7 +475,7 @@ Highlight parens etc. for improved readability.
 
 Highlight strings which represent colours. I only want this in programming modes, and I don't want colour names to be highlighted (=x-colors=).
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (use-package rainbow-mode
     :config
     (setq rainbow-x-colors nil)
@@ -487,19 +489,26 @@ Expand parentheses for me.
 #+end_src
 ** Git
 
-Magit is an awesome interface to git. Summon it with `C-x g`.
+=git-timemachine= steps through historic versions of git controlled file.
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
+  (use-package git-timemachine
+    :bind ("M-g t" . git-timemachine-toggle))
+#+end_src
+
+
+=Magit= is an interface to git. Summon it with =C-x g=.
+
+#+begin_src emacs-lisp :tangle yes
   (use-package magit
-    :bind ("C-x g" . magit-status))
+    :bind ("M-g s" . magit-status))
 #+end_src
 
 Display line changes in gutter based on git history. Enable it everywhere.
 
-#+begin_src emacs-lisp :tangle no
-  (use-package git-gutter
-    :config
-    (global-git-gutter-mode 't))
+#+begin_src emacs-lisp :tangle true
+  (use-package git-gutter-fringe
+    :config (global-git-gutter-mode t))
 #+end_src
 
 ** Syntax checking
@@ -549,7 +558,6 @@ Setup is pretty simple - we just enable globally and turn on a custom eslint fun
       :fringe-face 'flycheck-fringe-info))
     #+end_src
 
-
 ** Autocomplete
 
 =Eglot= is a client to Language Server Protocol servers.
@@ -581,30 +589,72 @@ Install the default snippets.
   (use-package yasnippet-snippets)
 #+end_src
 
+* Majot Modes
+** Config Files
+
+Common config file formats.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package ini-mode :defer)
+  (use-package ssh-config-mode :defer)
+  (use-package conf-mode :defer
+    :mode (("\\.conf\\'"    . conf-space-mode)
+           ("\\.setup.*\\'" . conf-space-mode)))
+#+end_src
+
+JSON/Yaml.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package json-mode :defer)
+  (use-package yaml-mode :defer
+    :hook (yaml-mode . display-line-numbers-mode))
+#+end_src
+
+** Git
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package gitattributes-mode :defer)
+  (use-package gitconfig-mode :defer)
+  (use-package gitignore-mode :defer)
+#+end_src
 
 ** Markdown
 
 Markdown support isn't built into Emacs, add it with =markdown-mode=.
 
-#+begin_src emacs-lisp :tangle no
-  (use-package markdown-mode
+#+begin_src emacs-lisp :tangle yes
+  (use-package markdown-mode :defer
     :commands (markdown-mode gfm-mode)
-    :mode (("README\\.md\\'" . gfm-mode)
-           ("\\.md\\'" . markdown-mode)
-           ("\\.markdown\\'" . markdown-mode))
-    :init (setq markdown-command "multimarkdown"))
+    :mode "\\.md\\'")
 #+end_src
 
-** Golang
+Use =grip= for live preview in browser.
 
-Go-mode provides basic language support, we call =gofmt= on each save to keep code tidy.
+#+begin_src emacs-lisp :tangle yes
+  (use-package grip-mode
+    :ensure-system-package (grip . "pip3 install grip")
+    :bind (:map markdown-mode-command-map
+           ("g" . grip-mode)))
+#+end_src
+
+** Docker
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package dockerfile-mode :defer
+    :mode "Dockerfile" "\\'Dockerfile."
+    :hook (dockerfile-mode . display-line-numbers-mode))
+  (use-package docker-compose-mode)
+#+end_src
+
+** TODO Golang
+
+Go Setup.
 
 #+begin_src emacs-lisp :tangle no
   (use-package go-mode
     :config
     (add-hook 'before-save-hook 'gofmt-before-save))
 #+end_src
-
 
 * Org
 
@@ -625,9 +675,9 @@ I should comment on these more...
 Customize appearance.
 
 #+begin_src emacs-lisp :tangle no
-(let*
-((base-font-color     (face-foreground 'default nil 'default))
-(headline           `(:foreground ,base-font-color)))
+  (let*
+      ((base-font-color     (face-foreground 'default nil 'default))
+       (headline           `(:foreground ,base-font-color)))
 
     (custom-theme-set-faces 'user
                             `(org-level-8 ((t (,@headline))))
@@ -641,6 +691,15 @@ Customize appearance.
                             `(org-document-title ((t (,@headline :height 1))))))
 #+end_src
 
+** Exporters
+
+*** Markdown
+
+Export to Github Flavored Markdown.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package ox-gfm)
+#+end_src
 
 * Extra
 ** Record key frequency
@@ -649,7 +708,6 @@ Keep track of what gets used so we can drop unused features.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package keyfreq
-
     :commands keyfreq
     :config
     (keyfreq-mode t)
