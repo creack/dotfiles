@@ -199,25 +199,3 @@
       ("<SPC>" rotate-layout)
       ("q" nil)))
   )
-
-(use-package which-key
-  :delight
-  :hook (after-init . which-key-mode)
-  :config
-  (use-package which-key-posframe
-    :config (which-key-posframe-mode))
-  )
-
-(use-package dired
-  :ensure nil
-  :hook
-  (dired-mode . dired-hide-details-mode)
-  :config
-  (use-package dired-git-info
-    :bind
-    (:map dired-mode-map
-      (")" . dired-git-info-mode))
-    :hook
-    (dired-after-readin . dired-git-info-auto-enable)
-    )
-  )
