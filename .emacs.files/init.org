@@ -88,8 +88,8 @@ Disable GUI window decorations.
 
 #+begin_src emacs-lisp :tangle yes
   (tool-bar-mode   -1)
-  (menu-bar-mode   1) ; Keep the menu bar while getting familiar with org mode.
   (scroll-bar-mode -1)
+  (unless window-system (menu-bar-mode -1))
 #+end_src
 
 Disable the bell.
@@ -98,16 +98,12 @@ Disable the bell.
   (setq ring-bell-function 'ignore)
 #+end_src
 
-Show trailing whitespaces expect for some modes.
+Show trailing whitespaces in prog mode.
 
 #+begin_src emacs-lisp :tangle yes
-  (setq-default show-trailing-whitespace t
-                truncate-lines           t
-                require-final-newline    t)
-
-  (add-hook 'minibuffer-setup-hook '(lambda() (setq show-trailing-whitespace nil)))
-  (add-hook 'compilation-mode-hook '(lambda() (setq show-trailing-whitespace nil)))
-
+  (setq-default truncate-lines        t
+                require-final-newline t)
+  (add-hook 'prog-mode-hook '(lambda() (setq show-trailing-whitespace t)))
 #+end_src
 
 Truncate long tines instead of wrapping and ensure the final newline.
@@ -290,7 +286,136 @@ Show the available next key bindings.
     :config (which-key-mode t))
 #+end_src
 
+** Spellcheck
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package flyspell :delight
+    :ensure-system-package aspell
+    :hook
+    ((org-mode yaml-mode markdown-mode git-commit-mode) . flyspell-mode)
+    (prog-mode . flyspell-prog-mode)
+    (before-save-hook . flyspell-buffer)
+    :custom
+    (flyspell-issue-message-flag nil)
+    (ispell-program-name "aspell")
+    (ispell-extra-args '("--sug-mode=ultra" "--lang=en_US" "--run-together"))
+    :config (use-package flyspell-correct-ivy
+      :bind ("C-M-:" . flyspell-correct-at-point)
+      :config (setq flyspell-correct-interface #'flyspell-correct-ivy)))
+#+end_src
+
+* Autocomplete
+** LSP
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package lsp-mode :delight " LSP"
+    :custom
+    (lsp-file-watch-ignored '(
+               "[/\\\\].git$"
+               "[/\\\\]infrastructure$"
+               "[/\\\\]vendor$"
+               "[/\\\\]cli$"
+               "[/\\\\]internal$"
+               "[/\\\\]e2e$"
+               "[/\\\\]functions[/\\\\]migrations$"
+               "[/\\\\]tests[/\\\\]mocks$"
+               "[/\\\\]\\.gocache$"
+               "[/\\\\]_archives$"
+               ))
+    (lsp-prefer-flymake nil)                     ;; Disable flymake in favor of flycheck.
+    (lsp-eldoc-enable-hover nil)                 ;; Disable eldoc. Redundant with lsp-ui-doc.
+    (lsp-gopls-build-flags ["-tags=wireinject"]) ;; Use wire build tag.
+    :config
+    (lsp-register-custom-settings '(
+                                     ("gopls.completeUnimported" t t)
+                                     ("gopls.staticcheck" t t)
+                                     ))
+    (use-package lsp-ui ;; Overlay UI components for LSP.
+      :preface
+      (defun creack/toggle-lsp-ui-doc ()
+        (interactive)
+        (if lsp-ui-doc-mode
+          (progn
+            (lsp-ui-doc-mode -1)
+            (lsp-ui-doc--hide-frame))
+          (lsp-ui-doc-mode 1)))
+
+      :custom
+      (lsp-ui-doc-position       'top)
+      (lsp-ui-doc-header         nil)
+      (lsp-ui-doc-use-childframe t)
+      (lsp-ui-doc-use-webkit     t)
+      (lsp-ui-doc-enable         t)
+
+      :bind
+      (:map lsp-ui-flycheck-list-mode-map ;; Fix the terminal mode bindings.
+        ("RET"     . lsp-ui-flycheck-list--view)
+        ("TAB"     . lsp-ui-flycheck-list--visit)
+        ("C-c l"   . lsp-ui-flycheck-list--quit)
+        )
+      (:map lsp-ui-mode-map
+        ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
+        ([remap xref-find-references]  . lsp-ui-peek-find-references)
+        ("C-c d"   . creack/toggle-lsp-ui-doc)
+        ("C-c C-d" . creack/toggle-lsp-ui-doc)
+        )
+      )
+    )
+#+end_src
+
+** Company
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package company :defer :delight
+    :bind
+    (:map company-active-map
+     ("C-n" . company-select-next)
+     ("C-p" . company-select-previous)
+     ("<tab>" . company-complete-common-or-cycle)
+     :map company-search-map
+     ("C-p" . company-select-previous)
+     ("C-n" . company-select-next))
+
+    :custom
+    ;(company-echo-delay 0)
+    (company-idle-delay 0)                ;; Show company right away when prefix match.
+    (company-minimum-prefix-length 1)     ;; Show company after the first char typed.
+    (company-tooltip-align-annotations t) ;; Align the completion popu.
+    (company-show-numbers t)              ;; Easy navigation to candidates with M-<n>.
+    (company-dabbrev-downcase nil)        ;; Don't worry about case.
+
+    :hook
+    (after-init . global-company-mode)
+
+    :config
+    ;; Show quick tooltip
+    (use-package company-quickhelp
+      :defines company-quickhelp-delay
+      :bind (:map company-active-map
+              ("M-h" . company-quickhelp-manual-begin))
+      :hook (global-company-mode . company-quickhelp-mode)
+      :custom (company-quickhelp-delay 0.3))
+
+    ;; Lsp completion
+    (use-package company-lsp
+      :custom
+      (company-lsp-cache-candidates t) ;; auto, t(always using a cache), or nil
+      (company-lsp-async t)
+      (company-lsp-enable-snippet t)
+      (company-lsp-enable-recompletion t)))
+#+end_src
+
 * Navigation
+** Projectile
+
+Use Projectile for workspace management.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package projectile
+    :config (projectile-mode +1)
+    :delight '(:eval (concat " <" (projectile-project-name) ">")))
+#+end_src
+
 ** Ivy
 
 =Ivy= is a generic completion framework which uses the minibuffer.
@@ -367,15 +492,46 @@ Install =Ivy= and friends.
 
 #+end_src
 
+** Multiple Cursor
+
+Enable multiple cursors support.
+
+#+begin_src emacs-lisp :tangle yes
+(use-package multiple-cursors
+  :bind
+  ("M-n"         . mc/mark-next-like-this)         ;; Add new cursor with matching region.
+  ("M-p"         . mc/mark-previous-like-this)     ;; Add new cursor with matching region.
+  ("M-]"         . mc/mark-all-like-this)          ;; Add new cursor with matching region.
+  ("C-c SPC"     . set-rectangular-region-anchor)  ;; Rectangular region with many cursors.
+  ("M-SPC"       . set-rectangular-region-anchor)  ;; Rectangular region with many cursors.
+  )
+#+end_src
+
 * Appearance
 ** Theme
 
 Install and enable the theme.
 
+#+begin_src emacs-lisp :tangle no
+  (use-package nord-theme
+    :config (load-theme 'nord t))
+#+end_src
+
 #+begin_src emacs-lisp :tangle yes
-  (use-package solarized-theme
-    :config
-    (load-theme 'solarized-dark t))
+  (use-package monokai-theme
+    :config (load-theme 'monokai t))
+#+end_src
+
+#+begin_src emacs-lisp :tangle no
+  (use-package monokai-pro-theme :defer
+    :init (load-theme 'monokai-pro t))
+#+end_src
+
+In terminal mode, use a full size vertical bar for splits.
+
+#+begin_src emacs-lisp :tangle yes
+  (unless window-system
+    (set-display-table-slot standard-display-table 'vertical-border (make-glyph-code ?│)))
 #+end_src
 
 ** Font
@@ -398,7 +554,23 @@ Install the font on osx.
 Enable the font in emacs.
 
 #+begin_src emacs-lisp :tangle yes
+  ;(set-face-attribute 'default nil :font "Fira Code-12")
   (set-frame-font "Fira Code 12" nil t)
+#+end_src
+
+Use a different font for the mode line.
+
+#+begin_src emacs-lisp :tangle yes
+  (set-face-attribute 'mode-line nil :font "DejaVu Sans Mono-8")
+#+end_src
+
+Enable ligatures in GUI mode.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package fira-code-mode :when window-system
+    :custom
+    (fira-code-mode-disabled-ligatures '(":" "[]" "#{" "#(" "#_" "#_(" "x")) ; List of ligatures to turn off
+    :hook (prog-mode . fira-code-mode))
 #+end_src
 
 ** Mode Line
@@ -407,11 +579,10 @@ Enable the font in emacs.
 
 #+begin_src emacs-lisp :tangle no
   (use-package feebleline
-    :config
-    (feebleline-mode 't))
+    :config (feebleline-mode 't))
 #+end_src
 
-* Coding
+* TODO Coding
 ** Compilation
 
 Don't ask about killing current process before restarting and enable scrolling in the output buffer.
@@ -459,34 +630,32 @@ Create bindings to quickly recompile and kill the running command.
 
 When programming I like my editor to try to help me with keeping parentheses balanced.
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (use-package smartparens
-    :config
-    (add-hook 'prog-mode-hook 'smartparens-mode))
+    :hook (prog-mode . smartparens-mode))
 #+end_src
 
 Highlight parens etc. for improved readability.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package rainbow-delimiters
-    :config
-    (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
+    :hook (prog-mode . rainbow-delimiters-mode))
 #+end_src
 
 Highlight strings which represent colours. I only want this in programming modes, and I don't want colour names to be highlighted (=x-colors=).
 
 #+begin_src emacs-lisp :tangle yes
   (use-package rainbow-mode
-    :config
-    (setq rainbow-x-colors nil)
-    (add-hook 'prog-mode-hook 'rainbow-mode))
+    :custom (rainbow-x-colors nil)
+    :hook (prog-mode . rainbow-mode))
 #+end_src
 
 Expand parentheses for me.
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (add-hook 'prog-mode-hook 'electric-pair-mode)
 #+end_src
+
 ** Git
 
 =git-timemachine= steps through historic versions of git controlled file.
@@ -506,67 +675,20 @@ Expand parentheses for me.
 
 Display line changes in gutter based on git history. Enable it everywhere.
 
-#+begin_src emacs-lisp :tangle true
+#+begin_src emacs-lisp :tangle yes
   (use-package git-gutter-fringe
     :config (global-git-gutter-mode t))
 #+end_src
 
 ** Syntax checking
 
-=Flycheck= is a general syntax highlighting framework which other packages hook into. It's an improvment on the built in =flymake=.
-
-Setup is pretty simple - we just enable globally and turn on a custom eslint function, and also add a custom checker for proselint.
+=Flycheck= is a general linter framework which other packages hook into. It's an improvment on the built in =flymake=.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package flycheck
-    :config
-    (add-hook 'after-init-hook 'global-flycheck-mode)
-    (setq-default flycheck-highlighting-mode 'lines)
-    ;; Define fringe indicator / warning levels
-    (define-fringe-bitmap 'flycheck-fringe-bitmap-ball
-      (vector #b00000000
-              #b00000000
-              #b00000000
-              #b00000000
-              #b00000000
-              #b00000000
-              #b00000000
-              #b00011100
-              #b00111110
-              #b00111110
-              #b00111110
-              #b00011100
-              #b00000000
-              #b00000000
-              #b00000000
-              #b00000000
-              #b00000000))
-    (flycheck-define-error-level 'error
-      :severity 2
-      :overlay-category 'flycheck-error-overlay
-      :fringe-bitmap 'flycheck-fringe-bitmap-ball
-      :fringe-face 'flycheck-fringe-error)
-    (flycheck-define-error-level 'warning
-      :severity 1
-      :overlay-category 'flycheck-warning-overlay
-      :fringe-bitmap 'flycheck-fringe-bitmap-ball
-      :fringe-face 'flycheck-fringe-warning)
-    (flycheck-define-error-level 'info
-      :severity 0
-      :overlay-category 'flycheck-info-overlay
-      :fringe-bitmap 'flycheck-fringe-bitmap-ball
-      :fringe-face 'flycheck-fringe-info))
-    #+end_src
-
-** Autocomplete
-
-=Eglot= is a client to Language Server Protocol servers.
-
-#+begin_src emacs-lisp :tangle no
-  (use-package eglot
-    :commands eglot
-    :config
-    (add-to-list 'eglot-server-programs '(elm-mode . ("elm-language-server" "--stdio"))))
+    :bind
+    ("C-c <up>"   . flycheck-next-error)      ; Ctrl-up   to go to next error.
+    ("C-c <down>" . flycheck-previous-error)) ; Ctrl-down to go to previous error.
 #+end_src
 
 ** Snippets
@@ -585,11 +707,11 @@ Type the shortcut and press =TAB= to complete, or =M-/= to autosuggest a snippet
 
 Install the default snippets.
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (use-package yasnippet-snippets)
 #+end_src
 
-* Majot Modes
+* Major Modes
 ** Config Files
 
 Common config file formats.
@@ -646,30 +768,171 @@ Use =grip= for live preview in browser.
   (use-package docker-compose-mode)
 #+end_src
 
-** TODO Golang
+** Plantuml
 
-Go Setup.
+=PlantUML= is used to create diagrams and graphs.
 
-#+begin_src emacs-lisp :tangle no
-  (use-package go-mode
+Automatically downloads the jar the frist time it is used.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package plantuml-mode :defer
+    :ensure-system-package java
+    :custom
+    (plantuml-jar-path "~/.emacs.d/plantuml.jar")
+    (plantuml-default-exec-mode 'jar)
+    :mode ("\\.puml\\'" "\\.uml\\'")
     :config
-    (add-hook 'before-save-hook 'gofmt-before-save))
+    (unless (file-exists-p plantuml-jar-path)
+      (plantuml-download-jar)))
 #+end_src
 
-* Org
+** Makefile
+
+Hook =*.mk= to Makefile mode.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package makefile-mode :defer :ensure nil
+    :mode "Makefile" "\\.mk\\'"
+    :hook (makefile-mode . display-line-numbers-mode))
+  #+end_src
+
+** Cucumber / Gherkin Feature
+
+Install the major mode to work with feature files.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package feature-mode :defer)
+#+end_src
+
+** Protobuf
+
+Install the major mode for protobuf and set the basic code style.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package protobuf-mode
+    :hook
+    (protobuf-mode . (lambda() (c-add-style "pbstyle" '((c-basic-offset . 2) (indent-tabs-mode . nil)) t)))
+    (protobuf-mode . display-line-numbers-mode)
+    (protobuf-mode . yas-minor-mode))
+#+end_src
+
+** Terraform
+
+Enable Terraform major mode with snippet support.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package terraform-mode :defer
+    :hook (terraform-mode . yas-minor-mode))
+#+end_src
+
+** TODO Golang
+
+Enable =guru= support.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package go-guru)
+#+end_src
+
+Go setup.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package go-mode
+    :ensure-system-package
+    (gopls . "cd /tmp && GO111MODULE=on go get golang.org/x/tools/gopls@latest")
+
+    :preface
+    ;; Compilation helper funcs.
+    (defun go-save-and-compile-program()
+      "Save any unsaved buffers and compile."
+      (interactive)
+      (save-some-buffers t)
+      (compile "sh -c 'go build -o /tmp/a.out && /tmp/a.out'")
+      )
+    (defun go-save-and-go-generate()
+      (interactive)
+      (save-some-buffers t)
+      (compile "go generate")
+      )
+    (defun go-save-and-wire()
+      (interactive)
+      (save-some-buffers t)
+      (compile "wire")
+      )
+    (defun go-save-and-vendor()
+      (interactive)
+      (save-some-buffers t)
+      (compile "sh -c 'go mod tidy && go mod vendor'")
+      )
+    (defun go-save-and-test-program()
+      "Save any unsaved buffers and compile."
+      (interactive)
+      (save-some-buffers t)
+      (compile "go test -v -cover -coverprofile=/tmp/coverprofile -covermode=count")
+      )
+
+    :bind
+    (:map go-mode-map
+      ([mouse-8] . xref-pop-marker-stack)
+      ([mouse-9] . godef-jump)
+      ("TAB"     . company-indent-or-complete-common)
+      ("C-c e"   . lsp-rename)
+      ("C-c f"   . go-save-and-compile-program)
+      ("C-c g"   . go-save-and-go-generate)
+      ("C-c w"   . go-save-and-wire)
+      ("C-c i"   . gofmt)
+      ("C-c t"   . go-save-and-test-program)
+      ("C-c c"   . (lambda() (interactive) (go-coverage "/tmp/coverprofile")))
+      ([remap godef-describe]          . lsp-describe-thing-at-point)
+      ([remap godef-jump]              . lsp-ui-peek-find-implementation)
+      ([remap godef-jump-other-window] . go-guru-definition-other-window)
+      ([remap go-rename]               . lsp-rename)
+      )
+
+    :config
+    (setq
+      gofmt-command           "goimports"            ;; Use goimprots instead of gofmt.
+      gofmt-args              (quote ("-local=bitbucket.org/mlcloud,github.magicleap.com"))
+      gofmt-show-errors       nil                    ;; Don't show errors. Use LSP instead.
+      lsp-clients-go-library-directories (quote ("~/go/pkg/mod" ;; Ignore stdlib, go mod cache and go path from LSP.
+                                                  "~/goroot"
+                                                  "~/go"
+                                                  "~/go/src/google.golang.org"
+                                                  "~/go/src/golang.org"
+                                                  "~/go/src/gopkg.in"
+                                                  ))
+      )
+
+    :hook
+    (go-mode     . lsp)                          ;; Load LSP.
+    (go-mode     . yas-minor-mode)               ;; Enable yas.
+    (before-save . (lambda()             ;; Format the code with LSP before save.
+      (when (eq major-mode 'go-mode)
+        (lsp-format-buffer)
+        (lsp-organize-imports))))         ;; Let LSP handle imports.
+    )
+#+end_src
+
+* TODO Org
 
 I should comment on these more...
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (setq org-startup-indented 'f)
   (setq org-directory "~/org")
   (setq org-special-ctrl-a/e 't)
   (setq org-default-notes-file (concat org-directory "/notes.org"))
-  (define-key global-map "\C-cc" 'org-capture)
-  (setq org-mobile-directory "~/Dropbox/Apps/MobileOrg")
+  ;; (define-key global-map "\C-cc" 'org-capture)
   (setq org-src-fontify-natively 't)
   (setq org-src-tab-acts-natively t)
   (setq org-src-window-setup 'current-window)
+#+end_src
+
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package org
+    :ensure org-plus-contrib)
+  (use-package ox-hugo
+    :after ox)
 #+end_src
 
 Customize appearance.
@@ -691,6 +954,133 @@ Customize appearance.
                             `(org-document-title ((t (,@headline :height 1))))))
 #+end_src
 
+#+begin_src emacs-lisp :tangle no
+ (use-package ob-elvish)
+ (use-package ob-cfengine3)
+ (use-package diminish)
+ (use-package org
+    :ensure org-plus-contrib
+    :bind
+    (:map org-mode-map
+          ("C-c l" . org-store-link)
+          ("A-h" . org-mark-element)
+          ("C-a" . org-beginning-of-line)
+          ("C-e" . org-end-of-line)
+          ("C-k" . org-kill-line))
+    :custom
+      (org-directory "~/org")
+      (org-log-done t)
+      (org-startup-indented t)
+      (org-log-into-drawer t)
+      (org-special-ctrl-a/e t)
+      (org-special-ctrl-k t)
+      (org-use-speed-commands
+       (lambda ()
+         (and (looking-at org-outline-regexp)
+              (looking-back "^\**"))))
+      (org-confirm-babel-evaluate nil)
+      (org-src-fontify-natively t)
+      (org-src-tab-acts-natively t)
+      (org-hide-emphasis-markers t)
+      (org-fontify-done-headline t)
+      (org-tags-column 0)
+      (org-todo-keyword-faces
+       '(("AREA"         . "DarkOrchid1")
+         ("[AREA]"       . "DarkOrchid1")
+         ("PROJECT"      . "DarkOrchid1")
+         ("[PROJECT]"    . "DarkOrchid1")
+         ("INBOX"        . "cyan")
+         ("[INBOX]"      . "cyan")
+         ("PROPOSAL"     . "orange")
+         ("[PROPOSAL]"   . "orange")
+         ("DRAFT"        . "yellow3")
+         ("[DRAFT]"      . "yellow3")
+         ("INPROGRESS"   . "yellow4")
+         ("[INPROGRESS]" . "yellow4")
+         ("MEETING"      . "purple")
+         ("[MEETING]"    . "purple")
+         ("CANCELED"     . "blue")
+         ("[CANCELED]"   . "blue")))
+      (prettify-symbols-unprettify-at-point 'right-edge)
+    :custom-face
+      (variable-pitch ((t (:family "ETBembo" :height 180 :weight thin))))
+      ;;(variable-pitch ((t (:family "Avenir Next" :height 160 :weight light))))
+      (fixed-pitch ((t (:family "Inconsolata Nerd Font"))))
+      (org-indent ((t (:inherit (org-hide fixed-pitch)))))
+      (org-done ((t (:foreground "PaleGreen"
+                                 :strike-through t))))
+    :hook
+      (org-mode . (lambda () (add-hook 'after-save-hook 'org-babel-tangle :append :local)))
+      (org-babel-after-execute . org-redisplay-inline-images)
+      (org-mode . visual-line-mode)
+      (org-mode . variable-pitch-mode)
+      (org-mode . (lambda ()
+                    "Beautify Org Checkbox Symbol"
+                    (push '("[ ]" . "☐" ) prettify-symbols-alist)
+                    (push '("[X]" . "☑" ) prettify-symbols-alist)
+                    (push '("[-]" . "⊡" ) prettify-symbols-alist)
+                    (prettify-symbols-mode)))
+    :config
+      (org-babel-do-load-languages
+       'org-babel-load-languages
+       '((cfengine3 . t)
+         (ruby      . t)
+         (latex     . t)
+         (plantuml  . t)
+         (python    . t)
+         (shell     . t)
+         (elvish    . t)
+         (calc      . t)
+         (dot       . t)
+         (ditaa     . t)
+         (org       . t)))
+      (font-lock-add-keywords
+       'org-mode
+       '(("^ *\\([-]\\) "
+          (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+      (let* ((variable-tuple
+              (cond ((x-list-fonts   "ETBembo")         '(:font   "ETBembo"))
+                    ((x-list-fonts   "Source Sans Pro") '(:font   "Source Sans Pro"))
+                    ((x-list-fonts   "Lucida Grande")   '(:font   "Lucida Grande"))
+                    ((x-list-fonts   "Verdana")         '(:font   "Verdana"))
+                    ((x-family-fonts "Sans Serif")      '(:family "Sans Serif"))
+                    (nil (warn "Cannot find a Sans Serif Font."))))
+             (base-font-color (face-foreground 'default nil 'default))
+             (headline `(:inherit default :weight bold
+                                  :foreground ,base-font-color)))
+
+        (custom-theme-set-faces
+         'user
+         `(org-level-8        ((t (,@headline ,@variable-tuple))))
+         `(org-level-7        ((t (,@headline ,@variable-tuple))))
+         `(org-level-6        ((t (,@headline ,@variable-tuple))))
+         `(org-level-5        ((t (,@headline ,@variable-tuple))))
+         `(org-level-4        ((t (,@headline ,@variable-tuple :height 1.1))))
+         `(org-level-3        ((t (,@headline ,@variable-tuple :height 1.25))))
+         `(org-level-2        ((t (,@headline ,@variable-tuple :height 1.5))))
+         `(org-level-1        ((t (,@headline ,@variable-tuple :height 1.75))))
+         `(org-headline-done  ((t (,@headline ,@variable-tuple :strike-through t))))
+         `(org-document-title ((t (,@headline ,@variable-tuple
+                                              :height 2.0 :underline nil))))))
+      (eval-after-load 'face-remap '(diminish 'buffer-face-mode))
+      (eval-after-load 'simple '(diminish 'visual-line-mode))
+      (defface org-checkbox-done-text
+        '((t (:foreground "#71696A" :strike-through t)))
+        "Face for the text part of a checked org-mode checkbox.")
+
+      (font-lock-add-keywords
+       'org-mode
+       `(("^[ \t]*\\(?:[-+*]\\|[0-9]+[).]\\)[ \t]+\\(\\(?:\\[@\\(?:start:\\)?[0-9]+\\][ \t]*\\)?\\[\\(?:X\\|\\([0-9]+\\)/\\2\\)\\][^\n]*\n\\)"
+          1 'org-checkbox-done-text prepend))
+       'append))
+
+  (use-package org-indent
+    :ensure nil
+    :diminish
+    :custom
+    (org-indent-indentation-per-level 4))
+#+end_src
+
 ** Exporters
 
 *** Markdown
@@ -701,7 +1091,7 @@ Export to Github Flavored Markdown.
   (use-package ox-gfm)
 #+end_src
 
-* Extra
+* TODO Extra
 ** Record key frequency
 
 Keep track of what gets used so we can drop unused features.

@@ -55,6 +55,14 @@ ${HOME}/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh: $
 clean_.oh-my-zsh:
 	${RM} -r ${HOME}/.oh-my-zsh
 
+# Install tpm (tmux plugin manager)
+install: ${HOME}/.tmux/plugins/tpm/tpm
+${HOME}/.tmux/plugins/tpm/tpm:
+	@[ -d $(dir $@) ] && (cd $(dir $@) && git pull) || git clone https://github.com/tmux-plugins/tpm $(dir $@)
+clean: clean_tpm
+clean_tpm:
+	${RM} -r ${HOME}/.tmux/plugins/tpm
+
 # Install nvm so it is around when needed.
 install: ${HOME}/.nvm
 clean:   clean_.nvm

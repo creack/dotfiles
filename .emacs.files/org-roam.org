@@ -1,0 +1,66 @@
+
+I'm testing a new library called [[https://github.com/jethrokuan/org-roam][org-roam]] for non-hierarchical note taking.
+
+Install and load dependencies first.
+
+#+begin_src emacs-lisp
+  (use-package emacsql
+    :defer nil)
+  (use-package emacsql-sqlite
+    :after emacsql
+    :defer nil)
+#+end_src
+
+Then we load =org-roam= itself.
+
+#+begin_src emacs-lisp
+  (use-package org-roam
+    :after (org emacsql emacsql-sqlite)
+    :load-path "lisp/org-roam"
+    :diminish
+    :hook
+    ((org-mode . org-roam-mode)
+     (after-init . org-roam--build-cache-async))
+    :custom
+    (org-roam-directory "~/Dropbox/Personal/org")
+    :bind
+    ("C-c n l" . org-roam)
+    ("C-c n t" . org-roam-today)
+    ("C-c n f" . org-roam-find-file)
+    ("C-c n i" . org-roam-insert)
+    ("C-c n g" . org-roam-show-graph))
+#+end_src
+
+=org-roam= [[https://org-roam.readthedocs.io/en/develop/ecosystem/#deft][integrates nicely with =deft=]]:
+
+#+begin_src emacs-lisp
+  (use-package deft
+    :after org
+    :bind
+    ("C-c n d" . deft)
+    :custom
+    (deft-directory org-directory)
+    (deft-recursive t)
+    (deft-use-filename-as-title nil)
+    (deft-use-filter-string-for-filename t)
+    (deft-file-naming-rules '((noslash . "-")
+                              (nospace . "-")
+                              (case-fn . downcase)))
+    (deft-org-mode-title-prefix t)
+    (deft-extensions '("org" "txt" "text" "md" "markdown" "org.gpg"))
+    (deft-default-extension "org"))
+#+end_src
+
+Using =org-download= to make it easier to insert images into my org notes.
+
+#+begin_src emacs-lisp
+  (use-package org-download
+    :after org
+    :defer nil
+    :custom
+    (org-download-method 'directory)
+    (org-download-image-dir "images")
+    (org-image-actual-width '(300))
+    :config
+    (require 'org-download))
+#+end_src
