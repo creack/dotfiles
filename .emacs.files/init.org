@@ -88,7 +88,7 @@ Disable GUI window decorations.
 
 #+begin_src emacs-lisp :tangle yes
   (tool-bar-mode   -1)
-  (scroll-bar-mode -1)
+  ;(scroll-bar-mode -1)
   (unless window-system (menu-bar-mode -1))
 #+end_src
 
@@ -676,8 +676,8 @@ Expand parentheses for me.
 Display line changes in gutter based on git history. Enable it everywhere.
 
 #+begin_src emacs-lisp :tangle yes
-  (use-package git-gutter-fringe
-    :config (global-git-gutter-mode t))
+  ;(use-package git-gutter-fringe
+  ;  :config (global-git-gutter-mode t))
 #+end_src
 
 ** Syntax checking
@@ -929,8 +929,8 @@ I should comment on these more...
 
 
 #+begin_src emacs-lisp :tangle yes
-  (use-package org
-    :ensure org-plus-contrib)
+  (use-package org)
+   ; :ensure org-plus-contrib)
   (use-package ox-hugo
     :after ox)
 #+end_src

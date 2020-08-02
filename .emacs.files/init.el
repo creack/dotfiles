@@ -28,7 +28,7 @@
       initial-scratch-message nil)
 
 (tool-bar-mode   -1)
-(scroll-bar-mode -1)
+;(scroll-bar-mode -1)
 (unless window-system (menu-bar-mode -1))
 
 (setq ring-bell-function 'ignore)
@@ -320,8 +320,8 @@
 (use-package magit
   :bind ("M-g s" . magit-status))
 
-(use-package git-gutter-fringe
-  :config (global-git-gutter-mode t))
+;(use-package git-gutter-fringe
+;  :config (global-git-gutter-mode t))
 
 (use-package flycheck
   :bind
@@ -475,8 +475,8 @@
 (setq org-src-tab-acts-natively t)
 (setq org-src-window-setup 'current-window)
 
-(use-package org
-  :ensure org-plus-contrib)
+(use-package org)
+ ; :ensure org-plus-contrib)
 (use-package ox-hugo
   :after ox)
 
