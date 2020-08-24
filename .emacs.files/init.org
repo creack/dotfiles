@@ -630,7 +630,7 @@ Create bindings to quickly recompile and kill the running command.
 
 When programming I like my editor to try to help me with keeping parentheses balanced.
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
   (use-package smartparens
     :hook (prog-mode . smartparens-mode))
 #+end_src
@@ -652,7 +652,7 @@ Highlight strings which represent colours. I only want this in programming modes
 
 Expand parentheses for me.
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
   (add-hook 'prog-mode-hook 'electric-pair-mode)
 #+end_src
 
