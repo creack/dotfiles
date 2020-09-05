@@ -144,7 +144,10 @@ Create a region when creating a mark.
 Enable the mouse support in the terminal.
 
 #+begin_src emacs-lisp :tangle yes
-  (xterm-mouse-mode t)
+  (unless window-system
+    (xterm-mouse-mode t)
+    (global-set-key (kbd "<mouse-4>") (lambda() (interactive) (scroll-down 5)))
+    (global-set-key (kbd "<mouse-5>") (lambda() (interactive) (scroll-up 5))))
 #+end_src
 
 Keep track of the window layouts.
@@ -321,6 +324,7 @@ Show the available next key bindings.
                "[/\\\\]tests[/\\\\]mocks$"
                "[/\\\\]\\.gocache$"
                "[/\\\\]_archives$"
+               "[/\\\\]node_modules$"
                ))
     (lsp-prefer-flymake nil)                     ;; Disable flymake in favor of flycheck.
     (lsp-eldoc-enable-hover nil)                 ;; Disable eldoc. Redundant with lsp-ui-doc.
