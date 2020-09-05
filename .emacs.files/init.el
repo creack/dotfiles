@@ -52,7 +52,10 @@
 
 (transient-mark-mode t)
 
-(xterm-mouse-mode t)
+(unless window-system
+  (xterm-mouse-mode t)
+  (global-set-key (kbd "<mouse-4>") (lambda() (interactive) (scroll-down 5)))
+  (global-set-key (kbd "<mouse-5>") (lambda() (interactive) (scroll-up 5))))
 
 (winner-mode t)
 
@@ -137,6 +140,7 @@
              "[/\\\\]tests[/\\\\]mocks$"
              "[/\\\\]\\.gocache$"
              "[/\\\\]_archives$"
+             "[/\\\\]node_modules$"
              ))
   (lsp-prefer-flymake nil)                     ;; Disable flymake in favor of flycheck.
   (lsp-eldoc-enable-hover nil)                 ;; Disable eldoc. Redundant with lsp-ui-doc.
@@ -302,17 +306,12 @@
 (bind-key "C-c r" '(lambda() (interactive) (save-some-buffers t) (recompile)))
 (bind-key "C-c k" 'kill-compilation)
 
-(use-package smartparens
-  :hook (prog-mode . smartparens-mode))
-
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
 
 (use-package rainbow-mode
   :custom (rainbow-x-colors nil)
   :hook (prog-mode . rainbow-mode))
-
-(add-hook 'prog-mode-hook 'electric-pair-mode)
 
 (use-package git-timemachine
   :bind ("M-g t" . git-timemachine-toggle))
