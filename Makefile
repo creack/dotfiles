@@ -10,19 +10,21 @@ else
 OS=darwin
 endif
 
-LINKS_SRCS    = .editorconfig     \
-                .emacs.files      \
-                .emacs            \
-                .config           \
-                .gitconfig        \
-                .gitconfig.perso  \
-                .tmux.conf        \
-                .zshrc            \
-                .zshenv           \
-                .Xresources       \
-                .aspell.en.pws    \
-                .aspell.en.prepl  \
-                .ssh/config       \
+LINKS_SRCS    = .editorconfig       \
+                .emacs.files        \
+                .emacs              \
+                .config             \
+                .gitconfig          \
+                .gitconfig.creack   \
+                .gitconfig.zk       \
+                .gitconfig.immertec \
+                .tmux.conf          \
+                .zshrc              \
+                .zshenv             \
+                .Xresources         \
+                .aspell.en.pws      \
+                .aspell.en.prepl    \
+                .ssh/config         \
                 .fluxbox/keys
 LINKS_TARGETS = ${LINKS_SRCS:%=${HOME}/%}
 LINKS_CLEAN   = ${LINKS_SRCS:%=clean_link_%}
@@ -36,22 +38,31 @@ PURGE_LIST = .cache .emacs.d .yarn .npm .node-gyp .elinks .apex .terraform.d .pa
 # Default to install target.
 all: install
 
+# Default the git profile to the .creack one.
+install: ${HOME}/.gitconfig.local
+${HOME}/.gitconfig.local: ${PWD}/.gitconfig.creack
+	ln -f -s $< $@
+clean: clean_link_.gitconfig.local
+
 # Install oh-my-zsh if not installed.
 # Use anonymous@ to avoid matching any existing insteadOf url config.
 # TODO: Migrate to antigen or alike for cleaner zsh plugin management.
 install: ${HOME}/.oh-my-zsh/oh-my-zsh.sh
 install: ${HOME}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-install: ${HOME}/.oh-my-zsh/custom/plugins/zsh-completions/zsh-completions.zsh
-install: ${HOME}/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+install: ${HOME}/.oh-my-zsh/custom/plugins/zsh-completions/zsh-completions.plugin.zsh
+install: ${HOME}/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
 clean:   clean_.oh-my-zsh
 ${HOME}/.oh-my-zsh/oh-my-zsh.sh:
 	@[ -d $(dir $@) ] && (cd $(dir $@) && git pull) || git clone "https://anonymouse@github.com/robbyrussell/oh-my-zsh" $(dir $@)
 ${HOME}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh: ${HOME}/.oh-my-zsh/oh-my-zsh.sh
 	@[ -d $(dir $@) ] && (cd $(dir $@) && git pull) || git clone "https://github.com/zsh-users/zsh-syntax-highlighting.git" $(dir $@)
-${HOME}/.oh-my-zsh/custom/plugins/zsh-completions/zsh-completions.zsh: ${HOME}/.oh-my-zsh/oh-my-zsh.sh
+	@touch $@
+${HOME}/.oh-my-zsh/custom/plugins/zsh-completions/zsh-completions.plugin.zsh: ${HOME}/.oh-my-zsh/oh-my-zsh.sh
 	@[ -d $(dir $@) ] && (cd $(dir $@) && git pull) || git clone https://github.com/zsh-users/zsh-completions $(dir $@)
-${HOME}/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh: ${HOME}/.oh-my-zsh/oh-my-zsh.sh
+	@touch $@
+${HOME}/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh: ${HOME}/.oh-my-zsh/oh-my-zsh.sh
 	@[ -d $(dir $@) ] && (cd $(dir $@) && git pull) || git clone https://github.com/zsh-users/zsh-autosuggestions $(dir $@)
+	@touch $@
 clean_.oh-my-zsh:
 	${RM} -r ${HOME}/.oh-my-zsh
 

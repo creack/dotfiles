@@ -47,10 +47,12 @@ plugins=(
     zsh-autosuggestions
     zsh-completions
     zsh-syntax-highlighting
+    nvm
 )
 
+NVM_LAZY=true
 
-# Set tmux autostart.
+# Set tmux autostart unless we are using vscode or emacs tramp.
 if [ -n "$VSCODE_IPC_HOOK_CLI" ] || [ "$TERM" = "dumb" ] || [ -z "$TERM" ]; then
   ZSH_TMUX_AUTOSTART=false
 else
@@ -71,21 +73,6 @@ unsetopt share_history
 # Tell git to use the current tty for gpg passphrase prompt (needs to be at the end so the tty is within tmux, not out).
 export GPG_TTY=$(tty)
 
-# Init nvm in a function so it doesn't run each time (very slow).
-function loadnvm() {
-    export NVM_DIR="$HOME/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-    [ -f .nvmrc ] && nvm use || nvm use --lts
-}
-
-[ -f "$HOME/.zshrc_priv_config" ] && source "$HOME/.zshrc_priv_config"
-
-#VSCODE_IPC_HOOK_CLI=1
-if [ -n "$VSCODE_IPC_HOOK_CLI" ]; then
-  loadnvm
-fi
-
 function rl() {
   local ssh_auth_sock=$(ls -t $(find /tmp/ssh-* -group $USER -name 'agent.*' 2> /dev/null) | head -1)
   if [ -S "${ssh_auth_sock}" ]; then
@@ -101,6 +88,41 @@ if [ -z "$SSH_AUTH_SOCK" ] || [ ! -S "$SSH_AUTH_SOCK" ]; then
   rl
 fi
 
+# Update the ~/.gitconfig.local link to target a new profile.
+function setgit() {
+  local new_profile=$1
+  local profile_path="${HOME}/.gitconfig.${new_profile}"
+  local fail=0
+
+  # Make sure the target exists.
+  if [ ! -f "${profile_path}" ]; then
+    echo "Git profile '${new_profile}' not found." >&2
+    fail=1
+  fi
+
+  # Make sure the existing profile is a link and not a hard-set file.
+  if [ ! -L "${HOME}/.gitconfig.local" ]; then
+    echo "Error: The ~/.gitconfig.local  file is not a link." >&2
+    fail=1
+  fi
+
+  if [ "${fail}" = 1 ]; then
+    return 1;
+  fi
+
+  ln -f -s ${profile_path} ${HOME}/.gitconfig.local
+}
+
+# Small helper used in the prompt to show the current git profile.
+function getgit() {
+  if [ -f "${HOME}/.gitconfig.local" ]; then
+    ls -l ${HOME}/.gitconfig.local | sed 's/.*\.gitconfig\.//'
+  fi
+}
+
+# Show the git profile in the prompt.
+export PROMPT='%{$fg_bold[blue]%}($(getgit))%{$reset_color%}'${PROMPT}
+
 # Putty bindings for meta left/right
 bindkey '\e\eOD' backward-word
 bindkey '\e\eOC' forward-word
@@ -111,5 +133,11 @@ bindkey "^[[1;3C" forward-word
 
 # Set M-l as lowercase word.
 bindkey "^[l" down-case-word
+
+# Load more autocompletions.
+autoload -U +X bashcompinit && bashcompinit
+complete -o nospace -C ${HOME}/go/bin/terraform terraform
+complete -o nospace -C ${HOME}/go/bin/vault vault
+
 
 [ -n "${ZPROF}" ] && zprof

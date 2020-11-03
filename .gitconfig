@@ -9,7 +9,6 @@
   lg2     = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(bold white)— %an%C(reset)' --abbrev-commit
   lg3     = !"git log --show-signature"
   lg      = !"git lg1"
-  cz      = commit --author 'hbd <zak@urfav.dev>' --no-gpg-sign -p -m
 
   change  = codereview change
   gofmt   = codereview gofmt
@@ -28,9 +27,13 @@
 [merge]
   tool = ediff
 
-[include]
-  path = ~/.gitconfig.perso
+# Always use ssh instead of http for go get.
 [url "git@github.com:"]
 	insteadOf = https://github.com/
 [url "git@bitbucket.org:"]
 	insteadOf = https://bitbucket.org/
+[url "git@gitlab.com:"]
+	insteadOf = https://gitlab.com/
+
+[include]
+  path = ~/.gitconfig.local

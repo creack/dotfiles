@@ -1,0 +1,17 @@
+# -*- mode: conf -*-
+
+[commit]
+  gpgsign = false
+
+[alias]
+  commit = commit -S
+  ci     = commit
+  cz     = commit -p -m
+  t      = tag
+
+[user]
+  email = zak@urfav.dev
+  name  = Zak
+
+[github]
+  user = hbd
