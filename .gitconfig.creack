@@ -4,12 +4,12 @@
   gpgsign = true
 
 [alias]
-  ci = commit -s -S
-  t  = tag -s
+  commit = commit -s -S
+  ci     = commit
+  t      = tag -s
 
 [user]
-#  email      = git+guillaume@charmes.net
-  email      = guillaume@coder.com
+  email      = git+guillaume@charmes.net
   name       = Guillaume J. Charmes
   signingKey = A3E09CB1E79947FE
 
