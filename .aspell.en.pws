@@ -1,4 +1,4 @@
-personal_ws-1.1 en 39 
+personal_ws-1.1 en 46 
 Analytics
 CLI
 CORS
@@ -9,10 +9,14 @@ GOFLAGS
 TLS
 TODO
 api
+auth
 aws
+balancer
 cmd
+const
 el
 eldoc
+eslint
 funcs
 gRPC
 geohash
@@ -23,6 +27,7 @@ grpc
 http
 init
 json
+linter
 lsp
 nolint
 params
@@ -32,7 +37,9 @@ sqs
 stdin
 swiper
 symlinks
+terraform
 ui
+unassociated
 uncomment
 unlinking
 unmarshal
