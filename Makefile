@@ -33,7 +33,8 @@ LINKS_CLEAN   = ${LINKS_SRCS:%=clean_link_%}
 PURGE_LIST = .cache .emacs.d .yarn .npm .node-gyp .elinks .apex .terraform.d .parallel \
              .psql_history .python_history .wget-hsts .node_repl_history \
              .yarnrc .zcompdump* .sudo_as_admin_successful .xsession-errors .lesshst \
-             .config/yarn .texlive* .java .refresh .ssh_known_hosts
+             .config/yarn .texlive* .java .refresh .ssh_known_hosts .boto \
+             .sudo_as_admin_successful .pm2 .pm2-dev .qt .nx .ipython .clang-tools .bash_logout .viminfo
 
 # Default to install target.
 all: install
@@ -132,10 +133,8 @@ clean_link_%:
 	@[ -L ${HOME}/$* ] && ${RM} ${HOME}/$* || true
 
 # Make sure we have a ~/.ssh dir for linkink ~/.ssh/config
-# If ~/.ssh/.ssh/config.private does not exist, copy the template.
 ${HOME}/.ssh/config: ${PWD}/.ssh/config
 	@mkdir -p $(dir $@)
-	@[ -f ${HOME}/.ssh/config.private ] || cp ${PWD}/.ssh/config.private ${HOME}/.ssh/config.private
 	ln -f -s $< $@
 clean_link_.ssh/config:
 	@[ -L ${HOME}/.ssh/config ] && ${RM} ${HOME}/.ssh/config || true
