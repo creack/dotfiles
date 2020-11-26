@@ -33,7 +33,7 @@ LINKS_CLEAN   = ${LINKS_SRCS:%=clean_link_%}
 PURGE_LIST = .cache .emacs.d .yarn .npm .node-gyp .elinks .apex .terraform.d .parallel \
              .psql_history .python_history .wget-hsts .node_repl_history \
              .yarnrc .zcompdump* .sudo_as_admin_successful .xsession-errors .lesshst \
-             .config/yarn .texlive* .java .refresh
+             .config/yarn .texlive* .java .refresh .ssh_known_hosts
 
 # Default to install target.
 all: install
