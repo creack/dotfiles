@@ -76,7 +76,7 @@ export GPG_TTY=$(tty)
 function rl() {
   local ssh_auth_sock=$(ls -t $(find /tmp/ssh-* -group $USER -name 'agent.*' 2> /dev/null) | head -1)
   if [ -S "${ssh_auth_sock}" ]; then
-    echo2 "Refreshed ssh agent socket."
+    echo "Refreshed ssh agent socket." >&2
     export SSH_AUTH_SOCK=${ssh_auth_sock}
     # If within tmux, update the session env as well.
     [ -n "$TMUX" ] && tmux set-environment SSH_AUTH_SOCK ${SSH_AUTH_SOCK}
@@ -120,6 +120,17 @@ function getgit() {
   fi
 }
 
+# Small helper to cleanup aws env.
+function unsetaws() {
+  unset AWS_ACCESS_KEY_ID
+  unset AWS_SECRET_ACCESS_KEY
+  unset AWS_SESSION_TOKEN
+  unset AWS_REGION
+  unset AWS_DEFAULT_REGION
+  unset AWS_PROFILE
+  unset AWS_DEFAULT_PROFILE
+}
+
 # Show the git profile in the prompt.
 export PROMPT='%{$fg_bold[blue]%}($(getgit))%{$reset_color%}'${PROMPT}
 
@@ -139,5 +150,7 @@ autoload -U +X bashcompinit && bashcompinit
 complete -o nospace -C ${HOME}/go/bin/terraform terraform
 complete -o nospace -C ${HOME}/go/bin/vault vault
 
+# Load the private config if set.
+[ -f ~/.zshrc_priv_config ] && source ~/.zshrc_priv_config
 
 [ -n "${ZPROF}" ] && zprof
