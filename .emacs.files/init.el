@@ -102,6 +102,7 @@
 (setq vc-follow-symlinks t)
 
 (use-package editorconfig :delight
+  :init (setq editorconfig--enable-20210221-testing t) ; Enable the testing branch to work around a bug causing too many reloads. Need to be in :init as it must be set before the package loads.
   :config (editorconfig-mode t))
 
 (setq undo-tree-auto-save-history t
@@ -135,21 +136,21 @@
              "[/\\\\]vendor$"
              "[/\\\\]cli$"
              "[/\\\\]internal$"
-             "[/\\\\]e2e$"
              "[/\\\\]functions[/\\\\]migrations$"
              "[/\\\\]tests[/\\\\]mocks$"
+             "[/\\\\]\\.cache$"
              "[/\\\\]\\.gocache$"
              "[/\\\\]_archives$"
              "[/\\\\]node_modules$"
              ))
-  (lsp-prefer-flymake nil)                     ;; Disable flymake in favor of flycheck.
-  (lsp-eldoc-enable-hover nil)                 ;; Disable eldoc. Redundant with lsp-ui-doc.
-  (lsp-gopls-build-flags ["-tags=wireinject"]) ;; Use wire build tag.
-  :config
-  (lsp-register-custom-settings '(
-                                   ("gopls.completeUnimported" t t)
-                                   ("gopls.staticcheck" t t)
-                                   ))
+  (lsp-prefer-flymake nil)   ;; Disable flymake in favor of flycheck.
+  (lsp-eldoc-enable-hover t) ;; Disable eldoc. Redundant with lsp-ui-doc.
+  ;(lsp-gopls-build-flags ["-tags=wireinject"]) ;; Use wire build tag.
+  ;:config
+  ;(lsp-register-custom-settings '(
+  ;                                 ("gopls.completeUnimported" t t)
+  ;                                 ("gopls.staticcheck" t t)
+  ;                                 ))
   (use-package lsp-ui ;; Overlay UI components for LSP.
     :preface
     (defun creack/toggle-lsp-ui-doc ()
@@ -162,9 +163,8 @@
 
     :custom
     (lsp-ui-doc-position       'top)
-    (lsp-ui-doc-header         nil)
+    (lsp-ui-doc-header         t)
     (lsp-ui-doc-use-childframe t)
-    (lsp-ui-doc-use-webkit     t)
     (lsp-ui-doc-enable         t)
 
     :bind
@@ -306,7 +306,7 @@
 (bind-key "C-c r" '(lambda() (interactive) (save-some-buffers t) (recompile)))
 (bind-key "C-c k" 'kill-compilation)
 
-(use-package rainbow-delimiters
+(use-package rainbow-delimiters :delight
   :hook (prog-mode . rainbow-delimiters-mode))
 
 (use-package rainbow-mode
@@ -323,9 +323,22 @@
 ;  :config (global-git-gutter-mode t))
 
 (use-package flycheck
+  :ensure-system-package
+  (shellcheck . "echo 'Missing shellcheck binary.' >&2; exit 1")
+  :custom
+  (flycheck-check-syntax-automatically '(save mode-enabled))
   :bind
-  ("C-c <up>"   . flycheck-next-error)      ; Ctrl-up   to go to next error.
-  ("C-c <down>" . flycheck-previous-error)) ; Ctrl-down to go to previous error.
+  ("C-c <up>"   . flycheck-next-error)     ; Ctrl-c up   to go to next error.
+  ("C-c <down>" . flycheck-previous-error) ; Ctrl-c down to go to previous error.
+  :init
+  ;; From https://www.flycheck.org/en/28/_downloads/flycheck.html (search for "shellcheck").
+  (flycheck-define-checker sh-shellcheck ; Create a custom checker for shellcheck.
+    "A shell script syntax and style checker using Shellcheck."
+    :command ("shellcheck" "-f" "checkstyle" "-s" (eval (symbol-name sh-shell)) source)
+    :modes sh-mode
+    :error-parser flycheck-parse-checkstyle)
+  :hook sh-mode ; Enable flycheck in sh-mode.
+  )
 
 (use-package yasnippet
   :delight yas-minor-mode
@@ -337,6 +350,7 @@
 
 (use-package ini-mode :defer)
 (use-package ssh-config-mode :defer)
+(use-package nginx-mode :defer)
 (use-package conf-mode :defer
   :mode (("\\.conf\\'"    . conf-space-mode)
          ("\\.setup.*\\'" . conf-space-mode)))
@@ -386,7 +400,10 @@
   (protobuf-mode . yas-minor-mode))
 
 (use-package terraform-mode :defer
-  :hook (terraform-mode . yas-minor-mode))
+  :hook
+  (terraform-mode . yas-minor-mode)
+  (terraform-mode . terraform-format-on-save-mode)
+  )
 
 (use-package go-guru)
 
@@ -421,7 +438,7 @@
     "Save any unsaved buffers and compile."
     (interactive)
     (save-some-buffers t)
-    (compile "go test -v -cover -coverprofile=/tmp/coverprofile -covermode=count")
+    (compile "go test -v -failfast -cover -coverprofile=/tmp/coverprofile -covermode=count")
     )
 
   :bind
@@ -482,7 +499,6 @@
 (use-package ox-gfm)
 
 (use-package keyfreq
-  :commands keyfreq
   :config
   (keyfreq-mode t)
   (keyfreq-autosave-mode t))

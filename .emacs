@@ -2,6 +2,14 @@
 (package-initialize)
 (org-babel-load-file "~/.emacs.files/init.org")
 
+;; TODO: Try this.
+(use-package flycheck-tip
+  :commands 'flycheck-tip-cycle
+  :after flycheck
+  :bind (:map flycheck-mode-map
+          ("C-c C-n" . flycheck-tip-cycle))
+  )
+
 (with-eval-after-load 'org
   (defvar-local rasmus/org-at-src-begin -1
     "Variable that holds whether last position was a ")
