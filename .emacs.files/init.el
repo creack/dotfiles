@@ -185,12 +185,13 @@
 (use-package company :defer :delight
   :bind
   (:map company-active-map
-   ("C-n" . company-select-next)
-   ("C-p" . company-select-previous)
-   ("<tab>" . company-complete-common-or-cycle)
-   :map company-search-map
-   ("C-p" . company-select-previous)
-   ("C-n" . company-select-next))
+        ("<tab>" . company-complete-common-or-cycle)
+        ("TAB" . company-complete-common-or-cycle)
+        ("C-n" . company-select-next)
+        ("C-p" . company-select-previous))
+  (:map company-search-map
+        ("C-p" . company-select-previous)
+        ("C-n" . company-select-next))
 
   :custom
   ;(company-echo-delay 0)
@@ -204,7 +205,7 @@
   (after-init . global-company-mode)
 
   :config
-  ;; Show quick tooltip
+  ;; Show quick tooltip.
   (use-package company-quickhelp
     :defines company-quickhelp-delay
     :bind (:map company-active-map
@@ -212,7 +213,7 @@
     :hook (global-company-mode . company-quickhelp-mode)
     :custom (company-quickhelp-delay 0.3))
 
-  ;; Lsp completion
+  ;; Lsp completion.
   (use-package company-lsp
     :custom
     (company-lsp-cache-candidates t) ;; auto, t(always using a cache), or nil
@@ -327,9 +328,10 @@
   (shellcheck . "echo 'Missing shellcheck binary.' >&2; exit 1")
   :custom
   (flycheck-check-syntax-automatically '(save mode-enabled))
-  :bind
-  ("C-c <up>"   . flycheck-next-error)     ; Ctrl-c up   to go to next error.
-  ("C-c <down>" . flycheck-previous-error) ; Ctrl-c down to go to previous error.
+  ;; NOTE: Disabled in favor of flycheck-tip.
+  ;; :bind
+  ;; ("C-c <up>"   . flycheck-next-error)     ; Ctrl-c up   to go to next error.
+  ;; ("C-c <down>" . flycheck-previous-error) ; Ctrl-c down to go to previous error.
   :init
   ;; From https://www.flycheck.org/en/28/_downloads/flycheck.html (search for "shellcheck").
   (flycheck-define-checker sh-shellcheck ; Create a custom checker for shellcheck.
@@ -337,7 +339,26 @@
     :command ("shellcheck" "-f" "checkstyle" "-s" (eval (symbol-name sh-shell)) source)
     :modes sh-mode
     :error-parser flycheck-parse-checkstyle)
-  :hook sh-mode ; Enable flycheck in sh-mode.
+  :hook
+  (sh-mode . flycheck-mode)                                   ; Enable flycheck in sh-mode.
+  (flycheck-mode . (lambda()(flycheck-set-indication-mode `left-margin))) ; Enable left margin indicators.
+  )
+
+(use-package flycheck-tip
+  :after flycheck
+  :bind (:map flycheck-mode-map
+              ("C-c <up>"   . flycheck-tip-cycle)         ; Ctrl-c up   to go to next error.
+              ("C-c <down>" . flycheck-tip-cycle-reverse) ; Ctrl-c down to go to previous error.
+              ("C-c C-n"    . flycheck-tip-cycle)
+              ("C-c C-p"    . flycheck-tip-cycle-reverse)
+              )
+  )
+
+(use-package flycheck-projectile
+  :after flycheck
+  :bind (:map flycheck-mode-map
+              ("C-c l" . flycheck-projectile-list-errors)
+              )
   )
 
 (use-package yasnippet
@@ -408,22 +429,28 @@
 (use-package tide
   :ensure-system-package
   (tsserver . "source ~/.nvm/nvm.sh && nvm use --lts")
-  :after (web-mode company flycheck prettier)
+  :after (web-mode js2-mode typescript-mode company flycheck prettier)
   :preface
   (defun setup-tide-mode ()
+    (interactive)
     (tide-setup)
     (tide-hl-identifier-mode +1) ; Needs to run after the setup. Can't be a hook.
+    (flycheck-add-next-checker 'javascript-tide 'javascript-eslint 'append)
+    (flycheck-add-next-checker 'typescript-tide 'javascript-eslint 'append)
+    (flycheck-add-next-checker 'tsx-tide 'javascript-eslint 'append)
+    (flycheck-add-next-checker 'jsx-tide 'javascript-eslint 'append)
+    (flycheck-mode +1)
+    (eldoc-mode +1)
+
+    (define-key tide-mode-map [C-down-mouse-1] 'mouse-drag-region)
+    (define-key tide-mode-map [C-mouse-1] 'tide-jump-to-definition)
+    (define-key tide-mode-map (kbd "<backtab>") 'company-complete-common-or-cycle)
+    (define-key tide-mode-map (kbd "C-c e") 'tide-rename-symbol)
+
+
     )
   :custom
   (tide-completion-detailed t)
-  :config
-  (flycheck-add-next-checker 'javascript-tide 'javascript-eslint 'append)
-  (flycheck-add-next-checker 'typescript-tide 'javascript-eslint 'append)
-  (flycheck-add-next-checker 'tsx-tide 'javascript-eslint 'append)
-  (flycheck-add-next-checker 'jsx-tide 'javascript-eslint 'append)
-  :hook
-  (tide-mode . flycheck-mode)
-  (tide-mode . eldoc-mode)
   )
 
 (use-package js2-mode
@@ -445,7 +472,7 @@
 
 (use-package web-mode
   :after flycheck
-  :mode "\\.[tj]sx?$"
+  :mode "\\.js$" "\\.jsx$" "\\.tsx$"
   :config
   (flycheck-add-mode 'javascript-eslint 'web-mode)
   :hook
