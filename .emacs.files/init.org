@@ -857,60 +857,60 @@ Enable Terraform major mode with snippet support.
 
 TODO: Document this.
 
-#+begin_src emacs-lisp :tangle
-(use-package tide
-  :ensure-system-package
-  (tsserver . "source ~/.nvm/nvm.sh && nvm use --lts")
-  :after (web-mode company flycheck prettier)
-  :preface
-  (defun setup-tide-mode ()
-    (tide-setup)
-    (tide-hl-identifier-mode +1) ; Needs to run after the setup. Can't be a hook.
+#+begin_src emacs-lisp :tangle yes
+  (use-package tide
+    :ensure-system-package
+    (tsserver . "source ~/.nvm/nvm.sh && nvm use --lts")
+    :after (web-mode company flycheck prettier)
+    :preface
+    (defun setup-tide-mode ()
+      (tide-setup)
+      (tide-hl-identifier-mode +1) ; Needs to run after the setup. Can't be a hook.
+      )
+    :custom
+    (tide-completion-detailed t)
+    :config
+    (flycheck-add-next-checker 'javascript-tide 'javascript-eslint 'append)
+    (flycheck-add-next-checker 'typescript-tide 'javascript-eslint 'append)
+    (flycheck-add-next-checker 'tsx-tide 'javascript-eslint 'append)
+    (flycheck-add-next-checker 'jsx-tide 'javascript-eslint 'append)
+    :hook
+    (tide-mode . flycheck-mode)
+    (tide-mode . eldoc-mode)
     )
-  :custom
-  (tide-completion-detailed t)
-  :config
-  (flycheck-add-next-checker 'javascriptt-tide 'javascript-eslint 'append)
-  (flycheck-add-next-checker 'typescript-tide 'javascript-eslint 'append)
-  (flycheck-add-next-checker 'tsx-tide 'javascript-eslint 'append)
-  (flycheck-add-next-checker 'jsx-tide 'javascript-eslint 'append)
-  :hook
-  (tide-mode . flycheck-mode)
-  (tide-mode . eldoc-mode)
-  )
 
-(use-package js2-mode
-  :mode "\\.js$"
-  :custom
-  (js2-global-externs (list "window" "module" "require" "buster" "sinon" "assert" "refute" "setTimeout" "clearTimeout" "setInterval" "clearInterval" "location" "__dirname" "console" "JSON" "jQuery" "$"))
-  :hook
-  (js2-mode . setup-tide-mode)
-  )
+  (use-package js2-mode
+    :mode "\\.js$"
+    :custom
+    (js2-global-externs (list "window" "module" "require" "buster" "sinon" "assert" "refute" "setTimeout" "clearTimeout" "setInterval" "clearInterval" "location" "__dirname" "console" "JSON" "jQuery" "$"))
+    :hook
+    (js2-mode . setup-tide-mode)
+    )
 
-(use-package typescript-mode
-  :ensure-system-package
-  (tsc . "source ~/.nvm/nvm.sh && nvm use --lts")
-  :mode "\\.ts$"
-  :hook
-  (typescript-mode . setup-tide-mode)
-  )
+  (use-package typescript-mode
+    :ensure-system-package
+    (tsc . "source ~/.nvm/nvm.sh && nvm use --lts")
+    :mode "\\.ts$"
+    :hook
+    (typescript-mode . setup-tide-mode)
+    )
 
 
-(use-package web-mode
-  :after flycheck
-  :mode "\\.[tj]sx?$"
-  :config
-  (flycheck-add-mode 'javascript-eslint 'web-mode)
-  :hook
-  (web-mode . setup-tide-mode)
-  )
+  (use-package web-mode
+    :after flycheck
+    :mode "\\.[tj]sx?$"
+    :config
+    (flycheck-add-mode 'javascript-eslint 'web-mode)
+    :hook
+    (web-mode . setup-tide-mode)
+    )
 
-(use-package prettier :delight
-  :ensure-system-package
-  (prettier . "source ~/.nvm/nvm.sh && nvm use --lts")
-  :config
-  (global-prettier-mode t)
-  )
+  (use-package prettier :delight
+    :ensure-system-package
+    (prettier . "source ~/.nvm/nvm.sh && nvm use --lts")
+    :config
+    (global-prettier-mode t)
+    )
 #+end_src
 
 ** TODO Golang
