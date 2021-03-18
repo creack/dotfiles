@@ -51,6 +51,7 @@ plugins=(
 )
 
 NVM_LAZY=true
+NVM_CUSTOM_LAZY=true
 
 # Set tmux autostart unless we are using vscode or emacs tramp.
 if [ -n "$VSCODE_IPC_HOOK_CLI" ] || [ "$TERM" = "dumb" ] || [ -z "$TERM" ]; then
@@ -67,8 +68,10 @@ fi
 export ZSH=~/.oh-my-zsh
 source $ZSH/oh-my-zsh.sh
 
-# Disable shared history so each term has it's own backlog.
-unsetopt share_history
+# Enable shared history so we can reference history between terms.
+setopt share_history
+# Save each command in history to make sure we don't loose it.
+setopt inc_append_history
 
 # Tell git to use the current tty for gpg passphrase prompt (needs to be at the end so the tty is within tmux, not out).
 export GPG_TTY=$(tty)
@@ -152,5 +155,53 @@ complete -o nospace -C ${HOME}/go/bin/vault vault
 
 # Load the private config if set.
 [ -f ~/.zshrc_priv_config ] && source ~/.zshrc_priv_config
+
+# The NVM_LAZY implementation doesn't support loading the local .nvmrc
+# and the NVM_AUTOLOAD is way too slow. Implement a custom loader.
+if (( $+NVM_CUSTOM_LAZY )); then
+  function custom-load-nvmrc() {
+    # If we don't have a .nvmrc file, stop here.
+    if [ ! -f .nvmrc ]; then
+      return;
+    fi
+
+    # Undo the nvm lazy loading so we'll use the actual commands.
+    unfunction node npm yarn 2> /dev/null
+
+    # If we already have nvm loaded, print the versions and stop here.
+    if [ -n "${NVM_BIN}" ]; then
+      local loaded_nvm_version=$(echo $NVM_BIN | sed 's|.*versions/node/\(.*\)/bin|\1|')
+      local loaded_nvm_major_version=$(echo $loaded_nvm_version | sed 's/v\?\([^.]*\).*/\1/')
+      local expected_nvm_major_version=$(cat .nvmrc | sed 's/v\?\([^.]*\).*/\1/')
+      if [ "${expected_nvm_major_version}" = "${loaded_nvm_major_version}" ]; then
+        echo "Loaded node version: ${loaded_nvm_version}, local nvmrc: $(cat .nvmrc)" >&2
+        return
+      fi
+    fi
+
+    # Load nvm with the local .nvmrc.
+    nvm use
+  }
+  autoload -U add-zsh-hook
+  add-zsh-hook chpwd custom-load-nvmrc
+  custom-load-nvmrc
+fi
+unset NVM_CUSTOM_LAZY
+
+# Helper to load extra plugins at runtime.
+function load-plugin() {
+  for p in "$@"; do
+    source $ZSH/plugins/"$p"/"$p".plugin.zsh
+  done
+}
+
+# Lazy load slow plugins.
+function helm kubectl aws {
+  unfunction $0
+  echo -n "Lazy loading '$0' plugin... " >&2
+  load-plugin $0
+  echo "Done." >&2
+  $0 $@
+}
 
 [ -n "${ZPROF}" ] && zprof
