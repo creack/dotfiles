@@ -14,10 +14,13 @@ Setting the TLS version is needed in emacs 26 to be able to pull from the gnu.or
 
 #+begin_src emacs-lisp :tangle yes
   (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3"
-        package-enable-at-startup nil
-        package-archives '(("gnu"   . "https://elpa.gnu.org/packages/")
+        package-archives '(
                            ("melpa" . "https://melpa.org/packages/")
-                           ("org"   . "https://orgmode.org/elpa/")))
+                           ("celpa" . "https://celpa.conao3.com/packages/")
+                           ("org"   . "https://orgmode.org/elpa/")
+                           ("gnu"   . "https://elpa.gnu.org/packages/")
+                           )
+        )
 #+end_src
 
 ** Setup use-package
@@ -27,8 +30,8 @@ If =use-package= is not installed, install it.
 #+begin_src emacs-lisp :tangle yes
   (unless (package-installed-p 'use-package)
     (package-refresh-contents)
-    (package-install 'use-package)
-    (eval-when-compile (require 'use-package)))
+    (package-install 'use-package))
+  (eval-when-compile (require 'use-package))
 #+end_src
 
 Set =ensure= by default to install packages from the remote repositories. This is equivalent to setting =:ensure t= on each call to =use-package=.
@@ -45,11 +48,34 @@ It only records things after it's initialised, so put as early in config as poss
 
 #+begin_src emacs-lisp :tangle yes
   (use-package benchmark-init :demand
+    :disabled ;; TODO: Re-enable this. Broken with emacs28.
     :hook (after-init . (lambda () ; Stop the benchmark and print result after the init.
                     (benchmark-init/deactivate)
                     (message "Loaded in %s" (emacs-init-time))
                     )))
 #+end_src
+
+** Compilation options
+
+#+begin_src emacs-lisp :tangle yes
+  (setq package-native-compile t
+        warning-suppress-log-types '((comp))
+        warning-suppress-types '((comp))
+   ;;comp-deferred-compilation t ; Enable async compilation to avoid blocking.
+   )
+#+end_src
+
+** Enable Hydra
+
+Install Hydra and enable the =:hydra= keyword for use-package.
+
+#+begin_src emacs-lisp :tangle yes
+(use-package hydra
+  :config
+  (use-package use-package-hydra)
+  )
+#+end_src
+
 
 ** Extend use-package
 
@@ -87,8 +113,8 @@ Don't display the help screen on startup and disable default scratch message.
 Disable GUI window decorations.
 
 #+begin_src emacs-lisp :tangle yes
-  (tool-bar-mode   -1)
-  ;(scroll-bar-mode -1)
+  ;; (tool-bar-mode   -1)
+  ;; (scroll-bar-mode -1)
   (unless window-system (menu-bar-mode -1))
 #+end_src
 
@@ -101,9 +127,7 @@ Disable the bell.
 Show trailing whitespaces in prog mode.
 
 #+begin_src emacs-lisp :tangle yes
-  (setq-default truncate-lines        t
-                require-final-newline t)
-  (add-hook 'prog-mode-hook '(lambda() (setq show-trailing-whitespace t)))
+  (add-hook 'prog-mode-hook #'(lambda() (setq show-trailing-whitespace t)))
 #+end_src
 
 Truncate long tines instead of wrapping and ensure the final newline.
@@ -116,15 +140,15 @@ Truncate long tines instead of wrapping and ensure the final newline.
 Define sane indentation.
 
 #+begin_src emacs-lisp :tangle yes
-  (setq-default indent-tabs-mode nil
-                tab-width        8)
+  ;; (setq-default indent-tabs-mode nil
+  ;;             tab-width        8)
 #+end_src
 
 Enable syntax highlight and highlight parens.
 
 #+begin_src emacs-lisp :tangle yes
-  (setq font-lock-maximum-decoration t)
-  (global-font-lock-mode t)
+  ;; (setq font-lock-maximum-decoration t)
+  ;; (global-font-lock-mode t)
   (show-paren-mode t)
 #+end_src
 
@@ -138,16 +162,22 @@ Show line/column in the mode-line.
 Create a region when creating a mark.
 
 #+begin_src emacs-lisp :tangle yes
-  (transient-mark-mode t)
+  ;; (transient-mark-mode t)
 #+end_src
 
 Enable the mouse support in the terminal.
 
 #+begin_src emacs-lisp :tangle yes
-  (unless window-system
+  (use-package emacs
+    :unless window-system
+    :config
     (xterm-mouse-mode t)
-    (global-set-key (kbd "<mouse-4>") (lambda() (interactive) (scroll-down 5)))
-    (global-set-key (kbd "<mouse-5>") (lambda() (interactive) (scroll-up 5))))
+    :custom
+    (mouse-wheel-scroll-amount '(5 ((shift) . hscroll) ((meta)) ((control) . vscroll)))
+    ;; :bind
+    ;; ("<mouse-4>" . (lambda() (interactive) (scroll-down 5)))
+    ;; ("<mouse-5>" . (lambda() (interactive) (scroll-up 5)))
+    )
 #+end_src
 
 Keep track of the window layouts.
@@ -156,10 +186,21 @@ Keep track of the window layouts.
   (winner-mode t)
 #+end_src
 
-Don't automatically enable eldoc.
+Enable eldoc but hide it from the mode-lint (:delight).
 
 #+begin_src emacs-lisp :tangle yes
-  (global-eldoc-mode -1)
+  (use-package eldoc :delight
+    :config
+   (global-eldoc-mode 1)
+    )
+#+end_src
+
+Set sane defaults for the kill ring.
+
+#+begin_src emacs-lisp :tangle yes
+  (setq kill-ring-max 200
+        kill-do-not-save-duplicates t
+        save-interprogram-paste-before-kill t)
 #+end_src
 
 *** Bindings                                                     :bindings:
@@ -176,8 +217,8 @@ Use =super= for copy/paste and undo to make for a better integration with window
 Set globally comment/uncomment.
 
 #+begin_src emacs-lisp :tangle yes
-  (bind-key "C-c C-c" 'comment-region)
-  (bind-key "C-c C-u" 'uncomment-region)
+  ;; (bind-key "C-c C-c" 'comment-region)
+  ;; (bind-key "C-c C-u" 'uncomment-region)
 #+end_src
 
 Quickly toggle the line numbers in the margin.
@@ -186,6 +227,7 @@ Quickly toggle the line numbers in the margin.
   (bind-key "C-c C-l" 'display-line-numbers-mode)
 #+end_src
 
+
 ** Backup / History
 
 Store all backup and temporary files in =~/.emacs.d/.tmp= instead of polluting the current directory.
@@ -193,8 +235,8 @@ Store all backup and temporary files in =~/.emacs.d/.tmp= instead of polluting t
 Define the target directories and create them if they don't exist.
 
 #+begin_src emacs-lisp :tangle yes
-  (setq backup-dir     "~/.emacs.d/.tmp/backup"
-        auto-saves-dir "~/.emacs.d/.tmp/auto-saves/")
+  (setq backup-dir     "~/.emacs.tmp/backup"
+        auto-saves-dir "~/.emacs.tmp/auto-saves/")
   (dolist (dir (list backup-dir auto-saves-dir))
     (when (not (file-directory-p dir))
       (make-directory dir t)))
@@ -224,7 +266,8 @@ Define how to hanlde automatic bakcups / open files.
 Keep track of recent files.
 
 #+begin_src emacs-lisp :tangle yes
-  (setq recentf-exclude '(".*/.emacs.d/.*" ".*/go/pkg/mod/.*"))
+  (setq recentf-exclude '(".*/.emacs.d/.*" ".*/go/pkg/mod/.*" ".*/.emacs.tmp/.*" ".*/node_modules/.*" ".*/vendor/.*")
+        recentf-save-file "~/.emacs.tmp/recentf")
   (recentf-mode t)
 #+end_src
 
@@ -270,16 +313,29 @@ See [[file:../.editorconfig][global editorconfig]] for more details.
 
 =undo-tree= visualises undo history as a tree for easy navigation.
 
-Enable undo history and store it in =~/.emacs=.
-
-#+begin_src emacs-lisp :tangle yes
-  (setq undo-tree-auto-save-history t
-        undo-tree-history-directory-alist '((".*" . "~/.emacs.d/.tmp")))
-#+end_src
+Enable undo history and store it in =~/.emacs.d.tmp/undo-tree=.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package undo-tree :delight
-    :config (global-undo-tree-mode t))
+    :after hydra
+    :demand
+    :custom
+    (undo-tree-auto-save-history t)
+    (undo-tree-history-directory-alist '((".*" . "~/.emacs.tmp/undo-tree")))
+    (undo-tree-visualizer-timestamps t)
+    :config
+    (global-undo-tree-mode)
+    :bind (:map undo-tree-map ("C-_" . hydra-undo-tree/undo-tree-undo))
+    :hydra (hydra-undo-tree (:idle 2)
+            "
+  _p_: undo  _n_: redo _s_: save _l_: load   "
+            ("p"   undo-tree-undo)
+            ("n"   undo-tree-redo)
+            ("s"   undo-tree-save-history)
+            ("l"   undo-tree-load-history)
+            ("u"   undo-tree-visualize "visualize" :color blue)
+            ("q"   nil "quit" :color blue))
+    )
 #+end_src
 
 ** Which Key
@@ -287,7 +343,8 @@ Show the available next key bindings.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package which-key :delight
-    :config (which-key-mode t))
+    :config (which-key-mode t)
+    )
 #+end_src
 
 ** Spellcheck
@@ -296,14 +353,15 @@ Show the available next key bindings.
   (use-package flyspell :delight
     :ensure-system-package aspell
     :hook
-    ((org-mode yaml-mode markdown-mode git-commit-mode) . flyspell-mode)
+    ((web-mode org-mode yaml-mode markdown-mode git-commit-mode) . flyspell-mode)
     (prog-mode . flyspell-prog-mode)
-    (before-save-hook . flyspell-buffer)
+    ;(before-save . flyspell-buffer)
     :custom
     (flyspell-issue-message-flag nil)
     (ispell-program-name "aspell")
     (ispell-extra-args '("--sug-mode=ultra" "--lang=en_US" "--run-together"))
     :config (use-package flyspell-correct-ivy
+      ;:disabled
       :bind ("C-M-:" . flyspell-correct-at-point)
       :config (setq flyspell-correct-interface #'flyspell-correct-ivy)))
 #+end_src
@@ -313,56 +371,87 @@ Show the available next key bindings.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package lsp-mode :delight " LSP"
+    :hook
+    (lsp-after-open . lsp-origami-try-enable)
+    (lsp-mode . lsp-enable-which-key-integration)
     :custom
     (lsp-file-watch-ignored '(
-               "[/\\\\].git$"
-               "[/\\\\]infrastructure$"
-               "[/\\\\]vendor$"
-               "[/\\\\]cli$"
-               "[/\\\\]internal$"
-               "[/\\\\]functions[/\\\\]migrations$"
-               "[/\\\\]tests[/\\\\]mocks$"
-               "[/\\\\]\\.cache$"
-               "[/\\\\]\\.gocache$"
-               "[/\\\\]_archives$"
-               "[/\\\\]node_modules$"
-               ))
-    (lsp-prefer-flymake nil)   ;; Disable flymake in favor of flycheck.
-    (lsp-eldoc-enable-hover t) ;; Disable eldoc. Redundant with lsp-ui-doc.
-    ;(lsp-gopls-build-flags ["-tags=wireinject"]) ;; Use wire build tag.
-    ;:config
-    ;(lsp-register-custom-settings '(
-    ;                                 ("gopls.completeUnimported" t t)
-    ;                                 ("gopls.staticcheck" t t)
-    ;                                 ))
+                              "[/\\\\].git$"
+                              "[/\\\\]infrastructure$"
+                              "[/\\\\]vendor$"
+                              "[/\\\\]cli$"
+                              "[/\\\\]internal$"
+                              "[/\\\\]functions[/\\\\]migrations$"
+                              "[/\\\\]tests[/\\\\]mocks$"
+                              "[/\\\\]\\.cache$"
+                              "[/\\\\]\\.gocache$"
+                              "[/\\\\]_archives$"
+                              "[/\\\\]node_modules$"
+                              ".*node_modules.*"
+                              ))
+    (lsp-enable-links nil)
+    (lsp-keymap-prefix "C-c l") ; Set the keymap prefix. (Default to s-l.)
+    (lsp-prefer-flymake nil)    ; Disable flymake in favor of flycheck.
+    (lsp-diagnostic-package :none)
+    (gc-cons-threshold (* 100 1024 1024)) ; Increase emacs' garbage collector limit to 100M. LSP is demanding.
+    (read-process-output-max (* 3 1024 1024)) ; Increase the emacs' subprocesses max output to 3MB.
+    ;; (lsp-eldoc-enable-hover t) ;; Disable eldoc. Redundant with lsp-ui-doc.
+    ;; (lsp-gopls-build-flags ["-tags=wireinject"]) ;; Use wire build tag.
+    ;; :config
+    ;; (lsp-register-custom-settings '(
+    ;;                                  ("gopls.completeUnimported" t t)
+    ;;                                  ("gopls.staticcheck" t t)
+    ;;                                  ))
+    (lsp-auto-guess-root t)        ; Auto detect project root, based on projectile.
+    (lsp-keep-workspace-alive t)
+    (lsp-ui-imenu-enable nil)
+    ;; (lsp-lens-enable t)
+    (lsp-completion-enable nil)
+    (lsp-display-inline-image nil)
+    (lsp-document-sync-method 'lsp--sync-incremental)
+    :bind
+    (:map lsp-mode-map
+          ("C-c e"   . lsp-rename)
+          )
+    :config
+    (lsp-enable-which-key-integration)
     (use-package lsp-ui ;; Overlay UI components for LSP.
-      :preface
-      (defun creack/toggle-lsp-ui-doc ()
-        (interactive)
-        (if lsp-ui-doc-mode
-          (progn
-            (lsp-ui-doc-mode -1)
-            (lsp-ui-doc--hide-frame))
-          (lsp-ui-doc-mode 1)))
-
       :custom
       (lsp-ui-doc-position       'top)
-      (lsp-ui-doc-header         t)
-      (lsp-ui-doc-use-childframe t)
-      (lsp-ui-doc-enable         t)
+      ;; (lsp-ui-doc-header         t)
+      (lsp-ui-doc-use-childframe nil)
+      ;; (lsp-ui-doc-enable         t)
+      (lsp-ui-sideline-ignore-duplicate t)
+      ;; (lsp-ui-sideline-update-mode 'point)
+      ;; (lsp-ui-doc-include-signature t)
+      ;; (lsp-ui-peek-fontify 'always)
+
+      ;; For referemce:
+      ;; (use-package lsp-ui
+      ;;   :config
+      ;;   (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
+      ;;   (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references)
+      ;;   (setq lsp-ui-sideline-enable nil
+      ;;         lsp-ui-sideline-update-mode 'line
+      ;;         lsp-ui-sideline-show-code-actions t
+      ;;         lsp-ui-sideline-show-hover t
+      ;;         lsp-ui-doc-enable nil
+      ;;         lsp-ui-doc-include-signature t
+      ;;         lsp-eldoc-enable-hover nil ; Disable eldoc displays in minibuffer
+      ;;         lsp-ui-doc-position 'at-point
+      ;;         lsp-ui-imenu-enable t
+      ;;         lsp-ui-sideline-ignore-duplicate t))
 
       :bind
       (:map lsp-ui-flycheck-list-mode-map ;; Fix the terminal mode bindings.
-        ("RET"     . lsp-ui-flycheck-list--view)
-        ("TAB"     . lsp-ui-flycheck-list--visit)
-        ("C-c l"   . lsp-ui-flycheck-list--quit)
-        )
+            ("RET"   . lsp-ui-flycheck-list--view)
+            ("TAB"   . lsp-ui-flycheck-list--visit)
+            ("C-c l" . lsp-ui-flycheck-list--quit)
+            )
       (:map lsp-ui-mode-map
-        ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
-        ([remap xref-find-references]  . lsp-ui-peek-find-references)
-        ("C-c d"   . creack/toggle-lsp-ui-doc)
-        ("C-c C-d" . creack/toggle-lsp-ui-doc)
-        )
+            ;; ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
+            ([remap xref-find-references]  . lsp-ui-peek-find-references)
+            )
       )
     )
 #+end_src
@@ -383,31 +472,42 @@ Show the available next key bindings.
 
     :custom
     ;(company-echo-delay 0)
-    (company-idle-delay 0)                ;; Show company right away when prefix match.
-    (company-minimum-prefix-length 1)     ;; Show company after the first char typed.
+    (company-idle-delay 0.2)
+    (company-minimum-prefix-length 2)     ;; Show company after the first char typed.
     (company-tooltip-align-annotations t) ;; Align the completion popu.
     (company-show-numbers t)              ;; Easy navigation to candidates with M-<n>.
     (company-dabbrev-downcase nil)        ;; Don't worry about case.
-
     :hook
     (after-init . global-company-mode)
 
-    :config
-    ;; Show quick tooltip.
-    (use-package company-quickhelp
-      :defines company-quickhelp-delay
-      :bind (:map company-active-map
-              ("M-h" . company-quickhelp-manual-begin))
-      :hook (global-company-mode . company-quickhelp-mode)
-      :custom (company-quickhelp-delay 0.3))
+    :bind
+    (:map company-mode-map
+          ("TAB" . company-indent-or-complete-common))
 
-    ;; Lsp completion.
+
+    ;;:custom
+    ;;(company-backends '()) ;; Clear the default backends.
+    :config
+    ;; LSP completion.
     (use-package company-lsp
+      :load-path "~/.emacs.files/libs"
+      :preface
+      ;; Work around from https://github.com/tigersoldier/company-lsp/issues/145
+      (defun lsp--sort-completions (completions)
+        (lsp-completion--sort-completions completions))
+      (defun lsp--annotate (item)
+        (lsp-completion--annotate item))
+      (defun lsp--resolve-completion (item)
+        (lsp-completion--resolve item))
+      :config
+      (push 'company-lsp company-backends)
       :custom
-      (company-lsp-cache-candidates t) ;; auto, t(always using a cache), or nil
+      (company-lsp-cache-candidates t)
       (company-lsp-async t)
       (company-lsp-enable-snippet t)
-      (company-lsp-enable-recompletion t)))
+      (company-lsp-enable-recompletion t)
+      )
+    )
 #+end_src
 
 * Navigation
@@ -418,7 +518,13 @@ Use Projectile for workspace management.
 #+begin_src emacs-lisp :tangle yes
   (use-package projectile
     :config (projectile-mode +1)
-    :delight '(:eval (concat " <" (projectile-project-name) ">")))
+    :delight '(:eval (concat " <" (projectile-project-name) ">"))
+    :custom
+    (projectile-completion-system 'ivy)
+    (projectile-enable-caching t)
+    :bind-keymap
+    ("C-c p" . projectile-command-map)
+  )
 #+end_src
 
 ** Ivy
@@ -448,6 +554,7 @@ Install =Ivy= and friends.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package ivy :delight
+    ;:disabled
     :config (ivy-mode t))
 #+end_src
 
@@ -455,6 +562,7 @@ Install =Ivy= and friends.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package counsel :delight :after ivy
+    ;:disabled
     :config (counsel-mode t))
 #+end_src
 
@@ -462,6 +570,7 @@ Install =Ivy= and friends.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package ivy-rich :after ivy counsel
+    ;:disabled
     :custom
     (ivy-rich-path-style    'abbrev)
     (ivy-virtual-abbreviate 'full)
@@ -472,15 +581,19 @@ Install =Ivy= and friends.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package prescient :after ivy
+    ;; :disabled
     :config (prescient-persist-mode t))
   (use-package ivy-prescient :after prescient
+    ;; :disabled
     :config (ivy-prescient-mode t))
 #+end_src
 
 =swiper= is an =ivy= enhanced version of isearch.
 
 #+begin_src emacs-lisp :tangle yes
-  (use-package swiper)
+  (use-package swiper
+    ;; :disabled
+    )
 #+end_src
 
 *** Bindings                                                       :bindings:
@@ -502,14 +615,41 @@ Install =Ivy= and friends.
 Enable multiple cursors support.
 
 #+begin_src emacs-lisp :tangle yes
-(use-package multiple-cursors
-  :bind
-  ("M-n"         . mc/mark-next-like-this)         ;; Add new cursor with matching region.
-  ("M-p"         . mc/mark-previous-like-this)     ;; Add new cursor with matching region.
-  ("M-]"         . mc/mark-all-like-this)          ;; Add new cursor with matching region.
-  ("C-c SPC"     . set-rectangular-region-anchor)  ;; Rectangular region with many cursors.
-  ("M-SPC"       . set-rectangular-region-anchor)  ;; Rectangular region with many cursors.
-  )
+  (use-package multiple-cursors
+    :after hydra
+    :bind
+    ("C-c h c"     . hydra-multiple-cursors/body)
+    ("M-n"         . mc/mark-next-like-this)         ;; Add new cursor with matching region.
+    ("M-p"         . mc/mark-previous-like-this)     ;; Add new cursor with matching region.
+    ("M-]"         . mc/mark-all-like-this)          ;; Add new cursor with matching region.
+    ("C-c SPC"     . set-rectangular-region-anchor)  ;; Rectangular region with many cursors.
+    ("M-SPC"       . set-rectangular-region-anchor)  ;; Rectangular region with many cursors.
+    :hydra (hydra-multiple-cursors (:hint nil)
+                                   "
+   Up^^             Down^^           Miscellaneous           % 2(mc/num-cursors) cursor%s(if (> (mc/num-cursors) 1) \"s\" \"\")
+  ------------------------------------------------------------------
+   [_p_]   Next     [_n_]   Next     [_l_] Edit lines  [_0_] Insert numbers
+   [_P_]   Skip     [_N_]   Skip     [_a_] Mark all    [_A_] Insert letters
+   [_M-p_] Unmark   [_M-n_] Unmark   [_s_] Search      [_q_] Quit
+   [_|_] Align with input CHAR       [Click] Cursor at point"
+                                   ("l" mc/edit-lines :exit t)
+                                   ("a" mc/mark-all-like-this :exit t)
+                                   ("n" mc/mark-next-like-this)
+                                   ("N" mc/skip-to-next-like-this)
+                                   ("M-n" mc/unmark-next-like-this)
+                                   ("p" mc/mark-previous-like-this)
+                                   ("P" mc/skip-to-previous-like-this)
+                                   ("M-p" mc/unmark-previous-like-this)
+                                   ("|" mc/vertical-align)
+                                   ("s" mc/mark-all-in-region-regexp :exit t)
+                                   ("0" mc/insert-numbers :exit t)
+                                   ("A" mc/insert-letters :exit t)
+                                   ("<mouse-1>" mc/add-cursor-on-click)
+                                   ;; Help with click recognition in this hydra
+                                   ("<down-mouse-1>" ignore)
+                                   ("<drag-mouse-1>" ignore)
+                                   ("q" nil))
+    )
 #+end_src
 
 * Appearance
@@ -517,19 +657,28 @@ Enable multiple cursors support.
 
 Install and enable the theme.
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (use-package nord-theme
-    :config (load-theme 'nord t))
+    ;; :config (load-theme 'nord t)
+    )
 #+end_src
 
 #+begin_src emacs-lisp :tangle yes
   (use-package monokai-theme
-    :config (load-theme 'monokai t))
+    ;; :config (load-theme 'monokai t)
+    )
+#+end_src
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package gruvbox-theme
+    :config (load-theme 'monokai t)
+    )
 #+end_src
 
 #+begin_src emacs-lisp :tangle no
-  (use-package monokai-pro-theme :defer
-    :init (load-theme 'monokai-pro t))
+  (use-package monokai-pro-theme
+    ;; :config (load-theme 'monokai-pro t)
+    )
 #+end_src
 
 In terminal mode, use a full size vertical bar for splits.
@@ -559,23 +708,32 @@ Install the font on osx.
 Enable the font in emacs.
 
 #+begin_src emacs-lisp :tangle yes
-  ;(set-face-attribute 'default nil :font "Fira Code-12")
-  (set-frame-font "Fira Code 12" nil t)
+  (use-package emacs
+    :when window-system
+    :config
+    (set-frame-font "Fira Code 12" nil t)
+  )
 #+end_src
 
 Use a different font for the mode line.
 
 #+begin_src emacs-lisp :tangle yes
-  (set-face-attribute 'mode-line nil :font "DejaVu Sans Mono-8")
+  (use-package emacs
+    :when window-system
+    :config
+    (set-face-attribute 'mode-line nil :font "DejaVu Sans Mono-8")
+  )
 #+end_src
 
 Enable ligatures in GUI mode.
 
 #+begin_src emacs-lisp :tangle yes
-  (use-package fira-code-mode :when window-system
+  (use-package fira-code-mode
+    :when window-system
     :custom
     (fira-code-mode-disabled-ligatures '(":" "[]" "#{" "#(" "#_" "#_(" "x")) ; List of ligatures to turn off
-    :hook (prog-mode . fira-code-mode))
+    :hook (prog-mode . fira-code-mode)
+    )
 #+end_src
 
 ** Mode Line
@@ -600,26 +758,27 @@ Don't ask about killing current process before restarting and enable scrolling i
 Use proper ansi colors in the output buffer.
 
 #+begin_src emacs-lisp :tangle yes
-  (setq compilation-environment '("TERM=xterm-truecolor" "COLORTERM=truecolor"))
+  ;; (setq compilation-environment '("TERM=xterm-truecolor" "COLORTERM=truecolor"))
+  (setq compilation-environment '("TERM=dumb"))
 #+end_src
 
 Use the =xterm-color= package to replace the native ansi.el to have better support for colors.
 
 #+begin_src emacs-lisp :tangle yes
-  (use-package xterm-color
-    :preface
-    (defun my/compilation-color (proc)
-      ;; We need to differentiate between compilation-mode buffers
-      ;; and running as part of comint.
-      (when (eq (process-filter proc) 'compilation-filter)
-        ;; This is a process associated with a compilation-mode buffer.
-        ;; We may call `xterm-color-filter' before its own filter function.
-        (set-process-filter
-         proc
-         (lambda (proc string)
-           (funcall 'compilation-filter proc
-                    (xterm-color-filter string))))))
-    :hook (compilation-start . my/compilation-color))
+  ;(use-package xterm-color
+  ;  :preface
+  ;  (defun my/compilation-color (proc)
+  ;    (lv-message "Starting new compilation!")
+  ;    ;; We need to differentiate between compilation-mode buffers
+  ;    ;; and running as part of comint.
+  ;    (when (eq (process-filter proc) 'compilation-filter)
+  ;      ;; This is a process associated with a compilation-mode buffer.
+  ;      ;; We may call `xterm-color-filter' before its own filter function.
+  ;      (set-process-filter proc (lambda (proc string)
+  ;                                 (funcall #'compilation-filter proc
+  ;                                          (xterm-color-filter string))))))
+  ;  ;:hook (compilation-start . my/compilation-color)
+  ;  )
 #+end_src
 
 *** Bindings                                                     :bindings:
@@ -627,17 +786,22 @@ Use the =xterm-color= package to replace the native ansi.el to have better suppo
 Create bindings to quickly recompile and kill the running command.
 
 #+begin_src emacs-lisp :tangle yes
-  (bind-key "C-c r" '(lambda() (interactive) (save-some-buffers t) (recompile)))
-  (bind-key "C-c k" 'kill-compilation)
+  (use-package emacs
+    :disabled ;; Try without for a while see if still needed.
+    :bind
+    ("C-c r"  . (lambda() (interactive) (save-some-buffers t) (recompile)))
+    ("C-c k" . kill-compilation)
+    )
 #+end_src
 
 ** Programming specific interface improvements
 
-When programming I like my editor to try to help me with keeping parentheses balanced.
+Use =smartparens= to help keeping parentheses balanced.
 
-#+begin_src emacs-lisp :tangle no
-  (use-package smartparens
-    :hook (prog-mode . smartparens-mode))
+#+begin_src emacs-lisp :tangle yes
+  (use-package smartparens :delight
+    :hook (prog-mode . smartparens-mode)
+    )
 #+end_src
 
 Highlight parens etc. for improved readability.
@@ -650,7 +814,7 @@ Highlight parens etc. for improved readability.
 Highlight strings which represent colours. I only want this in programming modes, and I don't want colour names to be highlighted (=x-colors=).
 
 #+begin_src emacs-lisp :tangle yes
-  (use-package rainbow-mode
+  (use-package rainbow-mode :delight
     :custom (rainbow-x-colors nil)
     :hook (prog-mode . rainbow-mode))
 #+end_src
@@ -710,29 +874,41 @@ TODO: Cleanup shellcheck and document the related packages.
       :error-parser flycheck-parse-checkstyle)
     :hook
     (sh-mode . flycheck-mode)                                   ; Enable flycheck in sh-mode.
-    (flycheck-mode . (lambda()(flycheck-set-indication-mode `left-margin))) ; Enable left margin indicators.
     )
 #+end_src
 
 
 #+begin_src emacs-lisp :tangle yes
   (use-package flycheck-tip
-    :after flycheck
-    :bind (:map flycheck-mode-map
-                ("C-c <up>"   . flycheck-tip-cycle)         ; Ctrl-c up   to go to next error.
-                ("C-c <down>" . flycheck-tip-cycle-reverse) ; Ctrl-c down to go to previous error.
-                ("C-c C-n"    . flycheck-tip-cycle)
-                ("C-c C-p"    . flycheck-tip-cycle-reverse)
-                )
+    :after (flycheck hydra)
+    :bind
+    (:map flycheck-mode-map
+          ("C-c <up>"   . hydra-flycheck/flycheck-tip-cycle)         ; Ctrl-c up   to go to next error.
+          ("C-c <down>" . hydra-flycheck/flycheck-tip-cycle-reverse) ; Ctrl-c down to go to previous error.
+          ("C-c C-n"    . flycheck-tip-cycle)
+          ("C-c C-p"    . flycheck-tip-cycle-reverse)
+          )
+    ("C-c h f" . hydra-flycheck/body)
+    :hydra (hydra-flycheck
+            (:pre (flycheck-list-errors)
+                  :post (quit-windows-on "*Flycheck errors*")
+                  :hint nil)
+            "Errors"
+            ("f" flycheck-error-list-set-filter "Filter")
+            ("j" flycheck-tip-cycle "Next")
+            ("k" flycheck-tip-cycle-reverse "Previous")
+            ("gg" flycheck-first-error "First")
+            ("G" (progn (goto-char (point-max)) (flycheck-previous-error)) "Last")
+            ("q" nil))
     )
 #+end_src
 
 #+begin_src emacs-lisp :tangle yes
   (use-package flycheck-projectile
-    :after flycheck
-    :bind (:map flycheck-mode-map
-                ("C-c l" . flycheck-projectile-list-errors)
-                )
+    :after (projectile flycheck)
+    ;:bind (:map flycheck-mode-map
+    ;            ("C-c l" . flycheck-projectile-list-errors)
+    ;            )
     )
 #+end_src
 
@@ -747,14 +923,17 @@ Type the shortcut and press =TAB= to complete, or =M-/= to autosuggest a snippet
   (use-package yasnippet
     :delight yas-minor-mode
     :config
-    (add-to-list 'yas-snippet-dirs "~/.dotfiles/.emacs.files/yasnippet")
-    (yas-global-mode t))
+    ;(add-to-list 'yas-snippet-dirs "~/.dotfiles/.emacs.files/yasnippet")
+    (yas-global-mode t)
+    )
 #+end_src
 
 Install the default snippets.
 
 #+begin_src emacs-lisp :tangle yes
-  (use-package yasnippet-snippets)
+  (use-package yasnippet-snippets
+    :after yasnippet
+    )
 #+end_src
 
 * TODO Major Modes
@@ -841,7 +1020,7 @@ Hook =*.mk= to Makefile mode.
   (use-package makefile-mode :defer :ensure nil
     :mode "Makefile" "\\.mk\\'"
     :hook (makefile-mode . display-line-numbers-mode))
-  #+end_src
+#+end_src
 
 ** Cucumber / Gherkin Feature
 
@@ -887,52 +1066,92 @@ TODO: Document this.
     (tsserver . "source ~/.nvm/nvm.sh && nvm use --lts")
     :after (web-mode js2-mode typescript-mode company flycheck prettier)
     :preface
+    ;(defun creack/tide-references ()
+    ;  (interactive)
+    ;  (tide-references)
+    ;  (switch-to-buffer-other-window "*tide-references*")
+    ;  )
     (defun setup-tide-mode ()
       (interactive)
       (tide-setup)
-      (tide-hl-identifier-mode +1) ; Needs to run after the setup. Can't be a hook.
-      (flycheck-add-next-checker 'javascript-tide 'javascript-eslint 'append)
-      (flycheck-add-next-checker 'typescript-tide 'javascript-eslint 'append)
+      ;(tide-hl-identifier-mode +1) ; Needs to run after the setup. Can't be a hook.
+      ;(flycheck-add-next-checker 'javascript-tide 'javascript-eslint 'append)
+      ;(flycheck-add-next-checker 'typescript-tide 'javascript-eslint 'append)
       (flycheck-add-next-checker 'tsx-tide 'javascript-eslint 'append)
       (flycheck-add-next-checker 'jsx-tide 'javascript-eslint 'append)
       (flycheck-mode +1)
       (eldoc-mode +1)
-
+      (setq tide-completion-detailed t)
+      (company-mode +1)
+      (git-gutter-mode t)
+      (npm-mode t)
       (define-key tide-mode-map [C-down-mouse-1] 'mouse-drag-region)
       (define-key tide-mode-map [C-mouse-1] 'tide-jump-to-definition)
       (define-key tide-mode-map (kbd "<backtab>") 'company-complete-common-or-cycle)
-      (define-key tide-mode-map (kbd "C-c e") 'tide-rename-symbol)
-
+      ;(define-key tide-mode-map (kbd "C-c e") 'tide-rename-symbol)
+      ;(define-key tide-mode-map (kbd "M-?") 'creack/tide-references)
 
       )
     :custom
     (tide-completion-detailed t)
+    (tide-project-cleanup-delay 3600)
+
     )
 
   (use-package js2-mode
-    :mode "\\.js$"
+    ;:mode "\\.js$"
     :custom
     (js2-global-externs (list "window" "module" "require" "buster" "sinon" "assert" "refute" "setTimeout" "clearTimeout" "setInterval" "clearInterval" "location" "__dirname" "console" "JSON" "jQuery" "$"))
-    :hook
-    (js2-mode . setup-tide-mode)
+    ;:hook
+    ;(js2-mode . setup-tide-mode)
     )
 
   (use-package typescript-mode
     :ensure-system-package
     (tsc . "source ~/.nvm/nvm.sh && nvm use --lts")
-    :mode "\\.ts$"
-    :hook
-    (typescript-mode . setup-tide-mode)
+    ;:mode "\\.ts$"
+    ;:hook
+    ;(typescript-mode . setup-tide-mode)
     )
 
 
   (use-package web-mode
     :after flycheck
-    :mode "\\.js$" "\\.jsx$" "\\.tsx$"
-    :config
+    :mode "\\.js$" "\\.jsx$" "\\.ts$" "\\.tsx$"
+    ;:config
+    ;(flycheck-add-mode 'javascript-eslint 'web-mode)
+    :custom
+    ;; TODO: Document this.
+    (web-mode-markup-indent-offset 2)
+    (web-mode-css-indent-offset 2)
+    (web-mode-code-indent-offset 2)
+    (web-mode-comment-style 2)
+
+    ;(web-mode-enable-block-face t)
+    ;(web-mode-enable-comment-keywords t)
+    ;(web-mode-enable-heredoc-fontification t)
+
+    (web-mode-content-types-alist (("jsx" . "\\.js[x]?\\'") ("tsx" . "\\.ts[x]?\\'")))
+
+    (web-mode-enable-auto-closing t)
+    (web-mode-enable-auto-pairing t)
+
+    ;; Enable symbol highlight.
+    ;;(web-mode-enable-current-element-highlight t)
+    ;;(web-mode-enable-current-column-highlight t) ;; Conflicts with origami. See if lsp-fold helps.
+    :config (flycheck-add-mode 'typescript-tslint 'web-mode)
     (flycheck-add-mode 'javascript-eslint 'web-mode)
+
+    :bind (:map web-mode-map ("C-c C-l" . display-line-numbers-mode))
     :hook
     (web-mode . setup-tide-mode)
+    (web-mode . lsp)
+    (before-save . (lambda()
+                     (when (eq major-mode 'web-mode)
+                        (tide-format-before-save)
+                       ;;(lsp-format-buffer)
+                       ;;(lsp-organize-imports)
+                       )))
     )
 
   (use-package prettier :delight
@@ -944,12 +1163,6 @@ TODO: Document this.
 #+end_src
 
 ** TODO Golang
-
-Enable =guru= support.
-
-#+begin_src emacs-lisp :tangle yes
-  (use-package go-guru)
-#+end_src
 
 Go setup.
 
@@ -992,8 +1205,6 @@ Go setup.
     (:map go-mode-map
       ([mouse-8] . xref-pop-marker-stack)
       ([mouse-9] . godef-jump)
-      ("TAB"     . company-indent-or-complete-common)
-      ("C-c e"   . lsp-rename)
       ("C-c f"   . go-save-and-compile-program)
       ("C-c g"   . go-save-and-go-generate)
       ("C-c w"   . go-save-and-wire)
@@ -1006,6 +1217,8 @@ Go setup.
       ([remap go-rename]               . lsp-rename)
       )
 
+    :config
+    (use-package go-guru) ;; Enable =guru= support.
     :config
     (setq
       gofmt-command           "goimports"            ;; Use goimprots instead of gofmt.
@@ -1024,9 +1237,9 @@ Go setup.
     (go-mode     . lsp)                          ;; Load LSP.
     (go-mode     . yas-minor-mode)               ;; Enable yas.
     (before-save . (lambda()             ;; Format the code with LSP before save.
-      (when (eq major-mode 'go-mode)
-        (lsp-format-buffer)
-        (lsp-organize-imports))))         ;; Let LSP handle imports.
+                     (when (eq major-mode 'go-mode)
+                       (lsp-format-buffer)
+                       (lsp-organize-imports))))         ;; Let LSP handle imports.
     )
 #+end_src
 
@@ -1218,9 +1431,18 @@ Keep track of what gets used so we can drop unused features.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package keyfreq
+    ;; NOTE: The default file used to store the stats is ~/.emacs.keyfreq, which is good to be outside ~/.emacs.d as we want to keep it.
     :config
     (keyfreq-mode t)
-    (keyfreq-autosave-mode t))
+    (keyfreq-autosave-mode t)
+    :custom
+    ;; Define the commands to exclude.
+    (keyfreq-excluded-commands '(self-insert-command
+                                 forward-char
+                                 backward-char
+                                 previous-line
+                                 next-line))
+    )
 #+end_src
 
 ** SSH Agent
@@ -1233,14 +1455,15 @@ Set the ssh-agent to the most recent socket in  =/tmp/ssh-*=.
   (defun my/ssh-refresh ()
     "Reset the environment variable SSH_AUTH_SOCK"
     (interactive)
-    (let (ssh-auth-sock-old (getenv "SSH_AUTH_SOCK"))
-      (setenv "SSH_AUTH_SOCK"
-              (car (split-string
-                    (shell-command-to-string
-                     "ls -t $(find /tmp/ssh-* -group $USER -name 'agent.*' 2> /dev/null) | head -1"))))
-      (message
-       (format "SSH_AUTH_SOCK %s --> %s"
-               ssh-auth-sock-old (getenv "SSH_AUTH_SOCK")))))
+    ;(let (ssh-auth-sock-old (getenv "SSH_AUTH_SOCK"))
+    (setenv "SSH_AUTH_SOCK"
+            (car (split-string
+                  (shell-command-to-string
+                   "ls -t $(find /tmp/ssh-* -group $USER -name 'agent.*' 2> /dev/null) | head -1"))))
+      ;;   (message
+      ;;    (format "SSH_AUTH_SOCK %s --> %s"
+      ;;            ssh-auth-sock-old (getenv "SSH_AUTH_SOCK"))))
+      )
 #+end_src
 
 Reload ssh agent now and env every 10 minutes.

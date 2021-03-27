@@ -1,5 +1,7 @@
 [ -n "${ZPROF}" ] && zmodload zsh/zprof
 
+export COLORTERM=truecolor
+
 # User config.
 
 # Start emacs as a daemon.
