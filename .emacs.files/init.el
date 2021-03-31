@@ -7,6 +7,8 @@
                          )
       )
 
+(if (package-installed-p 'use-package)
+  (package-refresh-contents))
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
@@ -35,7 +37,10 @@
 (unless package-archive-contents
   (package-refresh-contents))
 
-(use-package use-package-ensure-system-package)
+(use-package use-package-ensure-system-package
+  :custom
+  (async-shell-command-buffer 'new-buffer) ; Automatically open a new buffer instead of asking about it.
+  )
 
 (use-package delight)
 
@@ -78,7 +83,10 @@
 
 (winner-mode t)
 
-(global-eldoc-mode -1)
+(use-package eldoc :delight
+  :config
+ (global-eldoc-mode 1)
+  )
 
 (setq kill-ring-max 200
       kill-do-not-save-duplicates t
@@ -113,7 +121,14 @@
       kept-new-versions 5            ; Keep some new versions
       kept-old-versions 2)           ; and some old ones, too.
 
-(setq recentf-exclude '(".*/.emacs.d/.*" ".*/go/pkg/mod/.*" ".*/.emacs.tmp/.*" ".*/node_modules/.*" ".*/vendor/.*")
+(setq recentf-exclude '(
+                        ".*/.emacs.d/.*"
+                        ".*/go/pkg/mod/.*"
+                        ".*/.emacs.tmp/.*"
+                        ".*/node_modules/.*"
+                        ".*/vendor/.*"
+                        ".*\\.el.gz$"
+                        )
       recentf-save-file "~/.emacs.tmp/recentf")
 (recentf-mode t)
 
@@ -169,10 +184,11 @@ _p_: undo  _n_: redo _s_: save _l_: load   "
     :bind ("C-M-:" . flyspell-correct-at-point)
     :config (setq flyspell-correct-interface #'flyspell-correct-ivy)))
 
+;(use-package helm-flex)
 (use-package lsp-mode :delight " LSP"
   :hook
   (lsp-after-open . lsp-origami-try-enable)
-  (lsp-mode . lsp-enable-which-key-integration)
+  (lsp-mode       . lsp-enable-which-key-integration)
   :custom
   (lsp-file-watch-ignored '(
                             "[/\\\\].git$"
@@ -190,30 +206,31 @@ _p_: undo  _n_: redo _s_: save _l_: load   "
                             ))
   (lsp-enable-links nil)
   (lsp-keymap-prefix "C-c l") ; Set the keymap prefix. (Default to s-l.)
-  (lsp-prefer-flymake nil)    ; Disable flymake in favor of flycheck.
-  (lsp-diagnostic-package :none)
+
+  (lsp-prefer-flymake nil)       ; Disable flymake in favor of flycheck.
+  ;; (lsp-diagnostic-package :none) ; Disable lsp flycheck in favor of regular flycheck.
+  (lsp-diagnostics-flycheck-default-level 'info)
+  (lsp-diagnostic-clean-after-change t)
   (gc-cons-threshold (* 100 1024 1024)) ; Increase emacs' garbage collector limit to 100M. LSP is demanding.
   (read-process-output-max (* 3 1024 1024)) ; Increase the emacs' subprocesses max output to 3MB.
-  ;; (lsp-eldoc-enable-hover t) ;; Disable eldoc. Redundant with lsp-ui-doc.
-  ;; (lsp-gopls-build-flags ["-tags=wireinject"]) ;; Use wire build tag.
-  ;; :config
-  ;; (lsp-register-custom-settings '(
-  ;;                                  ("gopls.completeUnimported" t t)
-  ;;                                  ("gopls.staticcheck" t t)
-  ;;                                  ))
+  ;; (lsp-eldoc-enable-hover nil) ;; Disable eldoc. Redundant with lsp-ui-doc.
+
   (lsp-auto-guess-root t)        ; Auto detect project root, based on projectile.
   (lsp-keep-workspace-alive t)
-  (lsp-ui-imenu-enable nil)
+  (lsp-enable-imenu nil)
   ;; (lsp-lens-enable t)
-  (lsp-completion-enable nil)
-  (lsp-display-inline-image nil)
-  (lsp-document-sync-method 'lsp--sync-incremental)
+  (lsp-signature-auto-activate nil)                    ; Don't auto pop the signatures as we have it already in eldoc and lsp-ui.
+  ;; (lsp-completion-enable nil)                       ; Disable completion from LSP in favor of tide.
+  (lsp-display-inline-image nil)                       ; Make sure we don't try to display graphics in the terminal.
+  ;; (lsp-document-sync-method 'lsp--sync-incremental) ; Set the sync mode to incremental to (try to) improve performance.
+  (lsp-document-sync-method 'lsp--sync-full)           ; Set the sync mode to full to (try to) avoid LSP getting lost all the time.
   :bind
   (:map lsp-mode-map
         ("C-c e"   . lsp-rename)
         )
   :config
   (lsp-enable-which-key-integration)
+  :config
   (use-package lsp-ui ;; Overlay UI components for LSP.
     :custom
     (lsp-ui-doc-position       'top)
@@ -221,7 +238,12 @@ _p_: undo  _n_: redo _s_: save _l_: load   "
     (lsp-ui-doc-use-childframe nil)
     ;; (lsp-ui-doc-enable         t)
     (lsp-ui-sideline-ignore-duplicate t)
-    ;; (lsp-ui-sideline-update-mode 'point)
+    (lsp-ui-sideline-show-code-actions t)
+    (lsp-ui-sideline-show-symbol t)
+    (lsp-ui-sideline-show-hover t)
+    (lsp-ui-doc-enable nil) ; lsp-ui-doc breaks the mouse resize.
+    (lsp-ui-imenu-enable nil)
+
     ;; (lsp-ui-doc-include-signature t)
     ;; (lsp-ui-peek-fontify 'always)
 
@@ -258,15 +280,15 @@ _p_: undo  _n_: redo _s_: save _l_: load   "
   :bind
   (:map company-active-map
         ("<tab>" . company-complete-common-or-cycle)
-        ("TAB" . company-complete-common-or-cycle)
-        ("C-n" . company-select-next)
-        ("C-p" . company-select-previous))
+        ("TAB"   . company-complete-common-or-cycle)
+        ("C-n"   . company-select-next)
+        ("C-p"   . company-select-previous))
   (:map company-search-map
         ("C-p" . company-select-previous)
         ("C-n" . company-select-next))
 
   :custom
-  ;(company-echo-delay 0)
+                                        ;(company-echo-delay 0)
   (company-idle-delay 0.2)
   (company-minimum-prefix-length 2)     ;; Show company after the first char typed.
   (company-tooltip-align-annotations t) ;; Align the completion popu.
@@ -283,11 +305,27 @@ _p_: undo  _n_: redo _s_: save _l_: load   "
   ;;:custom
   ;;(company-backends '()) ;; Clear the default backends.
   :config
+  (use-package company-quickhelp
+    :disabled
+    :defines company-quickhelp-delay
+    :bind (:map company-active-map
+                ("M-h" . company-quickhelp-manual-begin))
+    :hook (global-company-mode . company-quickhelp-mode)
+    :custom (company-quickhelp-delay 0.3)
+    :config
+    (use-package company-quickhelp-terminal
+      :disabled
+      ;:config
+      ;(company-quickhelp-terminal-mode 1)
+      )
+    )
+
   ;; LSP completion.
   (use-package company-lsp
+    :disabled
     :load-path "~/.emacs.files/libs"
     :preface
-    ;; Work around from https://github.com/tigersoldier/company-lsp/issues/145
+    ;; Work around from ht tps://github.com/tigersoldier/company-lsp/issues/145
     (defun lsp--sort-completions (completions)
       (lsp-completion--sort-completions completions))
     (defun lsp--annotate (item)
@@ -364,6 +402,7 @@ _p_: undo  _n_: redo _s_: save _l_: load   "
   ("M-]"         . mc/mark-all-like-this)          ;; Add new cursor with matching region.
   ("C-c SPC"     . set-rectangular-region-anchor)  ;; Rectangular region with many cursors.
   ("M-SPC"       . set-rectangular-region-anchor)  ;; Rectangular region with many cursors.
+  (:map mc/keymap ("C-y" . yank))
   :hydra (hydra-multiple-cursors (:hint nil)
                                  "
  Up^^             Down^^           Miscellaneous           % 2(mc/num-cursors) cursor%s(if (> (mc/num-cursors) 1) \"s\" \"\")
@@ -453,6 +492,11 @@ _p_: undo  _n_: redo _s_: save _l_: load   "
   ("C-c k" . kill-compilation)
   )
 
+(use-package smartparens :delight
+  :disabled
+  :hook (prog-mode . smartparens-mode)
+  )
+
 (use-package rainbow-delimiters :delight
   :hook (prog-mode . rainbow-delimiters-mode))
 
@@ -470,8 +514,8 @@ _p_: undo  _n_: redo _s_: save _l_: load   "
 ;  :config (global-git-gutter-mode t))
 
 (use-package flycheck
-  :ensure-system-package
-  (shellcheck . "echo 'Missing shellcheck binary.' >&2; exit 1")
+  :after nvm ; flycheck needs various binaries from npm to setup js/ts linters.
+  :ensure-system-package shellcheck
   :custom
   (flycheck-check-syntax-automatically '(save mode-enabled))
   ;; NOTE: Disabled in favor of flycheck-tip.
@@ -550,6 +594,7 @@ _p_: undo  _n_: redo _s_: save _l_: load   "
   :mode "\\.md\\'")
 
 (use-package grip-mode
+  :when window-system
   :ensure-system-package (grip . "pip3 install grip")
   :bind (:map markdown-mode-command-map
          ("g" . grip-mode)))
@@ -558,16 +603,6 @@ _p_: undo  _n_: redo _s_: save _l_: load   "
   :mode "Dockerfile" "\\'Dockerfile."
   :hook (dockerfile-mode . display-line-numbers-mode))
 (use-package docker-compose-mode)
-
-(use-package plantuml-mode :defer
-  :ensure-system-package java
-  :custom
-  (plantuml-jar-path "~/.emacs.d/plantuml.jar")
-  (plantuml-default-exec-mode 'jar)
-  :mode ("\\.puml\\'" "\\.uml\\'")
-  :config
-  (unless (file-exists-p plantuml-jar-path)
-    (plantuml-download-jar)))
 
 (use-package makefile-mode :defer :ensure nil
   :mode "Makefile" "\\.mk\\'"
@@ -587,64 +622,85 @@ _p_: undo  _n_: redo _s_: save _l_: load   "
   (terraform-mode . terraform-format-on-save-mode)
   )
 
-(use-package tide
+(use-package nvm
   :ensure-system-package
-  (tsserver . "source ~/.nvm/nvm.sh && nvm use --lts")
-  :after (web-mode js2-mode typescript-mode company flycheck prettier)
-  :preface
-  ;(defun creack/tide-references ()
-  ;  (interactive)
-  ;  (tide-references)
-  ;  (switch-to-buffer-other-window "*tide-references*")
-  ;  )
-  (defun setup-tide-mode ()
-    (interactive)
-    (tide-setup)
-    ;(tide-hl-identifier-mode +1) ; Needs to run after the setup. Can't be a hook.
-    ;(flycheck-add-next-checker 'javascript-tide 'javascript-eslint 'append)
-    ;(flycheck-add-next-checker 'typescript-tide 'javascript-eslint 'append)
-    (flycheck-add-next-checker 'tsx-tide 'javascript-eslint 'append)
-    (flycheck-add-next-checker 'jsx-tide 'javascript-eslint 'append)
-    (flycheck-mode +1)
-    (eldoc-mode +1)
-    (setq tide-completion-detailed t)
-    (company-mode +1)
-    (git-gutter-mode t)
-    (npm-mode t)
-    (define-key tide-mode-map [C-down-mouse-1] 'mouse-drag-region)
-    (define-key tide-mode-map [C-mouse-1] 'tide-jump-to-definition)
-    (define-key tide-mode-map (kbd "<backtab>") 'company-complete-common-or-cycle)
-    ;(define-key tide-mode-map (kbd "C-c e") 'tide-rename-symbol)
-    ;(define-key tide-mode-map (kbd "M-?") 'creack/tide-references)
+  (
+   ;; Make sure the required packaes are installed.
+   (tsc                        . "npm install --global typescript typescript-plugin-css-modules")
+   (typescript-language-server . "npm install --global typescript-language-server")
+   (tsserver                   . "npm install --global tide")
+   (prettier                   . "npm install --global prettier prettier-plugin-jsdoc")
+   (eslint                     . "npm install --global eslint eslint-plugin-jest eslint-plugin-prettier eslint-plugin-jsdoc eslint-formatter-gitlab @babel/core @babel/eslint-parser @babel/plugin-proposal-class-properties")
+   ;; Other language servers, to be tested.
+   (yaml-language-server       . "npm install --global yaml-language-server")
+   (bash-language-server       . "npm install --global bash-language-server")
+   (html-languageserver        . "npm install --global vscode-html-languageserver-bin")
+   (vscode-json-languageserver . "npm install --global vscode-json-languageserver")
 
-    )
+   ;; Not needed by emacs, but might as well put it somewhere as it is quite useful.
+   (npm-check-updates . "npm install --global npm-check-updates")
+   (yarn              . "npm install --global yarn")
+   (jsdoc             . "npm install --global jsdoc jsdoc-mermaid jsdoc-tsimport-plugin tsd-jsdoc tui-jsdoc-template")
+   (nodemon           . "npm install --global nodemon")
+   (create-react-app  . "npm install --global create-react-app")
+   )
+  :config
+  (nvm-use "14") ; NOTE: The nvm package doesn't support "latest" or "--lts".
+  )
+
+(use-package tide
+  :after (nvm web-mode typescript-mode company flycheck prettier)
+  :bind
+  (:map tide-mode-map
+        ;; ("<backtab>"      . company-tide)
+        ([C-down-mouse-1] . mouse-drag-region)
+        ([C-mouse-1]      . tide-jump-to-definition)
+        ("<f1>"           . tide-documentation-at-point)
+        ("C-c e"          . tide-rename-symbol)
+        ("C-c o"          . tide-organize-imports)
+        ([remap xref-find-definitions] . tide-jump-to-definition)
+        ([remap xref-find-references]  . tide-references)
+        )
+  :config
+  (flycheck-add-next-checker 'tsx-tide 'javascript-eslint 'append)
+  (flycheck-add-next-checker 'jsx-tide 'javascript-eslint 'append)
   :custom
   (tide-completion-detailed t)
   (tide-project-cleanup-delay 3600)
+  :hook
+  (web-mode    . tide-setup)                ; Start with web-mode.
+  ;; (tide-mode   . git-gutter-mode)           ; Git info in the maring.
+  ;; (tide-mode   . npm-mode)                  ; Set the npm mode to easily run scripts from package.json.
+  (tide-mode   . flycheck-mode)             ; Enable flycheck.
+  ;; (tide-mode   . display-line-numbers-mode) ; Show line numbers.
+  (before-save . tide-format-before-save)   ; NOTE: tide-format-before-save checks that we are in tide-mode, so it is safe to hook to the global 'before-save.
+  ;; (tide-mode   . lsp-deferred)           ; Start LSP.
   )
 
 (use-package js2-mode
-  ;:mode "\\.js$"
+  ;; :mode "\\.js$"
   :custom
   (js2-global-externs (list "window" "module" "require" "buster" "sinon" "assert" "refute" "setTimeout" "clearTimeout" "setInterval" "clearInterval" "location" "__dirname" "console" "JSON" "jQuery" "$"))
-  ;:hook
-  ;(js2-mode . setup-tide-mode)
+  ;; :hook
+  ;; (js2-mode . setup-tide-mode)
   )
 
 (use-package typescript-mode
-  :ensure-system-package
-  (tsc . "source ~/.nvm/nvm.sh && nvm use --lts")
-  ;:mode "\\.ts$"
-  ;:hook
-  ;(typescript-mode . setup-tide-mode)
+  :after nvm
+  ;; :mode "\\.ts$"
+  ;; :hook
+  ;; (typescript-mode . setup-tide-mode)
   )
 
 
 (use-package web-mode
   :after flycheck
   :mode "\\.js$" "\\.jsx$" "\\.ts$" "\\.tsx$"
-  ;:config
-  ;(flycheck-add-mode 'javascript-eslint 'web-mode)
+  :bind
+  (:map web-mode-map
+        ("C-c C-l" . display-line-numbers-mode)
+        ([mouse-2] . web-mode-fold-or-unfold)
+        )
   :custom
   ;; TODO: Document this.
   (web-mode-markup-indent-offset 2)
@@ -652,36 +708,39 @@ _p_: undo  _n_: redo _s_: save _l_: load   "
   (web-mode-code-indent-offset 2)
   (web-mode-comment-style 2)
 
-  ;(web-mode-enable-block-face t)
-  ;(web-mode-enable-comment-keywords t)
-  ;(web-mode-enable-heredoc-fontification t)
+  ;; (web-mode-enable-block-face t)
+  ;; (web-mode-enable-comment-keywords t)
+  ;; (web-mode-enable-heredoc-fontification t)
 
-  (web-mode-content-types-alist (("jsx" . "\\.js[x]?\\'") ("tsx" . "\\.ts[x]?\\'")))
+  ;; Register the file extension we want to use with web-mode. (web-mode specific, does not overlap with :mode keyword).
+  (web-mode-content-types-alist '(("jsx" . "\\.js[x]?\\'") ("tsx" . "\\.ts[x]?\\'")))
 
   (web-mode-enable-auto-closing t)
   (web-mode-enable-auto-pairing t)
 
   ;; Enable symbol highlight.
-  ;;(web-mode-enable-current-element-highlight t)
-  ;;(web-mode-enable-current-column-highlight t) ;; Conflicts with origami. See if lsp-fold helps.
-  :config (flycheck-add-mode 'typescript-tslint 'web-mode)
+  ;; (web-mode-enable-current-element-highlight t)
+  ;; (web-mode-enable-current-column-highlight t) ;; Conflicts with origami. See if lsp-fold helps.
+  :config
+  (flycheck-add-mode 'typescript-tslint 'web-mode)
   (flycheck-add-mode 'javascript-eslint 'web-mode)
-
-  :bind (:map web-mode-map ("C-c C-l" . display-line-numbers-mode))
   :hook
-  (web-mode . setup-tide-mode)
-  (web-mode . lsp)
-  (before-save . (lambda()
+  ;; (web-mode . lsp-deferred)
+  (web-mode . tide-setup)
+  ;; (web-mode . git-gutter-mode)           ; Git info in the maring.
+  (web-mode . npm-mode)                  ; Set the npm mode to easily run scripts from package.json.
+  ;; (web-mode . display-line-numbers-mode) ; Show line numbers.
+  (before-save . (lambda ()
                    (when (eq major-mode 'web-mode)
-                      (tide-format-before-save)
-                     ;;(lsp-format-buffer)
-                     ;;(lsp-organize-imports)
-                     )))
+                     ;; (lsp-format-buffer)
+                     ;; (lsp-organize-imports)
+                     )
+                   )
+               )
   )
 
 (use-package prettier :delight
-  :ensure-system-package
-  (prettier . "source ~/.nvm/nvm.sh && nvm use --lts")
+  :after nvm
   :config
   (global-prettier-mode t)
   )
