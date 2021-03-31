@@ -18,6 +18,8 @@
 
   (add-to-list 'treemacs-ignored-file-predicates #'treemacs-ignore-example))
 
+(use-package npm-mode)
+
 
 (bind-key [mouse-2] #'origami-recursively-toggle-node)
 ;; (profiler-start 'cpu)
@@ -33,26 +35,31 @@
   (message "Native compilation is available")
   (message "Native complation is *not* available"))
 
-;(setq
-; lsp-eslint-server-command '("node" "/home/creack/Downloads/vscode-eslint/server/out/eslintServer.js" "--stdio")
-;  )
+(setq
+ lsp-eslint-server-command '("node" "/home/creack/Downloads/vscode-eslint/server/out/eslintServer.js" "--stdio")
+ )
+;; (tide-setup)
+;; (nvm-use)
 
 (use-package treemacs
+  :bind
+  ("<f5>" . treemacs)
   :config
   (use-package lsp-treemacs
+    :disabled
+    :custom
+    (lsp-treemacs-error-list-severity 4)
     :config
     (lsp-treemacs-sync-mode 1)
     )
-  (use-package treemacs-projectile)
+  (use-package treemacs-projectile
+    :after projectile
+    )
   :custom
   (treemacs-is-never-other-window t)
   (treemacs-show-hidden-files nil)
   (treemacs-width 20)
   )
-
-(use-package js-react-redux-yasnippets)
-
-(use-package eldoc :delight)
 
 (use-package yasnippet
   :after hydra
@@ -159,7 +166,7 @@ _B_uffers (3-way)   _F_iles (3-way)                          _w_ordwise
   :bind ("M-o" . ace-window)
   )
 
-(use-package tab-bar :ensure nil
+(use-package tab-bar
   :after hydra
   :custom
   (tab-bar-close-button-show nil)
@@ -187,24 +194,24 @@ _B_uffers (3-way)   _F_iles (3-way)                          _w_ordwise
 (use-package git-gutter :delight
   :config
   (set-face-foreground 'git-gutter:separator "#49483E")
-  (set-face-foreground 'git-gutter:modified "#66D9EF")
-  (set-face-foreground 'git-gutter:added "#A6E22E")
-  (set-face-foreground 'git-gutter:deleted "#F92672")
+  (set-face-foreground 'git-gutter:modified  "#66D9EF")
+  (set-face-foreground 'git-gutter:added     "#A6E22E")
+  (set-face-foreground 'git-gutter:deleted   "#F92672")
   (set-face-background 'git-gutter:separator nil)
-  (set-face-background 'git-gutter:modified nil)
-  (set-face-background 'git-gutter:added nil)
-  (set-face-background 'git-gutter:deleted nil)
-  ;:custom
-  ;(git-gutter:window-width 2)
-  ;(git-gutter:modified-sign "☁")
-  ;(git-gutter:added-sign "☀")
-  ;(git-gutter:deleted-sign "☂")
-  :bind ("C-x g" . git-gutter-mode)
-  ;;:hook
-  ;;(after-init . global-git-gutter-mode)
+  (set-face-background 'git-gutter:modified  nil)
+  (set-face-background 'git-gutter:added     nil)
+  (set-face-background 'git-gutter:deleted   nil)
+  ;; :custom
+  ;; (git-gutter:window-width 2)
+  ;; (git-gutter:modified-sign "☁")
+  ;; (git-gutter:added-sign "☀")
+  ;; (git-gutter:deleted-sign "☂")
+  ;; :bind ("C-x C-g" . git-gutter-mode)
+  ;; :hook
+  ;; (after-init . global-git-gutter-mode)
   )
 
-(use-package emacs :ensure nil
+(use-package emacs
   :after hydra
   :bind
   ("M-g"     . hydra-goto-line/body)
@@ -219,11 +226,12 @@ _B_uffers (3-way)   _F_iles (3-way)                          _w_ordwise
            ("q" nil "quit"))
   )
 
-(use-package emacs :ensure nil
+(use-package emacs
   :after hydra
   :bind
   ("M-y" . hydra-yank-pop/yank-pop)
   ("C-y" . hydra-yank-pop/yank)
+  ("C-c C-y" . yank)
   :hydra (hydra-yank-pop ()
            "yank"
            ("C-y" yank nil)
@@ -236,7 +244,7 @@ _B_uffers (3-way)   _F_iles (3-way)                          _w_ordwise
   )
 
 
-(use-package emacs :ensure nil
+(use-package emacs
   :after hydra
   :bind
   ("C-n". hydra-move/body)
@@ -255,7 +263,7 @@ _B_uffers (3-way)   _F_iles (3-way)                          _w_ordwise
            ("l" recenter-top-bottom))
   )
 
-(use-package emacs :ensure nil
+(use-package emacs
   :after (hydra lsp)
   :bind
   (:map lsp-mode-map
@@ -291,7 +299,7 @@ _B_uffers (3-way)   _F_iles (3-way)                          _w_ordwise
 ;; (global-set-key (kbd "<mouse-5>") (lambda() (interactive) (scroll-up 5))))
 ;; (company-complete-common-or-cycle)
 
-(use-package emacs :ensure nil
+(use-package emacs
   :after hydra
   :bind
   ("C-c h s" . hydra-flyspell/body)
@@ -480,142 +488,150 @@ lower-cased."
            ("gg" . hydra-goto-line/goto-line))
   )
 
-(with-eval-after-load 'org
-  (defvar-local rasmus/org-at-src-begin -1
-    "Variable that holds whether last position was a ")
+;; (with-eval-after-load 'org
+;;   (defvar-local rasmus/org-at-src-begin -1
+;;     "Variable that holds whether last position was a ")
+;;
+;;   (defvar rasmus/ob-header-symbol ?☰
+;;     "Symbol used for babel headers")
+;;
+;;   (defun rasmus/org-prettify-src--update ()
+;;     (let ((case-fold-search t)
+;;           (re "^[ \t]*#\\+begin_src[ \t]+[^ \f\t\n\r\v]+[ \t]*")
+;;           found)
+;;       (save-excursion
+;;         (goto-char (point-min))
+;;         (while (re-search-forward re nil t)
+;;           (goto-char (match-end 0))
+;;           (let ((args (org-trim
+;;                        (buffer-substring-no-properties (point)
+;;                                                        (line-end-position)))))
+;;             (when (org-string-nw-p args)
+;;               (let ((new-cell (cons args rasmus/ob-header-symbol)))
+;;                 (cl-pushnew new-cell prettify-symbols-alist :test #'equal)
+;;                 (cl-pushnew new-cell found :test #'equal)))))
+;;         (setq prettify-symbols-alist
+;;               (cl-set-difference prettify-symbols-alist
+;;                                  (cl-set-difference
+;;                                   (cl-remove-if-not
+;;                                    (lambda (elm)
+;;                                      (eq (cdr elm) rasmus/ob-header-symbol))
+;;                                    prettify-symbols-alist)
+;;                                   found :test #'equal)))
+;;         ;; Clean up old font-lock-keywords.
+;;         (font-lock-remove-keywords nil prettify-symbols--keywords)
+;;         (setq prettify-symbols--keywords (prettify-symbols--make-keywords))
+;;         (font-lock-add-keywords nil prettify-symbols--keywords)
+;;         (while (re-search-forward re nil t)
+;;           (font-lock-flush (line-beginning-position) (line-end-position))))))
+;;
+;;   (defun rasmus/org-prettify-src ()
+;;     "Hide src options via `prettify-symbols-mode'.
+;;
+;;   `prettify-symbols-mode' is used because it has uncollpasing. It's
+;;   may not be efficient."
+;;     (let* ((case-fold-search t)
+;;            (at-src-block (save-excursion
+;;                            (beginning-of-line)
+;;                            (looking-at "^[ \t]*#\\+begin_src[ \t]+[^ \f\t\n\r\v]+[ \t]*"))))
+;;       ;; Test if we moved out of a block.
+;;       (when (or (and rasmus/org-at-src-begin
+;;                      (not at-src-block))
+;;                 ;; File was just opened.
+;;                 (eq rasmus/org-at-src-begin -1))
+;;         (rasmus/org-prettify-src--update))
+;;       ;; Remove composition if at line; doesn't work properly.
+;;       (when at-src-block
+;;         (with-silent-modifications
+;;           (remove-text-properties (match-end 0)
+;;                                   (1+ (line-end-position))
+;;                                   '(composition))))
+;;       (setq rasmus/org-at-src-begin at-src-block)))
+;;
+;;   (defun rasmus/org-prettify-symbols ()
+;;     (mapc (apply-partially 'add-to-list 'prettify-symbols-alist)
+;;           (cl-reduce 'append
+;;                      (mapcar (lambda (x) (list x (cons (upcase (car x)) (cdr x))))
+;;                              `(("#+begin_src" . ?⇲) ;; ➤ 🖝 ➟ ➤ ✎
+;;                                ("#+end_src"   . ?⇱) ;;
+;;                                ("#+header:" . ,rasmus/ob-header-symbol)
+;;                                ("#+begin_quote" . ?»)
+;;                                ("#+end_quote" . ?«)))))
+;;     (turn-on-prettify-symbols-mode)
+;;     (add-hook 'post-command-hook 'rasmus/org-prettify-src t t))
+;;   (add-hook 'org-mode-hook #'rasmus/org-prettify-symbols))
 
-  (defvar rasmus/ob-header-symbol ?☰
-    "Symbol used for babel headers")
+(use-package beacon
+  :pin melpa
+  :config
+  (beacon-mode 1)
+  :custom
+  (beacon-blink-when-window-scrolls nil)
+  (beacon-blink-when-point-moves-horizontally 10)
+  (beacon-blink-when-point-moves-vertically 40)
+  )
 
-  (defun rasmus/org-prettify-src--update ()
-    (let ((case-fold-search t)
-          (re "^[ \t]*#\\+begin_src[ \t]+[^ \f\t\n\r\v]+[ \t]*")
-          found)
-      (save-excursion
-        (goto-char (point-min))
-        (while (re-search-forward re nil t)
-          (goto-char (match-end 0))
-          (let ((args (org-trim
-                       (buffer-substring-no-properties (point)
-                                                       (line-end-position)))))
-            (when (org-string-nw-p args)
-              (let ((new-cell (cons args rasmus/ob-header-symbol)))
-                (cl-pushnew new-cell prettify-symbols-alist :test #'equal)
-                (cl-pushnew new-cell found :test #'equal)))))
-        (setq prettify-symbols-alist
-              (cl-set-difference prettify-symbols-alist
-                                 (cl-set-difference
-                                  (cl-remove-if-not
-                                   (lambda (elm)
-                                     (eq (cdr elm) rasmus/ob-header-symbol))
-                                   prettify-symbols-alist)
-                                  found :test #'equal)))
-        ;; Clean up old font-lock-keywords.
-        (font-lock-remove-keywords nil prettify-symbols--keywords)
-        (setq prettify-symbols--keywords (prettify-symbols--make-keywords))
-        (font-lock-add-keywords nil prettify-symbols--keywords)
-        (while (re-search-forward re nil t)
-          (font-lock-flush (line-beginning-position) (line-end-position))))))
+(use-package org-roam
+  :hook
+  (after-init . org-roam-mode)
+  (org-mode . (lambda ()
+                       (set (make-local-variable 'time-stamp-pattern)
+                         "8/^#\\+LAST_MODIFIED:[ \t]+\\\\?[\"<]+%%\\\\?[\">]")
+                       ))
+  (before-save . (lambda ()
+                   (when (eq major-mode 'org-mode)
+                       (time-stamp)
+                     )
+                   )
+      )
+  :custom
+  (org-roam-directory "~/.emacs.files/roam/")
+  :custom ; Custom vars for time-stamp org-mode.
+  (time-stamp-active t)
+  (time-stamp-format "%Y-%m-%d %3a %02I:%02M%P %Z")
 
-  (defun rasmus/org-prettify-src ()
-    "Hide src options via `prettify-symbols-mode'.
-
-  `prettify-symbols-mode' is used because it has uncollpasing. It's
-  may not be efficient."
-    (let* ((case-fold-search t)
-           (at-src-block (save-excursion
-                           (beginning-of-line)
-                           (looking-at "^[ \t]*#\\+begin_src[ \t]+[^ \f\t\n\r\v]+[ \t]*"))))
-      ;; Test if we moved out of a block.
-      (when (or (and rasmus/org-at-src-begin
-                     (not at-src-block))
-                ;; File was just opened.
-                (eq rasmus/org-at-src-begin -1))
-        (rasmus/org-prettify-src--update))
-      ;; Remove composition if at line; doesn't work properly.
-      (when at-src-block
-        (with-silent-modifications
-          (remove-text-properties (match-end 0)
-                                  (1+ (line-end-position))
-                                  '(composition))))
-      (setq rasmus/org-at-src-begin at-src-block)))
-
-  (defun rasmus/org-prettify-symbols ()
-    (mapc (apply-partially 'add-to-list 'prettify-symbols-alist)
-          (cl-reduce 'append
-                     (mapcar (lambda (x) (list x (cons (upcase (car x)) (cdr x))))
-                             `(("#+begin_src" . ?⇲) ;; ➤ 🖝 ➟ ➤ ✎
-                               ("#+end_src"   . ?⇱) ;;
-                               ("#+header:" . ,rasmus/ob-header-symbol)
-                               ("#+begin_quote" . ?»)
-                               ("#+end_quote" . ?«)))))
-    (turn-on-prettify-symbols-mode)
-    (add-hook 'post-command-hook 'rasmus/org-prettify-src t t))
-  (add-hook 'org-mode-hook #'rasmus/org-prettify-symbols))
-
-
-;(display-buffer-in-side-window)
-(use-package emacs
-  :after hydra
-  :bind ("C-c h w" . hydra-window/body)
-  :hydra (hydra-window ()
-   "
-Movement^^        ^Split^         ^Switch^		^Resize^
-----------------------------------------------------------------
-_h_ ←       	_v_ertical    	_b_uffer		_q_ X←
-_j_ ↓        	_x_ horizontal	_f_ind files	_w_ X↓
-_k_ ↑        	_z_ undo      	_a_ce 1		_e_ X↑
-_l_ →        	_Z_ reset      	_s_wap		_r_ X→
-_F_ollow		_D_lt Other   	_S_ave		max_i_mize
-_SPC_ cancel	_o_nly this   	_d_elete
-"
-   ("h" windmove-left )
-   ("j" windmove-down )
-   ("k" windmove-up )
-   ("l" windmove-right )
-   ("q" hydra-move-splitter-left)
-   ("w" hydra-move-splitter-down)
-   ("e" hydra-move-splitter-up)
-   ("r" hydra-move-splitter-right)
-   ("b" helm-mini)
-   ("f" helm-find-files)
-   ("F" follow-mode)
-   ("a" (lambda ()
-          (interactive)
-          (ace-window 1)
-          (add-hook 'ace-window-end-once-hook
-                    'hydra-window/body))
-       )
-   ("v" (lambda ()
-          (interactive)
-          (split-window-right)
-          (windmove-right))
-       )
-   ("x" (lambda ()
-          (interactive)
-          (split-window-below)
-          (windmove-down))
-       )
-   ("s" (lambda ()
-          (interactive)
-          (ace-window 4)
-          (add-hook 'ace-window-end-once-hook
-                    'hydra-window/body)))
-   ("S" save-buffer)
-   ("d" delete-window)
-   ("D" (lambda ()
-          (interactive)
-          (ace-window 16)
-          (add-hook 'ace-window-end-once-hook
-                    'hydra-window/body))
-       )
-   ("o" delete-other-windows)
-   ("i" ace-maximize-window)
-   ("z" (progn
-          (winner-undo)
-          (setq this-command 'winner-undo))
-   )
-   ("Z" winner-redo)
-   ("SPC" nil)
-   )
+  :custom ; Custom varsfor org-roam-dailies.
+  (org-roam-dailies-directory "daily/")
+  (org-roam-dailies-capture-templates
+    '(
+       ("d" "default" entry
+         #'org-roam-capture--get-point
+         "* [%<%02I:%02M%P>] %?\n%i\n%a"
+         :file-name "daily/%<%Y-%m-%d>"
+         :empty-lines 1 ; Add a new-line before and after the entry.
+         :head "#+TITLE: %<%Y-%m-%d>\n#+CREATED: [%<%Y-%m-%d %3a %I:%M%p %Z>]\n#+LAST_MODIFIED: <>\n#+ROAM_ALIAS: \n#+ROAM_TAGS: "
+         :unnarrowed t ; When nil, hide the rest of the file, showing only new content.
+         )
+       ("l" "lab" entry
+         #'org-roam-capture--get-point
+         "* %?"
+         :file-name "daily/%<%Y-%m-%d>"
+         :head "#+title: %<%Y-%m-%d>\n"
+         :clock-in t
+         :olp ("Lab notes")
+         )
+       ("j" "journal" entry
+         #'org-roam-capture--get-point
+         "* %?"
+         :file-name "daily/%<%Y-%m-%d>"
+         :head "#+title: %<%Y-%m-%d>\n"
+         :time-prompt t
+         :olp ("Journal")
+         )
+       ))
+  :bind (:map org-roam-mode-map
+          ("C-c n l" . org-roam)
+          ("C-c n r" . org-roam-buffer-toggle-display)
+          ("C-c n b" . org-roam-switch-to-buffer)
+          ("C-c n d" . org-roam-find-directory)
+          ("C-c n f" . org-roam-find-file)
+          ("C-c n g" . org-roam-graph)
+          ("C-c n c" . org-roam-capture)
+          ("C-c n t" . org-roam-dailies-capture-today)
+          ("C-c n T" . org-roam-dailies-find-today)
+          )
+  :bind (:map org-mode-map
+          ("C-c n i" . org-roam-insert)
+          ("C-c n I" . org-roam-insert-immediate)
+          )
   )
