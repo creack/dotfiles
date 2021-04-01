@@ -18,7 +18,7 @@
 
   (add-to-list 'treemacs-ignored-file-predicates #'treemacs-ignore-example))
 
-(use-package npm-mode)
+;(use-package npm-mode)
 
 
 (bind-key [mouse-2] #'origami-recursively-toggle-node)

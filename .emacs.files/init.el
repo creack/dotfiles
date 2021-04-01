@@ -439,7 +439,7 @@ _p_: undo  _n_: redo _s_: save _l_: load   "
   )
 
 (use-package gruvbox-theme
-  :config (load-theme 'monokai t)
+  :config (load-theme 'gruvbox t)
   )
 
 (unless window-system
@@ -728,7 +728,7 @@ _p_: undo  _n_: redo _s_: save _l_: load   "
   ;; (web-mode . lsp-deferred)
   (web-mode . tide-setup)
   ;; (web-mode . git-gutter-mode)           ; Git info in the maring.
-  (web-mode . npm-mode)                  ; Set the npm mode to easily run scripts from package.json.
+  ;; (web-mode . npm-mode)                  ; Set the npm mode to easily run scripts from package.json.
   ;; (web-mode . display-line-numbers-mode) ; Show line numbers.
   (before-save . (lambda ()
                    (when (eq major-mode 'web-mode)

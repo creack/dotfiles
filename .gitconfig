@@ -24,6 +24,9 @@
   diff        = true
   status      = true
 
+[pull]
+  rebase = true
+
 [merge]
   tool = ediff
 
