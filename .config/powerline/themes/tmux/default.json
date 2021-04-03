@@ -7,16 +7,19 @@
         "priority": 10,
         "args": {
           "minimum": 1
-        }
+        },
+        "display": false
       },
       {
-        "function": "powerline.segments.common.env.user"
+        "function": "powerline.segments.common.env.user",
+        "draw_soft_divider": false
       }
     ],
     "right": [
       {
         "function": "powerline.segments.common.sys.system_load",
-        "priority": 50
+        "priority": 50,
+        "draw_hard_divider": false
       },
       {
         "function": "powerline.segments.common.sys.uptime",
