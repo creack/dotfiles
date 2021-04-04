@@ -8,10 +8,7 @@
                          )
       )
 
-(if package-archive-contents
-    (package-refresh-contents t)
-    (package-refresh-contents)
-  )
+(package-refresh-contents)
 
 (unless (package-installed-p 'use-package)
   ;; (package-refresh-contents)
@@ -105,8 +102,8 @@
 (bind-key "s-v" 'yank)
 (bind-key "s-z" 'undo)
 
-;; (bind-key "C-c C-c" 'comment-region)
-;; (bind-key "C-c C-u" 'uncomment-region)
+(bind-key "C-c C-c" 'comment-region)
+(bind-key "C-c C-u" 'uncomment-region)
 
 (bind-key "C-c C-l" 'display-line-numbers-mode)
 
@@ -185,6 +182,7 @@ _p_: undo  _n_: redo _s_: save _l_: load   "
   )
 
 (use-package flyspell :delight
+  :disabled
   :ensure-system-package aspell
   :hook
   ((web-mode org-mode yaml-mode markdown-mode git-commit-mode) . flyspell-mode)
@@ -390,9 +388,12 @@ _p_: undo  _n_: redo _s_: save _l_: load   "
 ;; (use-package gruvbox-theme     :config (load-theme 'gruvbox-dark-hard t))
 
 (use-package nord-theme
-  :hook
-  (server-after-make-frame . (lambda () (load-theme 'nord t)))
-  )
+:config
+(unless (daemonp)
+  (load-theme 'nord t))
+:hook
+(server-after-make-frame . (lambda () (load-theme 'nord t)))
+)
 
 (unless window-system
   (set-display-table-slot standard-display-table 'vertical-border (make-glyph-code ?│))
@@ -425,7 +426,6 @@ _p_: undo  _n_: redo _s_: save _l_: load   "
   )
 
 (use-package emacs
-  :disabled ;; Try without for a while see if still needed.
   :bind
   ("C-c r"  . (lambda() (interactive) (save-some-buffers t) (recompile)))
   ("C-c k" . kill-compilation)
@@ -575,6 +575,9 @@ _p_: undo  _n_: redo _s_: save _l_: load   "
   )
 
 (use-package terraform-mode :defer
+  :config
+  (use-package company-terraform
+    :config (company-terraform-init))
   :hook
   (terraform-mode . yas-minor-mode)
   (terraform-mode . terraform-format-on-save-mode)
@@ -601,6 +604,8 @@ _p_: undo  _n_: redo _s_: save _l_: load   "
    (jsdoc             . "npm install --global jsdoc jsdoc-mermaid jsdoc-tsimport-plugin tsd-jsdoc tui-jsdoc-template")
    (nodemon           . "npm install --global nodemon")
    (create-react-app  . "npm install --global create-react-app")
+   (openapi           . "npm install --global @redocly/openapi")
+   (redoc-cli         . "npm install --global redoc-cli")
    )
 
   :config
@@ -750,7 +755,8 @@ _p_: undo  _n_: redo _s_: save _l_: load   "
      (test . t)
      (regenerate_cgo . t)
      (generate . t)
-     (gc_details . t))
+     ;; (gc_details . t)
+     )
    )
   (lsp-go-link-target      "pkg.go.dev")
   (lsp-go-links-in-hover   nil)

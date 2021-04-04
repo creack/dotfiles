@@ -29,10 +29,7 @@ Setting the TLS version is needed in emacs 26 to be able to pull from the gnu.or
 If =use-package= is not installed, install it.
 
 #+begin_src emacs-lisp :tangle yes
-  (if package-archive-contents
-      (package-refresh-contents t)
-      (package-refresh-contents)
-    )
+  (package-refresh-contents)
 
   (unless (package-installed-p 'use-package)
     ;; (package-refresh-contents)
@@ -230,8 +227,8 @@ Use =super= for copy/paste and undo to make for a better integration with window
 Set globally comment/uncomment.
 
 #+begin_src emacs-lisp :tangle yes
-  ;; (bind-key "C-c C-c" 'comment-region)
-  ;; (bind-key "C-c C-u" 'uncomment-region)
+  (bind-key "C-c C-c" 'comment-region)
+  (bind-key "C-c C-u" 'uncomment-region)
 #+end_src
 
 Quickly toggle the line numbers in the margin.
@@ -378,6 +375,7 @@ Show the available next key bindings.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package flyspell :delight
+    :disabled
     :ensure-system-package aspell
     :hook
     ((web-mode org-mode yaml-mode markdown-mode git-commit-mode) . flyspell-mode)
@@ -657,9 +655,12 @@ Install and enable the theme.
   ;; (use-package gruvbox-theme     :config (load-theme 'gruvbox-dark-hard t))
 
   (use-package nord-theme
-    :hook
-    (server-after-make-frame . (lambda () (load-theme 'nord t)))
-    )
+  :config
+  (unless (daemonp)
+    (load-theme 'nord t))
+  :hook
+  (server-after-make-frame . (lambda () (load-theme 'nord t)))
+  )
 
 
 #+end_src
@@ -719,7 +720,6 @@ Create bindings to quickly recompile and kill the running command.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package emacs
-    :disabled ;; Try without for a while see if still needed.
     :bind
     ("C-c r"  . (lambda() (interactive) (save-some-buffers t) (recompile)))
     ("C-c k" . kill-compilation)
@@ -990,6 +990,9 @@ Enable Terraform major mode with snippet support.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package terraform-mode :defer
+    :config
+    (use-package company-terraform
+      :config (company-terraform-init))
     :hook
     (terraform-mode . yas-minor-mode)
     (terraform-mode . terraform-format-on-save-mode)
@@ -1022,6 +1025,8 @@ Use =nvm= to manage the node version.
      (jsdoc             . "npm install --global jsdoc jsdoc-mermaid jsdoc-tsimport-plugin tsd-jsdoc tui-jsdoc-template")
      (nodemon           . "npm install --global nodemon")
      (create-react-app  . "npm install --global create-react-app")
+     (openapi           . "npm install --global @redocly/openapi")
+     (redoc-cli         . "npm install --global redoc-cli")
      )
 
     :config
@@ -1181,11 +1186,12 @@ Go setup.
        (test . t)
        (regenerate_cgo . t)
        (generate . t)
-       (gc_details . t))
+       ;; (gc_details . t)
+       )
      )
     (lsp-go-link-target      "pkg.go.dev")
     (lsp-go-links-in-hover   nil)
-    (lsp-go-use-placeholders t)
+    ;; (lsp-go-use-placeholders t)
     (lsp-go-use-gofumpt      t)
 
     :custom ; Go-mode settings.
