@@ -1,6 +1,6 @@
 ;; -*- lexical-binding: t; -*-
 
-(toggle-debug-on-error)
+;; (toggle-debug-on-error)
 (package-initialize)
 (org-babel-load-file "~/.emacs.files/init.org")
 
@@ -342,71 +342,75 @@
 	     )
 
 (use-package org-roam :delight " Roam"
-	     :hook
-	     (after-init . org-roam-mode)
-	     (org-mode . (lambda ()
-			   (set (make-local-variable 'time-stamp-pattern)
-				"8/^#\\+LAST_MODIFIED:[ \t]+\\\\?[\"<]+%%\\\\?[\">]")
-			   ))
-	     (before-save . (lambda ()
-			      (when (eq major-mode 'org-mode)
-				(time-stamp)
-				)
-			      )
-			  )
-	     :custom
-	     (org-roam-directory "~/.emacs.files/roam/")
-	     :custom ; Custom vars for time-stamp org-mode.
-	     (time-stamp-active t)
-	     (time-stamp-format "%Y-%m-%d %3a %02I:%02M%P %Z")
+	:hook
+	(after-init . org-roam-mode)
+	(org-mode . (lambda ()
+			          (set (make-local-variable 'time-stamp-pattern)
+				          "8/^#\\+LAST_MODIFIED:[ \t]+\\\\?[\"<]+%%\\\\?[\">]")
+			          ))
+	(before-save . (lambda ()
+			             (when (eq major-mode 'org-mode)
+				             (time-stamp)
+				             )
+			             )
+		)
+	:custom
+	(org-roam-directory "~/.emacs.files/roam/")
+	:custom ; Custom vars for time-stamp org-mode.
+	(time-stamp-active t)
+	(time-stamp-format "%Y-%m-%d %3a %02I:%02M%P %Z")
 
-	     :custom ; Custom varsfor org-roam-dailies.
-	     (org-roam-dailies-directory "daily/")
-	     (org-roam-dailies-capture-templates
-	      '(
-		("d" "default" entry
-		 #'org-roam-capture--get-point
-		 "* [%<%02I:%02M%P>] %?\n%i\n%a"
-		 :file-name "daily/%<%Y-%m-%d>"
-		 :empty-lines 1 ; Add a new-line before and after the entry.
-		 :head "#+TITLE: %<%Y-%m-%d>\n#+CREATED: [%<%Y-%m-%d %3a %I:%M%p %Z>]\n#+LAST_MODIFIED: <>\n#+ROAM_ALIAS: \n#+ROAM_TAGS: "
-		 :unnarrowed t ; When nil, hide the rest of the file, showing only new content.
-		 )
-		("l" "lab" entry
-		 #'org-roam-capture--get-point
-		 "* %?"
-		 :file-name "daily/%<%Y-%m-%d>"
-		 :head "#+title: %<%Y-%m-%d>\n"
-		 :clock-in t
-		 :olp ("Lab notes")
-		 )
-		("j" "journal" entry
-		 #'org-roam-capture--get-point
-		 "* %?"
-		 :file-name "daily/%<%Y-%m-%d>"
-		 :head "#+title: %<%Y-%m-%d>\n"
-		 :time-prompt t
-		 :olp ("Journal")
-		 )
-		))
-	     :bind
-	     (:map org-roam-mode-map
-		   ("C-c n l" . org-roam)
-		   ("C-c n r" . org-roam-buffer-toggle-display)
-		   ("C-c n b" . org-roam-switch-to-buffer)
-		   ("C-c n d" . org-roam-find-directory)
-		   ("C-c n f" . org-roam-find-file)
-		   ("C-c n g" . org-roam-graph)
-		   ("C-c n c" . org-roam-capture)
-		   ("C-c n t" . org-roam-dailies-capture-today)
-		   ("C-c n T" . org-roam-dailies-find-today)
-		   )
-	     :bind
-	     (:map org-mode-map
-		   ("C-c n i" . org-roam-insert)
-		   ("C-c n I" . org-roam-insert-immediate)
-		   )
-	     )
+	:custom ; Custom varsfor org-roam-dailies.
+	(org-roam-dailies-directory "daily/")
+	(org-roam-dailies-capture-templates
+	  '(
+		   ("d" "default" entry
+		     #'org-roam-capture--get-point
+		     "* [%<%02I:%02M%P>] %?\n%i\n%a"
+		     :file-name "daily/%<%Y-%m-%d>"
+		     :empty-lines 1 ; Add a new-line before and after the entry.
+		     :head "#+TITLE: %<%Y-%m-%d>\n#+CREATED: [%<%Y-%m-%d %3a %I:%M%p %Z>]\n#+LAST_MODIFIED: <>\n#+ROAM_ALIAS: \n#+ROAM_TAGS: "
+		     :unnarrowed t ; When nil, hide the rest of the file, showing only new content.
+		     )
+		   ("l" "lab" entry
+		     #'org-roam-capture--get-point
+		     "* %?"
+		     :file-name "daily/%<%Y-%m-%d>"
+		     :head "#+TITLE: %<%Y-%m-%d>\n#+CREATED: [%<%Y-%m-%d %3a %I:%M%p %Z>]\n#+LAST_MODIFIED: <>\n#+ROAM_ALIAS: \n#+ROAM_TAGS: "
+		     :clock-in t
+         :clock-keep t
+         :clock-resume t
+		     :unnarrowed t ; When nil, hide the rest of the file, showing only new content.
+		     :olp ("Lab notes with clock")
+		     )
+		   ("j" "journal" entry
+		     #'org-roam-capture--get-point
+		     "* %?"
+		     :file-name "daily/%<%Y-%m-%d>"
+		     :head "#+TITLE: %<%Y-%m-%d>\n#+CREATED: [%<%Y-%m-%d %3a %I:%M%p %Z>]\n#+LAST_MODIFIED: <>\n#+ROAM_ALIAS: \n#+ROAM_TAGS: "
+		     :time-prompt t
+		     :unnarrowed t ; When nil, hide the rest of the file, showing only new content.
+		     :olp ("Journal")
+		     )
+		   ))
+	:bind
+	(:map org-roam-mode-map
+		("C-c n l" . org-roam)
+		("C-c n r" . org-roam-buffer-toggle-display)
+		("C-c n b" . org-roam-switch-to-buffer)
+		("C-c n d" . org-roam-find-directory)
+		("C-c n f" . org-roam-find-file)
+		("C-c n g" . org-roam-graph)
+		("C-c n c" . org-roam-capture)
+		("C-c n t" . org-roam-dailies-capture-today)
+		("C-c n T" . org-roam-dailies-find-today)
+		)
+	:bind
+	(:map org-mode-map
+		("C-c n i" . org-roam-insert)
+		("C-c n I" . org-roam-insert-immediate)
+		)
+	)
 
 
  ;;;;;;;;;;
@@ -420,12 +424,12 @@
   (setq-default eglot-workspace-configuration
 		'((:gopls .
 			  (
-			   ;; (staticcheck . t)
-			   (completeUnimported          . t)
-			   (usePlaceholders             . t)
-			   (expandWorkspaceToModule     . t)
-			   (experimentalWorkspaceModule . t)
-			   ))))
+			    ;; (staticcheck . t)
+			    (completeUnimported          . t)
+			    (usePlaceholders             . t)
+			    (expandWorkspaceToModule     . t)
+			    (experimentalWorkspaceModule . t)
+			    ))))
   )
 
 (use-package flymake
@@ -433,12 +437,34 @@
   )
 
 (use-package flycheck-golangci-lint
-  :after flycheck
+  :after (flycheck)
   :hook
   (flycheck-mode  . flycheck-golangci-lint-setup)
   (lsp-after-open . (lambda() (flycheck-add-next-checker 'lsp 'golangci-lint 'append)))
   )
 
-;; lsp-ui-doc--make-clickable-link
-;; (lsp-ui-doc--setup-markdown)
-(setq lsp-ui-doc-frame-hook #'(lambda() (message "hello!")))
+
+(use-package auto-package-update
+  :custom
+  (auto-package-update-delete-old-versions t)
+  (auto-package-update-interval 4)
+  :config
+  (auto-package-update-maybe)
+  (auto-package-update-at-time "03:00")
+  )
+
+(use-package flycheck-yamllint
+  :after (flycheck)
+  :ensure-system-package
+  (yamllint . "pip3 install yamllint")
+  :config
+  (flycheck-yamllint-setup)
+  :hook
+  (yaml-mode     . flycheck-mode)
+  )
+
+(use-package gitlab-ci-mode
+  :after (flycheck)
+  :config
+  (flycheck-add-mode 'yaml-yamllint 'gitlab-ci-mode)
+  )

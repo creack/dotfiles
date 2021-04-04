@@ -1,4 +1,4 @@
-if $1err != nil {
-        return $3fmt.Errorf("${2:errorContext}: %w", err)
+if err != nil {
+        return fmt.Errorf("${1:errorContext}: %w", err)
 }
 $0
