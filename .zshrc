@@ -1,5 +1,7 @@
 [ -n "${ZPROF}" ] && zmodload zsh/zprof
 
+export TMUX_TZ=$(date +%Z)
+
 export COLORTERM=truecolor
 
 # User config.
@@ -33,7 +35,7 @@ alias gwprotoc='protoc --grpc-gateway_out="logtostderr=true:."'
 alias sprotoc='protoc --swagger_out="logtostderr=true:."'
 
 # Recursive grep go file.
-alias fggrep="fgrep -R --exclude-dir=vendor --color --include='*.go'"
+alias fggrep="fgrep -R --exclude-dir=vendor --exclude-dir=.cache --color --include='*.go'"
 
 # Oh-my-zsh config.
 
@@ -42,14 +44,14 @@ ZSH_DISABLE_COMPFIX=true
 
 ZSH_THEME="simple"
 plugins=(
-    git
-    tmux
-    docker
-    docker-compose
-    zsh-autosuggestions
-    zsh-completions
-    zsh-syntax-highlighting
-    nvm
+  git
+  tmux
+  docker
+  docker-compose
+  zsh-autosuggestions
+  zsh-completions
+  zsh-syntax-highlighting
+  nvm
 )
 
 NVM_LAZY=true
