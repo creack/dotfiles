@@ -2,27 +2,30 @@
   "segments": {
     "left": [
       {
+        "function": "powerline.segments.common.env.environment",
+        "args": {
+          "variable": "USER"
+        }
+      }
+    ],
+    "right": [
+      {
         "before": "👤",
         "function": "powerline.segments.tmux.attached_clients",
         "priority": 10,
         "args": {
           "minimum": 1
-        },
-        "display": false
-      },
-      {
-        "function": "powerline.segments.common.env.user",
-        "draw_soft_divider": false
-      }
-    ],
-    "right": [
-      {
-        "function": "powerline.segments.common.sys.system_load",
-        "priority": 50,
-        "draw_hard_divider": false
+        }
       },
       {
         "function": "powerline.segments.common.sys.uptime",
+        "priority": 50,
+        "args": {
+          "shorten_len": 2
+        }
+      },
+      {
+        "function": "powerline.segments.common.sys.system_load",
         "priority": 50
       },
       {
@@ -31,9 +34,18 @@
       {
         "function": "powerline.segments.common.time.date",
         "name": "time",
+        "fg_color": 22,
+        "bg_color": 161,
         "args": {
-          "format": "%H:%M",
+          "format": "%I:%M %p",
           "istime": true
+        }
+      },
+      {
+        "function": "powerline.segments.common.env.environment",
+        "name": "tz",
+        "args": {
+          "variable": "TMUX_TZ"
         }
       },
       {

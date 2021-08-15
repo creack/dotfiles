@@ -27,7 +27,7 @@
 
 (use-package treemacs
   :bind
-  ("<f5>" . treemacs)
+  ("<f5>" . treemacs-select-window)
 
   :preface
   (defun creack/treemacs-ignore-node_modules (_ absolute-path)
@@ -51,9 +51,15 @@
     )
 
   :custom
-  (treemacs-is-never-other-window t)
-  (treemacs-show-hidden-files     nil)
-  (treemacs-width                 20)
+  (treemacs-is-never-other-window      t)
+  (treemacs-show-hidden-files          nil)
+  (treemacs-width                      35)
+  (treemacs-position                   'right)
+  (treemacs-follow-after-init          t)
+  (treemacs-move-forward-on-expand     t)
+  (treemacs-recenter-after-file-follow 'on-distance)
+  (treemacs-recenter-after-tag-follow  'on-distance)
+  (treemacs-tag-follow-delay            0.2)
   )
 
 (use-package yasnippet
@@ -87,6 +93,7 @@
 
 
 (use-package origami
+	     :disabled
   :after hydra
   :pin celpa
 
@@ -174,6 +181,7 @@
   )
 
 (use-package tab-bar
+  :disabled
   :after hydra
   :custom
   (tab-bar-close-button-show nil)
@@ -224,112 +232,112 @@
 	     ;; (after-init . global-git-gutter-mode)
 	     )
 
-(use-package emacs
-  :after hydra
-  :bind
-  ("M-g g"   . hydra-goto-line/body)
-  ("C-c h g" . hydra-goto-line/body)
-  :hydra
-  (hydra-goto-line
-   (goto-map ""
-	     :pre  (display-line-numbers-mode 1)
-	     :post (display-line-numbers-mode -1)
-	     )
-   "goto-line"
-   ("g" goto-line "go")
-   ("RET" nil nil)
-   ("m" set-mark-command "mark" :bind nil)
-   ("q" nil "quit"))
-  )
+;; (use-package emacs
+;;   :after hydra
+;;   :bind
+;;   ("M-g g"   . hydra-goto-line/body)
+;;   ("C-c h g" . hydra-goto-line/body)
+;;   :hydra
+;;   (hydra-goto-line
+;;    (goto-map ""
+;; 	     :pre  (display-line-numbers-mode 1)
+;; 	     :post (display-line-numbers-mode -1)
+;; 	     )
+;;    "goto-line"
+;;    ("g" goto-line "go")
+;;    ("RET" nil nil)
+;;    ("m" set-mark-command "mark" :bind nil)
+;;    ("q" nil "quit"))
+;;   )
+;;
+;; (use-package emacs
+;;   :disabled
+;;   :after hydra
+;;   :bind
+;;   ;; ("M-y"     . hydra-yank-pop/yank-pop)
+;;   ;; ("C-y"     . hydra-yank-pop/yank)
+;;   ;; ("C-c C-y" . yank)
+;;   :hydra
+;;   (hydra-yank-pop
+;;    ()
+;;    "yank"
+;;    ("C-y" yank             nil)
+;;    ("M-y" yank-pop         nil)
+;;    ("y"   (yank-pop 1)     "next")
+;;    ("Y"   (yank-pop -1)    "prev")
+;;    ("l"   browse-kill-ring "list"    :color blue)
+;;    ("c"   counsel-yank-pop "counsel" :color blue)
+;;    )
+;;   )
 
-(use-package emacs
-  :disabled
-  :after hydra
-  :bind
-  ("M-y"     . hydra-yank-pop/yank-pop)
-  ("C-y"     . hydra-yank-pop/yank)
-  ("C-c C-y" . yank)
-  :hydra
-  (hydra-yank-pop
-   ()
-   "yank"
-   ("C-y" yank             nil)
-   ("M-y" yank-pop         nil)
-   ("y"   (yank-pop 1)     "next")
-   ("Y"   (yank-pop -1)    "prev")
-   ("l"   browse-kill-ring "list"    :color blue)
-   ("c"   counsel-yank-pop "counsel" :color blue)
-   )
-  )
 
+;;(use-package emacs
+;;  :after hydra
+;;  :bind
+;;  ("C-n"     . hydra-move/next-line)
+;;  ("C-p"     . hydra-move/previous-line)
+;;  ("C-c h m" . hydra-move/body)
+;;  :hydra
+;;  (hydra-move
+;;   (:body-pre (next-line))
+;;   "move"
+;;   ("n" next-line)
+;;   ("p" previous-line)
+;;   ("f" forward-char)
+;;   ("b" backward-char)
+;;   ("a" beginning-of-line)
+;;   ("e" move-end-of-line)
+;;   ("v" scroll-up-command)
+;;   ;; Converting M-v to V here by analogy.
+;;   ("V" scroll-down-command)
+;;   ("l" recenter-top-bottom)
+;;   )
+;;  )
 
-(use-package emacs
-  :after hydra
-  :bind
-  ("C-n"     . hydra-move/next-line)
-  ("C-p"     . hydra-move/previous-line)
-  ("C-c h m" . hydra-move/body)
-  :hydra
-  (hydra-move
-   (:body-pre (next-line))
-   "move"
-   ("n" next-line)
-   ("p" previous-line)
-   ("f" forward-char)
-   ("b" backward-char)
-   ("a" beginning-of-line)
-   ("e" move-end-of-line)
-   ("v" scroll-up-command)
-   ;; Converting M-v to V here by analogy.
-   ("V" scroll-down-command)
-   ("l" recenter-top-bottom)
-   )
-  )
+;;(use-package emacs
+;;  :after hydra
+;;  :bind
+;;  ("<f4>"    . hydra-lsp/body)
+;;  ("C-c h l" . hydra-lsp/body)
+;;  :hydra
+;;  (hydra-lsp
+;;   (:exit t :hint nil)
+;;   "
+;;  Buffer^^               Server^^                   Symbol
+;; -------------------------------------------------------------------------------------
+;;  [_f_] format           [_M-r_] restart            [_d_] declaration  [_i_] implementation  [_o_] documentation
+;;  [_m_] imenu            [_S_]   shutdown           [_D_] definition   [_t_] type            [_r_] rename
+;;  [_x_] execute action   [_M-s_] describe session   [_R_] references   [_s_] signature"
+;;   ("d" lsp-find-declaration)
+;;   ("D" lsp-ui-peek-find-definitions)
+;;   ("R" lsp-ui-peek-find-references)
+;;   ("i" lsp-ui-peek-find-implementation)
+;;   ("t" lsp-find-type-definition)
+;;   ("s" lsp-signature-help)
+;;   ("o" lsp-describe-thing-at-point)
+;;   ("r" lsp-rename)
+;;
+;;   ("f" lsp-format-buffer)
+;;   ("m" lsp-ui-imenu)
+;;   ("x" lsp-execute-code-action)
+;;
+;;   ("M-s" lsp-describe-session)
+;;   ("M-r" lsp-restart-workspace)
+;;   ("S"   lsp-shutdown-workspace))
+;;  )
 
-(use-package emacs
-  :after hydra
-  :bind
-  ("<f4>"    . hydra-lsp/body)
-  ("C-c h l" . hydra-lsp/body)
-  :hydra
-  (hydra-lsp
-   (:exit t :hint nil)
-   "
-  Buffer^^               Server^^                   Symbol
- -------------------------------------------------------------------------------------
-  [_f_] format           [_M-r_] restart            [_d_] declaration  [_i_] implementation  [_o_] documentation
-  [_m_] imenu            [_S_]   shutdown           [_D_] definition   [_t_] type            [_r_] rename
-  [_x_] execute action   [_M-s_] describe session   [_R_] references   [_s_] signature"
-   ("d" lsp-find-declaration)
-   ("D" lsp-ui-peek-find-definitions)
-   ("R" lsp-ui-peek-find-references)
-   ("i" lsp-ui-peek-find-implementation)
-   ("t" lsp-find-type-definition)
-   ("s" lsp-signature-help)
-   ("o" lsp-describe-thing-at-point)
-   ("r" lsp-rename)
+;; (use-package use-package-chords
+;;   :config
+;;   (key-chord-mode 1)
+;;   )
 
-   ("f" lsp-format-buffer)
-   ("m" lsp-ui-imenu)
-   ("x" lsp-execute-code-action)
-
-   ("M-s" lsp-describe-session)
-   ("M-r" lsp-restart-workspace)
-   ("S"   lsp-shutdown-workspace))
-  )
-
-(use-package use-package-chords
-  :config
-  (key-chord-mode 1)
-  )
-
-(use-package ace-jump-mode
-  :chords
-  ("jj" . ace-jump-char-mode)
-  ("jk" . ace-jump-word-mode)
-  ("jl" . ace-jump-line-mode)
-  ("gg" . hydra-goto-line/goto-line)
-  )
+;; (use-package ace-jump-mode
+;;   :chords
+;;   ("jj" . ace-jump-char-mode)
+;;   ("jk" . ace-jump-word-mode)
+;;   ("jl" . ace-jump-line-mode)
+;;   ("gg" . hydra-goto-line/goto-line)
+;;   )
 
 (use-package beacon :delight
 	     :pin melpa
@@ -339,9 +347,20 @@
 	     (beacon-blink-when-window-scrolls           nil)
 	     (beacon-blink-when-point-moves-horizontally 10)
 	     (beacon-blink-when-point-moves-vertically   40)
-	     )
+	)
+
+(use-package emacs
+  :hook
+	(before-save . (lambda ()
+			             (when (eq major-mode 'sh-mode)
+				             (editorconfig-format-buffer)
+				             )
+			             )
+		)
+  )
 
 (use-package org-roam :delight " Roam"
+	:disabled
 	:hook
 	(after-init . org-roam-mode)
 	(org-mode . (lambda ()
@@ -377,11 +396,12 @@
 		     "* %?"
 		     :file-name "daily/%<%Y-%m-%d>"
 		     :head "#+TITLE: %<%Y-%m-%d>\n#+CREATED: [%<%Y-%m-%d %3a %I:%M%p %Z>]\n#+LAST_MODIFIED: <>\n#+ROAM_ALIAS: \n#+ROAM_TAGS: "
+		     :empty-lines 1 ; Add a new-line before and after the entry.
 		     :clock-in t
          :clock-keep t
          :clock-resume t
 		     :unnarrowed t ; When nil, hide the rest of the file, showing only new content.
-		     :olp ("Lab notes with clock")
+		     :olp ("Lab notes")
 		     )
 		   ("j" "journal" entry
 		     #'org-roam-capture--get-point
@@ -440,7 +460,7 @@
   :after (flycheck)
   :hook
   (flycheck-mode  . flycheck-golangci-lint-setup)
-  (lsp-after-open . (lambda() (flycheck-add-next-checker 'lsp 'golangci-lint 'append)))
+  ;; (lsp-after-open . (lambda() (when (eq major-mode 'go-mode) (flycheck-add-next-checker 'lsp 'golangci-lint 'append))))
   )
 
 
@@ -451,16 +471,6 @@
   :config
   (auto-package-update-maybe)
   (auto-package-update-at-time "03:00")
-  )
-
-(use-package flycheck-yamllint
-  :after (flycheck)
-  :ensure-system-package
-  (yamllint . "pip3 install yamllint")
-  :config
-  (flycheck-yamllint-setup)
-  :hook
-  (yaml-mode     . flycheck-mode)
   )
 
 (use-package gitlab-ci-mode
