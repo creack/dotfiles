@@ -615,12 +615,14 @@
   )
 
 (use-package terraform-mode :defer
-  :config
-  (use-package company-terraform
-    :config (company-terraform-init))
+  ;;:disabled
+  ;;:config
+  ;;(use-package company-terraform
+  ;;:config (company-terraform-init))
   :hook
-  (terraform-mode . yas-minor-mode)
+  ;;(terraform-mode . yas-minor-mode)
   (terraform-mode . terraform-format-on-save-mode)
+  (terraform-mode . lsp)
   )
 
 (use-package nvm
