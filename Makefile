@@ -120,6 +120,20 @@ clean_golangci-lint:
 	${RM} ${HOME}/.local/bin/golangci-lint
 	@rmdir ${HOME}/.local/bin ${HOME}/.local 2> /dev/null || true
 
+install: ${HOME}/.local/bin/terraform
+clean:   clean_terraform
+${HOME}/.local/bin/terraform: terraform.zip
+	unzip $<
+	mv terraform $@
+	touch $@
+.INTERMEDIATE: terraform.zip
+terraform.zip: versions/terraform
+	@mkdir -p $(dir $@)
+	curl -sfL "https://releases.hashicorp.com/terraform/$(shell cat $<)/terraform_$(shell cat $<)_${OS}_${ARCH}.zip" -o terraform.zip
+clean_terraform:
+	${RM} ${HOME}/.local/bin/terraform
+	@rmdir ${HOME}/.local/bin ${HOME}/.local 2> /dev/null || true
+
 clean_file_%:
 	${RM} ${HOME}/$*
 

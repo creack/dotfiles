@@ -25,6 +25,20 @@
   (creack/check-features)
   )
 
+(use-package drag-stuff
+  :delight
+  :bind
+  ("ESC <up>"   . drag-stuff-up)
+  ("ESC <down>" . drag-stuff-down)
+  ("M-<up>"   . drag-stuff-up)
+  ("M-<down>" . drag-stuff-down)
+  :config
+  (define-key drag-stuff-mode-map (drag-stuff--kbd 'up) 'drag-stuff-up)
+  (define-key drag-stuff-mode-map (drag-stuff--kbd 'down) 'drag-stuff-down)
+  (drag-stuff-global-mode)
+  )
+
+
 (use-package treemacs
   :bind
   ("<f5>" . treemacs-select-window)
@@ -471,10 +485,4 @@
   :config
   (auto-package-update-maybe)
   (auto-package-update-at-time "03:00")
-  )
-
-(use-package gitlab-ci-mode
-  :after (flycheck)
-  :config
-  (flycheck-add-mode 'yaml-yamllint 'gitlab-ci-mode)
   )
