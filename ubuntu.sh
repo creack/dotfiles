@@ -11,6 +11,7 @@ fi
 curl -fsSL https://tailscale.com/install.sh | sudo sh
 
 sudo apt-get install -y tmux most zsh watch htop build-essential mosh unzip python3-pip
+sudo snap install emacs --classic
 
 if [ ! "${user}" = "root" ]; then
   sudo chsh -s /usr/bin/zsh "${user}"
