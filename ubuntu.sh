@@ -13,11 +13,12 @@ curl -fsSL https://tailscale.com/install.sh | sudo sh
 sudo apt-get install -y tmux most zsh watch htop build-essential mosh unzip python3-pip
 
 if [ ! "${user}" = "root" ]; then
+  sudo chsh -s /usr/bin/zsh "${user}"
   pip3 install powerline-status
+
+  make
+
+  . "${HOME}/.nvm/nvm.sh"
+  nvm install 14
+  nvm install 16
 fi
-
-make
-
-. "${HOME}/.nvm/nvm.sh"
-nvm install 14
-nvm install 16
