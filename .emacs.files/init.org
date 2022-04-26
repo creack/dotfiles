@@ -942,9 +942,7 @@ YAML
 ** Git
 
 #+begin_src emacs-lisp :tangle yes
-  (use-package gitattributes-mode :defer)
-  (use-package gitconfig-mode :defer)
-  (use-package gitignore-mode :defer)
+  (use-package gitconfig :defer)
 #+end_src
 
 ** Markdown
@@ -978,7 +976,6 @@ Use =grip= for live preview in browser.
     :hook
     (dockerfile-mode . display-line-numbers-mode)
     )
-  (use-package docker-compose-mode)
 #+end_src
 
 ** Mermaid Diagrams
