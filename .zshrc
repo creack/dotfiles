@@ -58,7 +58,7 @@ NVM_LAZY=true
 NVM_CUSTOM_LAZY=true
 
 # Set tmux autostart unless we are using vscode or emacs tramp.
-if [ -n "$VSCODE_IPC_HOOK_CLI" ] || [ "$TERM" = "dumb" ] || [ -z "$TERM" ]; then
+if [ -n "$VSCODE_IPC_HOOK_CLI" ] || [ "$TERM" = "dumb" ] || [ -z "$TERM" ] || [ -f "$HOME/.notmux" ]; then
   ZSH_TMUX_AUTOSTART=false
 else
   ZSH_TMUX_AUTOSTART=true
@@ -207,5 +207,12 @@ function helm kubectl aws {
   echo "Done." >&2
   $0 $@
 }
+
+
+if [ "$(uname -s)" = "Darwin" ]; then
+  unset LSCOLORS
+  alias ls="gls --color"
+fi
+export LS_COLORS=$(vivid generate gruvbox-dark-soft)
 
 [ -n "${ZPROF}" ] && zprof
