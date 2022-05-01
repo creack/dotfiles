@@ -572,9 +572,7 @@
   (yaml-mode . lsp)
   )
 
-(use-package gitattributes-mode :defer)
-(use-package gitconfig-mode :defer)
-(use-package gitignore-mode :defer)
+(use-package gitconfig :defer)
 
 (use-package markdown-mode :defer
   :commands (markdown-mode gfm-mode)
@@ -594,7 +592,6 @@
   :hook
   (dockerfile-mode . display-line-numbers-mode)
   )
-(use-package docker-compose-mode)
 
 (use-package mermaid-mode
   :mode ("\\.puml\\'" "\\.uml\\'" "\\.mermaid\\'")

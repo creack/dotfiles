@@ -178,4 +178,4 @@ purge: clean
 	cd ${HOME}; ${RM} -r ${PURGE_LIST}
 
 # Phony targets.
-.PHONY: all install clean purge update
+.PHONY: all install clean purge update ubuntu
