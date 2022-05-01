@@ -216,3 +216,5 @@ fi
 export LS_COLORS=$(vivid generate gruvbox-dark-soft)
 
 [ -n "${ZPROF}" ] && zprof
+
+export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
