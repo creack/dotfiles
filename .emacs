@@ -477,7 +477,6 @@
   ;; (lsp-after-open . (lambda() (when (eq major-mode 'go-mode) (flycheck-add-next-checker 'lsp 'golangci-lint 'append))))
   )
 
-
 (use-package auto-package-update
   :custom
   (auto-package-update-delete-old-versions t)
@@ -485,4 +484,11 @@
   :config
   (auto-package-update-maybe)
   (auto-package-update-at-time "03:00")
+  )
+
+(use-package sqlformat
+  :hook
+  (sql-mode . sqlformat-on-save-mode)
+  :custom
+  (sqlformat-command 'pgformatter)
   )
