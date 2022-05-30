@@ -122,7 +122,7 @@ function setgit() {
 
 # Small helper used in the prompt to show the current git profile.
 function getgit() {
-  if [ -f "${HOME}/.gitconfig.local" ]; then
+  if [ ! "$USER" = "root" ] && [ -f "${HOME}/.gitconfig.local" ]; then
     ls -l ${HOME}/.gitconfig.local | sed 's/.*\.gitconfig\.//'
   fi
 }
