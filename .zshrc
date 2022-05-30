@@ -139,7 +139,7 @@ function unsetaws() {
 }
 
 # Show the git profile in the prompt.
-export PROMPT='%{$fg_bold[blue]%}($(getgit))%{$reset_color%}'${PROMPT}
+export PROMPT='%{$fg_bold[yellow]%}[%m]%{$reset_color%}%{$fg_bold[blue]%}($(getgit))%{$reset_color%}'${PROMPT}
 
 # Putty bindings for meta left/right
 bindkey '\e\eOD' backward-word
