@@ -27,13 +27,11 @@ else
   sudo apt-get install -y emacs-nox
 fi
 
-if [ ! "${user}" = "root" ]; then
-  sudo chsh -s /usr/bin/zsh "${user}"
-  pip3 install powerline-status
+sudo chsh -s /usr/bin/zsh "${user}"
+pip3 install powerline-status
 
-  make
+make
 
-  . "${HOME}/.nvm/nvm.sh"
-  nvm install 14
-  nvm install 16
-fi
+. "${HOME}/.nvm/nvm.sh"
+nvm install 14
+nvm install 16
