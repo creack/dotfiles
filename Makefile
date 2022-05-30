@@ -4,7 +4,7 @@ PWD  ?= $(shell pwd)
 RM   ?= rm -f
 
 ARCH=amd64
-ifeq (${HOME},/home/${USER})
+ifeq ($(shell uname),Linux)
 OS=linux
 else
 OS=darwin
