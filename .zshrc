@@ -124,6 +124,8 @@ function setgit() {
 function getgit() {
   if [ ! "$USER" = "root" ] && [ -f "${HOME}/.gitconfig.local" ]; then
     ls -l ${HOME}/.gitconfig.local | sed 's/.*\.gitconfig\.//'
+  elif [ "$USER" = "root" ]; then
+    echo "root"
   fi
 }
 
