@@ -779,8 +779,8 @@
 (use-package go-mode
   :ensure-system-package
   (
-   (gopls     . "cd /tmp && GO111MODULE=on go get golang.org/x/tools/gopls@latest")
-   (gofumpt   . "cd /tmp && GO111MODULE=on go get mvdan.cc/gofumpt@latest")
+   (gopls     . "cd /tmp && GO111MODULE=on go install golang.org/x/tools/gopls@latest")
+   (gofumpt   . "cd /tmp && GO111MODULE=on go install mvdan.cc/gofumpt@latest")
    )
 
   :preface
