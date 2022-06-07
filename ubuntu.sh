@@ -19,7 +19,7 @@ fi
 
 curl -fsSL https://tailscale.com/install.sh | sudo sh
 
-sudo apt-get install -y tmux most zsh watch htop build-essential mosh unzip python3-pip git rsync git-lfs
+sudo apt-get install -y tmux most zsh watch htop build-essential mosh unzip python3-pip git rsync git-lfs jq
 
 if hash snap 2> /dev/null; then
   sudo snap install emacs --classic
@@ -29,7 +29,7 @@ fi
 
 sudo chsh -s /usr/bin/zsh "${user}"
 pip3 install powerline-status
-
+pip3 install yq
 make
 
 . "${HOME}/.nvm/nvm.sh"
@@ -40,3 +40,7 @@ vivid_version=0.8.0
 wget "https://github.com/sharkdp/vivid/releases/download/v0.8.0/vivid_${vivid_version}_amd64.deb"
 sudo dpkg -i "vivid_${vivid_version}_amd64.deb"
 rm "vivid_${vivid_version}_amd64.deb"
+
+export GOBIN=~/go/bin
+export GOROOT=~/goroot
+go install github.com/owenthereal/ccat@latest
