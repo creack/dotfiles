@@ -10,9 +10,40 @@ export COLORTERM=truecolor
 alias emacs="emacsclient -a ''  -c -t"
 
 # Docker compose shortcuts in addition to the docker-compose oh-my-zsh plugin.
-alias dcu='docker-compose up -d --build -t 1'
-alias dcd='docker-compose down -v -t 1'
-alias dcr='docker-compose restart -t 1'
+alias dcu='docker compose up -d --build -t 1'
+alias dcup='docker compose up -t 1'
+alias dcd='docker compose down -t 1'
+alias dcda='docker compose down -t 1 -v --remove-orphans'
+alias dcl='docker compose logs'
+alias dclf='docker compose logs -f'
+alias dce='docker compose exec'
+alias dcr='docker compose run --rm'
+
+#alias dcps='docker compose ps'
+function dcps() {
+  local format
+  local project_name
+  local column_names
+
+  project_name=$(basename ${PWD})
+  format='{{.ID}}│{{printf "%.40s" .Image}}│{{.Command}}│{{.Label "com.docker.compose.service"}}│{{.Status}}│{{.Ports}}│{{.Networks}}│{{.Size}}'
+  column_names=$(echo "${format}" \
+                   | sed 's/Label [^}]*/Service/' \
+                   | sed 's/printf "[^"]*" //g' \
+                   | sed 's/{{\.\([^}]*\)}}│*/\1,/g' \
+                   | tr "[a-z]" "[A-Z]"
+              )
+
+  docker ps \
+         --all \
+         --filter "label=com.docker.compose.project=${project_name}" \
+         --format "${format}" \
+         $@ \
+    | column -t -s "│" -o '   ' -N "${column_names}"
+}
+
+# Set the uid/gid in the env for docker compose to use.
+export UID GID
 
 # Docker run with current user settings mounted in.
 alias udockerrun='docker run --rm --user $(id -u):$(id -g) -e HOME -v $HOME:$HOME -w $(pwd) -e GOPATH=$HOME/go:/go'
@@ -46,15 +77,15 @@ ZSH_THEME="simple"
 plugins=(
   git
   tmux
-  docker
-  docker-compose
   zsh-autosuggestions
   zsh-completions
   zsh-syntax-highlighting
   nvm
+  yarn
+  docker
 )
 
-NVM_LAZY=true
+zstyle ':omz:plugins:nvm' lazy yes
 NVM_CUSTOM_LAZY=true
 
 # Set tmux autostart unless we are using vscode or emacs tramp.
@@ -155,9 +186,11 @@ bindkey "^[[1;3C" forward-word
 bindkey "^[l" down-case-word
 
 # Load more autocompletions.
-autoload -U +X bashcompinit && bashcompinit
-complete -o nospace -C ${HOME}/go/bin/terraform terraform
-complete -o nospace -C ${HOME}/go/bin/vault vault
+#autoload -Uz compinit && compinit
+#autoload -U +X bashcompinit && bashcompinit
+#complete -o nospace -C ${HOME}/go/bin/terraform terraform
+#complete -o nospace -C ${HOME}/go/bin/vault vault
+#complete -o nospace -C /usr/bin/docker docker
 
 # Load the private config if set.
 [ -f ~/.zshrc_priv_config ] && source ~/.zshrc_priv_config
@@ -172,7 +205,7 @@ if (( $+NVM_CUSTOM_LAZY )); then
     fi
 
     # Undo the nvm lazy loading so we'll use the actual commands.
-    unfunction node npm yarn 2> /dev/null
+    #unfunction node npm yarn 2> /dev/null 2> /dev/null
 
     # If we already have nvm loaded, print the versions and stop here.
     if [ -n "${NVM_BIN}" ]; then
@@ -220,3 +253,5 @@ export LS_COLORS=$(vivid generate gruvbox-dark-soft)
 [ -n "${ZPROF}" ] && zprof
 
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+
+export DOCKER_BUILDKIT=1

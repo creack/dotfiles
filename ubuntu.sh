@@ -19,7 +19,7 @@ fi
 
 curl -fsSL https://tailscale.com/install.sh | sudo sh
 
-sudo apt-get install -y tmux most zsh watch htop build-essential mosh unzip python3-pip git rsync git-lfs jq
+sudo apt-get install -y tmux most zsh watch htop build-essential zip unzip python3-pip git rsync git-lfs jq
 
 if hash snap 2> /dev/null; then
   sudo snap install emacs --classic
