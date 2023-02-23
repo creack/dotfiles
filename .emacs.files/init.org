@@ -660,10 +660,10 @@ Enable multiple cursors support.
 Install and enable the theme.
 
 #+begin_src emacs-lisp :tangle yes
-  (use-package monokai-theme     :config (load-theme 'monokai t))
+  ;; (use-package monokai-theme     :config (load-theme 'monokai t))
   ;; (use-package darkokai-theme    :config (load-theme 'darkokai t))
   ;; (use-package monokai-pro-theme :config (load-theme 'monokai t))
-  ;; (use-package gruvbox-theme     :config (load-theme 'gruvbox t))
+  (use-package gruvbox-theme     :config (load-theme 'gruvbox t))
   ;; (use-package gruvbox-theme     :config (load-theme 'gruvbox-dark-hard t))
 
   ;; (use-package nord-theme
@@ -1105,6 +1105,7 @@ TODO: Document this.
     (flycheck-add-next-checker 'tsx-tide        'javascript-eslint 'append)
     (flycheck-add-next-checker 'jsx-tide        'javascript-eslint 'append)
     :custom
+    (tide-sync-request-timeout 15)
     (tide-completion-detailed t)
     (tide-project-cleanup-delay 3600)
     :hook
