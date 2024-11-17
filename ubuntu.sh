@@ -43,9 +43,9 @@ make
 nvm install --lts
 
 vivid_version=0.8.0
-wget "https://github.com/sharkdp/vivid/releases/download/v0.8.0/vivid_${vivid_version}_amd64.deb"
-sudo dpkg -i "vivid_${vivid_version}_amd64.deb"
-rm "vivid_${vivid_version}_amd64.deb"
+wget "https://github.com/sharkdp/vivid/releases/download/v0.8.0/vivid_${vivid_version}_arm64.deb"
+sudo dpkg -i "vivid_${vivid_version}_arm64.deb"
+rm "vivid_${vivid_version}_arm64.deb"
 export PATH="${PATH}:~/goroot/bin"
 export GOBIN=~/go/bin
 export GOROOT=~/goroot

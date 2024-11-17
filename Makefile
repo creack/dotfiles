@@ -3,7 +3,7 @@ HOME ?= $(shell [ -d "/Users/${USER}" ] && echo /Users/${USER} || echo /home/${U
 PWD  ?= $(shell pwd)
 RM   ?= rm -f
 
-ARCH=amd64
+ARCH=arm64
 ifeq ($(shell uname),Linux)
 OS=linux
 else
