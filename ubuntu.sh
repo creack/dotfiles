@@ -52,6 +52,7 @@ export GOROOT=~/goroot
 go install github.com/owenthereal/ccat@latest
 go install golang.org/x/tools/gopls@latest
 go install sigs.k8s.io/kind@latest
+go install github.com/githubnemo/CompileDaemon@latest
 
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 . "$HOME/.cargo/env"
