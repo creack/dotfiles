@@ -263,3 +263,6 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
+export PATH="${PATH}:/snap/bin:${HOME}/projects/gravitational/teleport/e/build"
+
+export TELEPORT_CONFIG_FILE=/home/ubuntu/teleport/teleport.yaml
