@@ -115,7 +115,7 @@ install: ${HOME}/.local/bin/golangci-lint
 clean:   clean_golangci-lint
 ${HOME}/.local/bin/golangci-lint: versions/golangci-lint
 	@mkdir -p $(dir $@)
-	curl -sfL "https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh" | sh -s -- -b $(dir $@) v$(shell cat $<)
+	curl -sfL "https://golangci-lint.run/install.sh" | sh -s -- -b $(dir $@) v$(shell cat $<)
 clean_golangci-lint:
 	${RM} ${HOME}/.local/bin/golangci-lint
 	@rmdir ${HOME}/.local/bin ${HOME}/.local 2> /dev/null || true
