@@ -1,23 +1,25 @@
-# Use 24bit term.
-#export TERM=xterm-truecolor
+# Loaded for every zsh invocation (interactive, non-interactive, scripts).
+# Keep this minimal — heavier setup belongs in .zprofile or .zshrc.
 
-# Set the path for pip/yarn/golang.
-export PATH=~/.local/bin:~/go/bin:~/goroot/bin:/usr/local/bin:/usr/local/sbin:~/.yarn/bin:$PATH
+# XDG base dirs.
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 
-# Use most as pager (for things like man, git diff, etc).
-export PAGER=most
+# Editor / pager.
+export EDITOR="emacsclient -a '' -c -t"
+export VISUAL="$EDITOR"
+export PAGER="${commands[most]:-less}"
 
-# Use emacs as default editor.
-export EDITOR="emacs -q"
+# Truecolor everywhere we can.
+export COLORTERM=truecolor
 
-# Enable go mod.
-export GO111MODULE=on
-
-# Enable nvm when using vscode.
-if [ -n "$VSCODE_IPC_HOOK_CLI" ]; then
-  export NVM_DIR="$HOME/.nvm"
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-fi
-if [ -f "$HOME/.cargo/env" ]; then
-  . "$HOME/.cargo/env"
-fi
+# Local bin first.
+typeset -U path
+path=(
+  $HOME/.local/bin
+  $HOME/go/bin
+  $path
+)
+export PATH

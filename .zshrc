@@ -1,15 +1,87 @@
-[ -n "${ZPROF}" ] && zmodload zsh/zprof
+# Interactive zsh config.
+# Profile startup with: ZPROF=1 zsh -ic exit
+[[ -n "$ZPROF" ]] && zmodload zsh/zprof
 
-export TMUX_TZ=$(date +%Z)
+# ---------------------------------------------------------------------------
+# History
+# ---------------------------------------------------------------------------
+HISTFILE="${XDG_STATE_HOME:-$HOME/.local/state}/zsh/history"
+mkdir -p "${HISTFILE:h}"
+HISTSIZE=100000
+SAVEHIST=100000
+setopt extended_history       # timestamps in history file
+setopt hist_expire_dups_first # drop dups first when trimming
+setopt hist_ignore_dups       # don't record consecutive dups
+setopt hist_ignore_space      # leading-space commands aren't recorded
+setopt hist_verify            # let !! expand for review before running
+setopt inc_append_history     # append immediately (don't lose on crash)
+setopt share_history          # share between concurrent sessions
 
-export COLORTERM=truecolor
+# ---------------------------------------------------------------------------
+# Options
+# ---------------------------------------------------------------------------
+setopt auto_cd                # `dir` == `cd dir`
+setopt auto_pushd             # cd pushes onto dir stack
+setopt pushd_ignore_dups
+setopt extended_glob
+setopt interactive_comments   # allow `# comments` in interactive shells
+setopt no_beep
 
-# User config.
+# ---------------------------------------------------------------------------
+# Completion
+# ---------------------------------------------------------------------------
+# brew completions
+if type brew &>/dev/null; then
+  FPATH="$(brew --prefix)/share/zsh/site-functions:$FPATH"
+fi
 
-# Start emacs as a daemon.
-alias emacs="emacsclient -a ''  -c -t"
+autoload -Uz compinit
+# Speed up compinit: only run the security check once per day.
+_zcompdump="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
+mkdir -p "${_zcompdump:h}"
+if [[ -n "$_zcompdump"(#qNmh-24) ]]; then
+  compinit -C -d "$_zcompdump"
+else
+  compinit -d "$_zcompdump"
+fi
+unset _zcompdump
 
-# Docker compose shortcuts in addition to the docker-compose oh-my-zsh plugin.
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*:descriptions' format '[%d]'
+
+# ---------------------------------------------------------------------------
+# Key bindings
+# ---------------------------------------------------------------------------
+bindkey -e                              # emacs keymap
+bindkey '^[[1;3D' backward-word         # alt-left
+bindkey '^[[1;3C' forward-word          # alt-right
+bindkey '^[l'     down-case-word        # M-l
+bindkey '^[[3~'   delete-char           # delete
+
+# ---------------------------------------------------------------------------
+# Aliases
+# ---------------------------------------------------------------------------
+# ls: GNU coreutils on mac, plain ls on linux.
+if [[ "$OSTYPE" == darwin* ]] && (( $+commands[gls] )); then
+  alias ls='gls --color=auto --group-directories-first'
+else
+  alias ls='ls --color=auto --group-directories-first'
+fi
+alias ll='ls -lh'
+alias la='ls -lAh'
+alias l='ls -CF'
+
+alias g='git'
+alias gs='git status -sb'
+alias gd='git diff'
+alias gl='git lg'
+
+# emacs as a daemon client.
+alias emacs="emacsclient -a '' -c -t"
+
+# docker compose shortcuts.
 alias dcu='docker compose up -d --build -t 1'
 alias dcup='docker compose up -t 1'
 alias dcd='docker compose down -t 1'
@@ -19,247 +91,80 @@ alias dclf='docker compose logs -f'
 alias dce='docker compose exec'
 alias dcr='docker compose run --rm'
 
-#alias dcps='docker compose ps'
-function dcps() {
-  local format
-  local project_name
-  local column_names
+# ---------------------------------------------------------------------------
+# Functions
+# ---------------------------------------------------------------------------
 
-  project_name=$(basename ${PWD})
+# Refresh SSH_AUTH_SOCK from the newest agent socket on disk (e.g. after
+# reconnecting to a tmux session whose forwarded socket has expired).
+rl() {
+  local sock
+  sock=$(ls -t $(find /tmp/ssh-* -group "$USER" -name 'agent.*' 2>/dev/null) 2>/dev/null | head -1)
+  if [[ -S "$sock" ]]; then
+    export SSH_AUTH_SOCK="$sock"
+    [[ -n "$TMUX" ]] && tmux set-environment SSH_AUTH_SOCK "$sock"
+    print -u2 "Refreshed SSH_AUTH_SOCK -> $sock"
+  fi
+}
+[[ -z "$SSH_AUTH_SOCK" || ! -S "$SSH_AUTH_SOCK" ]] && rl
+
+# Clear all AWS env vars (handy when bouncing between profiles).
+unsetaws() {
+  unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN \
+        AWS_REGION AWS_DEFAULT_REGION AWS_PROFILE AWS_DEFAULT_PROFILE
+}
+
+# Pretty `docker compose ps` for the current project.
+dcps() {
+  local format project_name column_names
+  project_name=$(basename "$PWD")
   format='{{.ID}}│{{printf "%.40s" .Image}}│{{.Command}}│{{.Label "com.docker.compose.service"}}│{{.Status}}│{{.Ports}}│{{.Networks}}│{{.Size}}'
-  column_names=$(echo "${format}" \
-                   | sed 's/Label [^}]*/Service/' \
-                   | sed 's/printf "[^"]*" //g' \
-                   | sed 's/{{\.\([^}]*\)}}│*/\1,/g' \
-                   | tr "[a-z]" "[A-Z]"
-              )
-
-  docker ps \
-         --all \
-         --filter "label=com.docker.compose.project=${project_name}" \
-         --format "${format}" \
-         $@ \
-    | column -t -s "│" -o '   ' -N "${column_names}"
+  column_names=$(echo "$format" \
+    | sed 's/Label [^}]*/Service/' \
+    | sed 's/printf "[^"]*" //g' \
+    | sed 's/{{\.\([^}]*\)}}│*/\1,/g' \
+    | tr '[:lower:]' '[:upper:]')
+  docker ps --all \
+    --filter "label=com.docker.compose.project=$project_name" \
+    --format "$format" "$@" \
+    | column -t -s '│' -o '   ' -N "$column_names"
 }
 
-# Set the uid/gid in the env for docker compose to use.
-export UID GID
+# ---------------------------------------------------------------------------
+# Plugins (sourced last so they hook the final widget chain).
+# ---------------------------------------------------------------------------
+_brew_prefix="${HOMEBREW_PREFIX:-$(brew --prefix 2>/dev/null)}"
 
-# Docker run with current user settings mounted in.
-alias udockerrun='docker run --rm --user $(id -u):$(id -g) -e HOME -v $HOME:$HOME -w $(pwd) -e GOPATH=$HOME/go:/go'
+# autosuggestions: ghost-text from history.
+[[ -r "$_brew_prefix/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]] \
+  && source "$_brew_prefix/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 
-# Docker wrappers for common tools.
-alias swagger='udockerrun quay.io/goswagger/swagger'
-alias protoc='udockerrun creack/grpc:go1.13-protobuf3.9.0-grpc1.24.0-protocgengo1.3.2'
-alias prototool='udockerrun --entrypoint prototool creack/grpc:go1.13-protobuf3.9.0-grpc1.24.0-protocgengo1.3.2'
-
-# Protobuf Go generation.
-alias gprotoc='protoc --go_out=plugins=grpc:.'
-
-# Protobuf Go Validations generation.
-alias gvprotoc='gprotoc --validate_out=lang=go:.'
-
-# GRPC Gateway generation.
-alias gwprotoc='protoc --grpc-gateway_out="logtostderr=true:."'
-
-# Swagger generation.
-alias sprotoc='protoc --swagger_out="logtostderr=true:."'
-
-# Recursive grep go file.
-alias fggrep="fgrep -R --exclude-dir=vendor --exclude-dir=.cache --color --include='*.go'"
-
-# Oh-my-zsh config.
-
-# Disable completion security check as it is too slow. Don't manually add any completions before checking them.
-ZSH_DISABLE_COMPFIX=true
-
-ZSH_THEME="simple"
-plugins=(
-  git
-  tmux
-  zsh-autosuggestions
-  zsh-completions
-  zsh-syntax-highlighting
-  nvm
-  yarn
-  docker
-)
-
-zstyle ':omz:plugins:nvm' lazy yes
-NVM_CUSTOM_LAZY=true
-
-# Set tmux autostart unless we are using vscode or emacs tramp.
-if [ -n "$VSCODE_IPC_HOOK_CLI" ] || [ "$TERM" = "dumb" ] || [ -z "$TERM" ] || [ -f "$HOME/.notmux" ]; then
-  ZSH_TMUX_AUTOSTART=false
-else
-  ZSH_TMUX_AUTOSTART=true
+# fzf: keybindings (Ctrl-R, Ctrl-T, Alt-C) + completion.
+if (( $+commands[fzf] )); then
+  source <(fzf --zsh) 2>/dev/null
 fi
 
-# TODO: Add ssh-agent plugin when not in remote server.
-# Allow agent-forwarding.
-#zstyle :omz:plugins:ssh-agent agent-forwarding on
+# syntax-highlighting must be sourced last.
+[[ -r "$_brew_prefix/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]] \
+  && source "$_brew_prefix/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 
-# Load oh-my-zsh.
-export ZSH=~/.oh-my-zsh
-source $ZSH/oh-my-zsh.sh
+unset _brew_prefix
 
-# Enable shared history so we can reference history between terms.
-setopt share_history
-# Save each command in history to make sure we don't loose it.
-setopt inc_append_history
+# ---------------------------------------------------------------------------
+# Prompt
+# ---------------------------------------------------------------------------
+if (( $+commands[starship] )); then
+  eval "$(starship init zsh)"
+fi
 
-# Tell git to use the current tty for gpg passphrase prompt (needs to be at the end so the tty is within tmux, not out).
+# ---------------------------------------------------------------------------
+# Misc env that depends on tools being on PATH
+# ---------------------------------------------------------------------------
 export GPG_TTY=$(tty)
-
-function rl() {
-  local ssh_auth_sock=$(ls -t $(find /tmp/ssh-* -group $USER -name 'agent.*' 2> /dev/null) | head -1)
-  if [ -S "${ssh_auth_sock}" ]; then
-    echo "Refreshed ssh agent socket." >&2
-    export SSH_AUTH_SOCK=${ssh_auth_sock}
-    # If within tmux, update the session env as well.
-    [ -n "$TMUX" ] && tmux set-environment SSH_AUTH_SOCK ${SSH_AUTH_SOCK}
-  fi
-}
-
-# If the ssh agent socket is not set or expired, reload it.
-if [ -z "$SSH_AUTH_SOCK" ] || [ ! -S "$SSH_AUTH_SOCK" ]; then
-  rl
-fi
-
-# Update the ~/.gitconfig.local link to target a new profile.
-function setgit() {
-  local new_profile=$1
-  local profile_path="${HOME}/.gitconfig.${new_profile}"
-  local fail=0
-
-  # Make sure the target exists.
-  if [ ! -f "${profile_path}" ]; then
-    echo "Git profile '${new_profile}' not found." >&2
-    fail=1
-  fi
-
-  # Make sure the existing profile is a link and not a hard-set file.
-  if [ ! -L "${HOME}/.gitconfig.local" ]; then
-    echo "Error: The ~/.gitconfig.local  file is not a link." >&2
-    fail=1
-  fi
-
-  if [ "${fail}" = 1 ]; then
-    return 1;
-  fi
-
-  ln -f -s ${profile_path} ${HOME}/.gitconfig.local
-}
-
-# Small helper used in the prompt to show the current git profile.
-function getgit() {
-  if [ ! "$USER" = "root" ] && [ -f "${HOME}/.gitconfig.local" ]; then
-    ls -l ${HOME}/.gitconfig.local | sed 's/.*\.gitconfig\.//'
-  elif [ "$USER" = "root" ]; then
-    echo "root"
-  fi
-}
-
-# Small helper to cleanup aws env.
-function unsetaws() {
-  unset AWS_ACCESS_KEY_ID
-  unset AWS_SECRET_ACCESS_KEY
-  unset AWS_SESSION_TOKEN
-  unset AWS_REGION
-  unset AWS_DEFAULT_REGION
-  unset AWS_PROFILE
-  unset AWS_DEFAULT_PROFILE
-}
-
-# Show the git profile in the prompt.
-export PROMPT='%{$fg_bold[yellow]%}[%m]%{$reset_color%}%{$fg_bold[blue]%}($(getgit))%{$reset_color%}'${PROMPT}
-
-# Putty bindings for meta left/right
-bindkey '\e\eOD' backward-word
-bindkey '\e\eOC' forward-word
-
-# Xterm bindings for meta left/right.
-bindkey "^[[1;3D" backward-word
-bindkey "^[[1;3C" forward-word
-
-# Set M-l as lowercase word.
-bindkey "^[l" down-case-word
-
-# Load more autocompletions.
-#autoload -Uz compinit && compinit
-#autoload -U +X bashcompinit && bashcompinit
-#complete -o nospace -C ${HOME}/go/bin/terraform terraform
-#complete -o nospace -C ${HOME}/go/bin/vault vault
-#complete -o nospace -C /usr/bin/docker docker
-
-# Load the private config if set.
-[ -f ~/.zshrc_priv_config ] && source ~/.zshrc_priv_config
-
-# The NVM_LAZY implementation doesn't support loading the local .nvmrc
-# and the NVM_AUTOLOAD is way too slow. Implement a custom loader.
-if (( $+NVM_CUSTOM_LAZY )); then
-  function custom-load-nvmrc() {
-    # If we don't have a .nvmrc file, stop here.
-    if [ ! -f .nvmrc ]; then
-      return;
-    fi
-
-    # Undo the nvm lazy loading so we'll use the actual commands.
-    #unfunction node npm yarn 2> /dev/null 2> /dev/null
-
-    # If we already have nvm loaded, print the versions and stop here.
-    if [ -n "${NVM_BIN}" ]; then
-      local loaded_nvm_version=$(echo $NVM_BIN | sed 's|.*versions/node/\(.*\)/bin|\1|')
-      local loaded_nvm_major_version=$(echo $loaded_nvm_version | sed 's/v\?\([^.]*\).*/\1/')
-      local expected_nvm_major_version=$(cat .nvmrc | sed 's/v\?\([^.]*\).*/\1/')
-      if [ "${expected_nvm_major_version}" = "${loaded_nvm_major_version}" ]; then
-        echo "Loaded node version: ${loaded_nvm_version}, local nvmrc: $(cat .nvmrc)" >&2
-        return
-      fi
-    fi
-
-    # Load nvm with the local .nvmrc.
-    nvm use
-  }
-  autoload -U add-zsh-hook
-  add-zsh-hook chpwd custom-load-nvmrc
-  custom-load-nvmrc
-fi
-unset NVM_CUSTOM_LAZY
-
-# Helper to load extra plugins at runtime.
-function load-plugin() {
-  for p in "$@"; do
-    source $ZSH/plugins/"$p"/"$p".plugin.zsh
-  done
-}
-
-# Lazy load slow plugins.
-function helm kubectl aws {
-  unfunction $0
-  echo -n "Lazy loading '$0' plugin... " >&2
-  load-plugin $0
-  echo "Done." >&2
-  $0 $@
-}
-
-
-if [ "$(uname -s)" = "Darwin" ]; then
-  unset LSCOLORS
-  alias ls="gls --color"
-fi
-export LS_COLORS=$(vivid generate gruvbox-dark-soft)
-
-[ -n "${ZPROF}" ] && zprof
-
-export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-
 export DOCKER_BUILDKIT=1
+(( $+commands[vivid] )) && export LS_COLORS="$(vivid generate gruvbox-dark-soft)"
 
-# pnpm
-export PNPM_HOME="/home/ubuntu/.local/share/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
-# pnpm end
+# Per-host overrides (untracked).
+[[ -r "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+
+[[ -n "$ZPROF" ]] && zprof

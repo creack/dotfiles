@@ -1,52 +1,74 @@
-[alias]
-  ci      = commit
-  co      = checkout
-  st      = status -sb
-  sti     = status -sb --ignored
-  b       = branch
-  merge   = merge --no-commit
-  lg1     = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(bold white)— %an%C(reset)%C(bold yellow)%d%C(reset)' --abbrev-commit --date=relative
-  lg2     = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(bold white)— %an%C(reset)' --abbrev-commit
-  lg3     = !"git log --show-signature"
-  lg      = !"git lg1"
+[user]
+  name  = Guillaume J. Charmes
+  email = gcharmes@future.fit
 
-  change  = codereview change
-  gofmt   = codereview gofmt
-  mail    = codereview mail
-  pending = codereview pending
-  submit  = codereview submit
-  sync    = codereview sync
+[init]
+  defaultBranch = main
 
-[color]
-  ui          = auto
-  interactive = true
-  branch      = true
-  diff        = true
-  status      = true
+[core]
+  excludesfile = ~/.gitignore.global
+  pager        = less -FRX
 
 [pull]
   ff = only
 
+[fetch]
+  prune = true
+
+[push]
+  default     = current
+  autoSetupRemote = true
+
+[rebase]
+  autoStash = true
+  autoSquash = true
+
 [merge]
-  tool = ediff
+  conflictstyle = zdiff3
 
-# Always use ssh instead of http for go get.
+[diff]
+  algorithm = histogram
+  colorMoved = default
+  mnemonicPrefix = true
+  renames = true
+
+[color]
+  ui = auto
+
+[rerere]
+  enabled = true
+
+[help]
+  autocorrect = prompt
+
+[alias]
+  ci    = commit
+  co    = checkout
+  sw    = switch
+  st    = status -sb
+  sti   = status -sb --ignored
+  b     = branch
+  d     = diff
+  ds    = diff --staged
+  amend = commit --amend --no-edit
+  undo  = reset --soft HEAD~1
+  unstage = restore --staged
+  lg1   = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(bold white)— %an%C(reset)%C(bold yellow)%d%C(reset)' --abbrev-commit --date=relative
+  lg2   = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n          %C(white)%s%C(reset) %C(bold white)— %an%C(reset)' --abbrev-commit
+  lg    = !git lg1
+
+# Use SSH for hosts where we push.
 [url "git@github.com:"]
-	insteadOf = https://github.com/
-[url "git@bitbucket.org:"]
-	insteadOf = https://bitbucket.org/
+  insteadOf = https://github.com/
 [url "git@gitlab.com:"]
-	insteadOf = https://gitlab.com/
+  insteadOf = https://gitlab.com/
 
+[filter "lfs"]
+  clean    = git-lfs clean -- %f
+  smudge   = git-lfs smudge -- %f
+  process  = git-lfs filter-process
+  required = true
+
+# Per-host overrides (untracked: signing key, alternate identity).
 [include]
   path = ~/.gitconfig.local
-
-[core]
-	excludesfile = ~/.gitignore.global
-[filter "lfs"]
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
-	required = true
-[init]
-	defaultBranch = main
