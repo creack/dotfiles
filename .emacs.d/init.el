@@ -57,6 +57,11 @@
 (when (fboundp 'tool-bar-mode)   (tool-bar-mode -1))
 (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
+;; Mouse support in terminal Emacs (clicks + scroll wheel). No-op in GUI,
+;; where the mouse already works.
+(unless (display-graphic-p)
+  (xterm-mouse-mode 1))
+
 (global-display-line-numbers-mode 1)
 (column-number-mode 1)
 (show-paren-mode 1)
@@ -86,6 +91,13 @@
         doom-themes-enable-italic t)
   (load-theme 'doom-gruvbox t)
   (doom-themes-org-config))
+
+;; doom-modeline pulls in shrink-path, which is hosted on gitlab. Our global
+;; git `insteadOf` rewrites gitlab https → ssh and we have no gitlab key, so the
+;; clone fails and aborts the rest of init. Pin it to the github mirror, where
+;; our ssh key works.
+(use-package shrink-path
+  :straight (shrink-path :type git :host github :repo "emacsmirror/shrink-path"))
 
 (use-package doom-modeline
   :init (doom-modeline-mode 1)
@@ -129,9 +141,6 @@
 (use-package which-key
   :init (which-key-mode))
 
-(use-package magit
-  :bind (("C-x g" . magit-status)))
-
 (use-package projectile
   :init (projectile-mode +1)
   :bind (:map projectile-mode-map ("C-c p" . projectile-command-map)))
@@ -157,6 +166,15 @@
   :config
   ;; gopls is the Go language server (brew install gopls).
   (add-to-list 'eglot-server-programs '((go-mode go-ts-mode) . ("gopls"))))
+
+;; --------------------------------------------------------------------
+;; Flymake — diagnostics backend used by eglot. Cycle errors with C-c arrows.
+;; --------------------------------------------------------------------
+(use-package flymake
+  :straight (:type built-in)
+  :bind (:map flymake-mode-map
+              ("C-c <down>" . flymake-goto-next-error)
+              ("C-c <up>"   . flymake-goto-prev-error)))
 
 ;; --------------------------------------------------------------------
 ;; EditorConfig — let .editorconfig drive indent / EOL / charset per file.
