@@ -33,7 +33,7 @@ brew "gnupg"
 brew "go"
 brew "golangci-lint"
 brew "node"
-brew "python@3.14"
+brew "python"
 
 # Cloud
 brew "awscli"
