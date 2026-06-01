@@ -31,6 +31,7 @@ brew "gnupg"
 
 # Languages / toolchains
 brew "go"
+brew "gopls"
 brew "golangci-lint"
 brew "node"
 brew "python"

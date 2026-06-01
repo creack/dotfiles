@@ -145,10 +145,35 @@
          ("C-c C-<" . mc/mark-all-like-this)))
 
 ;; --------------------------------------------------------------------
+;; LSP via eglot (built-in since Emacs 29).
+;; --------------------------------------------------------------------
+(use-package eglot
+  :straight (:type built-in)
+  :defer t
+  :custom
+  (eglot-autoshutdown t)
+  (eglot-sync-connect 0)        ; non-blocking connect
+  (eglot-events-buffer-size 0)  ; don't keep the chatty event log
+  :config
+  ;; gopls is the Go language server (brew install gopls).
+  (add-to-list 'eglot-server-programs '((go-mode go-ts-mode) . ("gopls"))))
+
+;; --------------------------------------------------------------------
+;; EditorConfig — let .editorconfig drive indent / EOL / charset per file.
+;; --------------------------------------------------------------------
+(use-package editorconfig
+  :init (editorconfig-mode 1))
+
+;; --------------------------------------------------------------------
 ;; Languages.
 ;; --------------------------------------------------------------------
 (use-package go-mode
-  :hook (go-mode . (lambda () (setq tab-width 8 indent-tabs-mode t))))
+  ;; tab-width / indent-tabs-mode come from .editorconfig.
+  :hook ((go-mode . eglot-ensure)
+         (before-save . gofmt-before-save))
+  :custom
+  ;; Prefer goimports if installed (manages imports too); fall back to gofmt.
+  (gofmt-command (or (executable-find "goimports") "gofmt")))
 
 (use-package markdown-mode
   :mode (("\\.md\\'" . markdown-mode)
