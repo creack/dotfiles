@@ -3,6 +3,24 @@
 [[ -n "$ZPROF" ]] && zmodload zsh/zprof
 
 # ---------------------------------------------------------------------------
+# tmux auto-attach
+# ---------------------------------------------------------------------------
+# Attach to the most recent existing tmux session, or create "main" if none
+# exist. Bail out when:
+#   - already inside tmux                ($TMUX set)
+#   - running inside emacs               (vterm / eshell / tramp)
+#   - running inside VS Code / Cursor    ($TERM_PROGRAM=vscode for both)
+#   - the escape-hatch file is present   (~/.notmux)
+#   - tmux isn't installed
+if [[ -z "$TMUX" && -z "$INSIDE_EMACS" && "$TERM_PROGRAM" != "vscode" && ! -f "$HOME/.notmux" ]] && (( $+commands[tmux] )); then
+  if tmux ls &>/dev/null; then
+    exec tmux attach
+  else
+    exec tmux new-session -s main
+  fi
+fi
+
+# ---------------------------------------------------------------------------
 # History
 # ---------------------------------------------------------------------------
 HISTFILE="${XDG_STATE_HOME:-$HOME/.local/state}/zsh/history"
@@ -60,6 +78,17 @@ bindkey '^[[1;3C' forward-word          # alt-right
 bindkey '^[l'     down-case-word        # M-l
 bindkey '^[[3~'   delete-char           # delete
 
+# Up/Down: search history for entries matching what's already typed before the
+# cursor (prefix search), rather than walking history in plain chronological
+# order. Falls back to line movement within a multiline buffer.
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey '^[[A' up-line-or-beginning-search    # up      (normal cursor keys)
+bindkey '^[OA' up-line-or-beginning-search    # up      (application mode)
+bindkey '^[[B' down-line-or-beginning-search  # down    (normal cursor keys)
+bindkey '^[OB' down-line-or-beginning-search  # down    (application mode)
+
 # ---------------------------------------------------------------------------
 # Aliases
 # ---------------------------------------------------------------------------
@@ -100,18 +129,28 @@ alias dcr='docker compose run --rm'
 # Functions
 # ---------------------------------------------------------------------------
 
-# Refresh SSH_AUTH_SOCK from the newest agent socket on disk (e.g. after
-# reconnecting to a tmux session whose forwarded socket has expired).
-rl() {
-  local sock
-  sock=$(ls -t $(find /tmp/ssh-* -group "$USER" -name 'agent.*' 2>/dev/null) 2>/dev/null | head -1)
-  if [[ -S "$sock" ]]; then
-    export SSH_AUTH_SOCK="$sock"
-    [[ -n "$TMUX" ]] && tmux set-environment SSH_AUTH_SOCK "$sock"
-    print -u2 "Refreshed SSH_AUTH_SOCK -> $sock"
+# Keep ssh-agent reliable without manual babysitting, when this machine holds
+# the private key: run a single long-lived agent on a fixed socket. Every shell
+# and tmux pane points at that path, so it survives tmux dropping SSH_AUTH_SOCK
+# from new panes and the agent's own random socket name. A socket left stale by
+# a reboot is detected and replaced. The key is loaded on demand; on macOS the
+# passphrase comes from the keychain after the first unlock.
+if [[ -O ~/.ssh/id_ed25519 ]]; then
+  export SSH_AUTH_SOCK="$HOME/.ssh/agent/sock"
+  mkdir -p "${SSH_AUTH_SOCK:h}"
+  ssh-add -l &>/dev/null
+  if [[ $? -eq 2 ]]; then              # nothing answering on the socket
+    rm -f "$SSH_AUTH_SOCK"
+    ssh-agent -a "$SSH_AUTH_SOCK" >/dev/null
   fi
-}
-[[ -z "$SSH_AUTH_SOCK" || ! -S "$SSH_AUTH_SOCK" ]] && rl
+  if ! ssh-add -l &>/dev/null; then    # agent up, but holding no keys yet
+    if [[ "$OSTYPE" == darwin* ]]; then
+      ssh-add --apple-use-keychain ~/.ssh/id_ed25519 2>/dev/null
+    else
+      ssh-add ~/.ssh/id_ed25519 2>/dev/null
+    fi
+  fi
+fi
 
 # Clear all AWS env vars (handy when bouncing between profiles).
 unsetaws() {
@@ -198,3 +237,4 @@ export DOCKER_BUILDKIT=1
 [[ -r "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
 
 [[ -n "$ZPROF" ]] && zprof
+export PATH="$HOME/.local/bin:$PATH"

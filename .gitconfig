@@ -13,15 +13,30 @@
   ff = only
 
 [fetch]
-  prune = true
+  prune     = true
+  pruneTags = true
 
 [push]
-  default     = current
+  default         = current
   autoSetupRemote = true
+  followTags      = true
 
 [rebase]
-  autoStash = true
+  autoStash  = true
   autoSquash = true
+  updateRefs = true
+
+[commit]
+  verbose = true
+
+[branch]
+  sort = -committerdate
+
+[tag]
+  sort = version:refname
+
+[column]
+  ui = auto
 
 [merge]
   conflictstyle = zdiff3
