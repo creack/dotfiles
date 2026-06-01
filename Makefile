@@ -20,7 +20,7 @@ HOME_LINKS = \
 CONFIG_LINKS = starship.toml ghostty/config
 
 # Directories symlinked into $HOME (entire tree).
-DIR_LINKS = .emacs.d
+DIR_LINKS = .emacs.d .claude/agents
 
 # -----------------------------------------------------------------------------
 # Top-level targets
