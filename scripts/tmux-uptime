@@ -1,0 +1,17 @@
+#!/bin/sh
+# Compact uptime for tmux statusbar: "3d 16h 28m".
+# Portable across Linux (/proc/uptime) and macOS/BSD (sysctl kern.boottime).
+
+if [ -r /proc/uptime ]; then
+  secs=$(awk '{print int($1)}' /proc/uptime)
+else
+  boot=$(sysctl -n kern.boottime 2>/dev/null | awk '{gsub(/,/,""); print $4}')
+  [ -z "$boot" ] && exit 0
+  secs=$(( $(date +%s) - boot ))
+fi
+
+d=$(( secs / 86400 ))
+h=$(( (secs % 86400) / 3600 ))
+m=$(( (secs % 3600) / 60 ))
+
+printf '%dd %dh %dm' "$d" "$h" "$m"

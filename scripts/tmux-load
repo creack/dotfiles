@@ -1,0 +1,11 @@
+#!/bin/sh
+# Load averages (1m, 5m, 15m) for tmux statusbar: "0.7 1.2 1.0".
+# Portable across Linux and macOS — both ship `uptime` with a load-average tail.
+
+uptime | awk -F'load average[s]*: *' '{
+  if (NF < 2) exit
+  gsub(/,/, "", $2)
+  # Trim trailing whitespace/newline.
+  sub(/[[:space:]]+$/, "", $2)
+  print $2
+}'
