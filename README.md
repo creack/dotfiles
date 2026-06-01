@@ -61,11 +61,19 @@ run `make links`.
 
 ## Targets
 
-- `make install`  — packages + symlinks
-- `make links`    — symlinks only
-- `make packages` — brew bundle (macOS) or apt install (Linux)
-- `make status`   — report which dotfiles are linked / shadowed / missing
-- `make clean`    — remove symlinks pointing at this repo
+- `make install`       — packages + symlinks
+- `make links`         — symlinks only
+- `make packages`      — brew bundle (macOS) or apt install (Linux)
+- `make update-skills` — re-fetch vendored Claude Code skills from upstream
+- `make status`        — report which dotfiles are linked / shadowed / missing
+- `make clean`         — remove symlinks pointing at this repo
+
+## Claude Code skills (vendored)
+
+- `.claude/skills/use-modern-go/SKILL.md` — JetBrains
+  [go-modern-guidelines](https://github.com/JetBrains/go-modern-guidelines).
+  Detects project Go version from `go.mod` and steers Claude toward modern
+  idioms. Run `make update-skills` to pull the latest from upstream.
 
 ## Local overrides
 

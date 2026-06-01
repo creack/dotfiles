@@ -20,7 +20,7 @@ HOME_LINKS = \
 CONFIG_LINKS = starship.toml ghostty/config
 
 # Directories symlinked into $HOME (entire tree).
-DIR_LINKS = .emacs.d .claude/agents
+DIR_LINKS = .emacs.d .claude/agents .claude/skills
 
 # -----------------------------------------------------------------------------
 # Top-level targets
@@ -46,6 +46,13 @@ endif
 
 .PHONY: brew
 brew: packages ## Alias for `packages` (legacy).
+
+.PHONY: update-skills
+update-skills: ## Re-fetch vendored .claude/skills/* from upstream sources.
+	@echo "==> use-modern-go (JetBrains/go-modern-guidelines)"
+	curl -sfL https://raw.githubusercontent.com/JetBrains/go-modern-guidelines/main/claude/modern-go-guidelines/skills/use-modern-go/SKILL.md \
+	  -o $(PWD)/.claude/skills/use-modern-go/SKILL.md
+	@echo "done. review: git diff .claude/skills/"
 
 .PHONY: clean
 clean: ## Remove symlinks pointing to this repo.

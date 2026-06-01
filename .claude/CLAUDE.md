@@ -31,3 +31,11 @@ Per-project CLAUDE.md files in repo roots layer on top of this.
 When a task involves driving a real browser (scrape, screenshot, fill form,
 click through a flow, verify deployed UI), delegate to the `browser-agent`
 subagent — it has Playwright MCP wired up.
+
+## Go
+
+For any Go work (new code, refactors, code review), invoke the
+`use-modern-go` skill. It detects the project's Go version from `go.mod`
+and prefers modern idioms (`slices.Contains`, `cmp.Or`, `max(a, b)`,
+`for i := range n`, etc.) over older patterns. Source upstream:
+<https://github.com/JetBrains/go-modern-guidelines>.
