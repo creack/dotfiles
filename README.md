@@ -16,6 +16,8 @@ Personal dev environment. Works on macOS (Apple Silicon / Intel) and Linux
 | `.editorconfig`    | `~/.editorconfig`          | Indent / EOL rules                         |
 | `.config/starship.toml` | `~/.config/starship.toml` | Prompt                              |
 | `.config/ghostty/config` | `~/.config/ghostty/config` | Ghostty terminal (macOS)          |
+| `.claude/settings.json` | `~/.claude/settings.json` | Claude Code preferences           |
+| `.claude/CLAUDE.md`     | `~/.claude/CLAUDE.md`     | Claude Code user-level instructions |
 | `.emacs.d/`        | `~/.emacs.d/`              | Modern use-package / straight.el config    |
 | `Brewfile`         | —                          | Packages installed via `brew bundle`       |
 | `Makefile`         | —                          | `install` / `clean` / `status`             |

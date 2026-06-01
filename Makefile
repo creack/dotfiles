@@ -4,7 +4,7 @@ HOME    ?= $(shell echo $$HOME)
 PWD     ?= $(shell pwd)
 UNAME_S := $(shell uname -s)
 
-# Files symlinked directly into $HOME.
+# Files symlinked into $HOME (path relative to $HOME).
 HOME_LINKS = \
 	.zshrc \
 	.zshenv \
@@ -12,7 +12,9 @@ HOME_LINKS = \
 	.tmux.conf \
 	.gitconfig \
 	.gitignore.global \
-	.editorconfig
+	.editorconfig \
+	.claude/settings.json \
+	.claude/CLAUDE.md
 
 # Files symlinked into $HOME/.config/ (path is relative to .config/).
 CONFIG_LINKS = starship.toml ghostty/config
@@ -102,6 +104,7 @@ $(HOME)/.config/%: $(PWD)/.config/%
 	fi
 
 $(HOME)/%: $(PWD)/%
+	@mkdir -p $(dir $@)
 	@if [ -e "$@" ] && [ ! -L "$@" ]; then \
 	  echo "  \033[31mskip\033[0m $@ (exists, not a symlink — back up and remove first)"; \
 	else \
