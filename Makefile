@@ -1,181 +1,106 @@
-USER ?= $(shell whoami)
-HOME ?= $(shell [ -d "/Users/${USER}" ] && echo /Users/${USER} || echo /home/${USER})
-PWD  ?= $(shell pwd)
-RM   ?= rm -f
+.DEFAULT_GOAL := install
 
-ARCH=amd64
-ifeq ($(shell uname),Linux)
-OS=linux
+HOME    ?= $(shell echo $$HOME)
+PWD     ?= $(shell pwd)
+UNAME_S := $(shell uname -s)
+
+# Files symlinked directly into $HOME.
+HOME_LINKS = \
+	.zshrc \
+	.zshenv \
+	.zprofile \
+	.tmux.conf \
+	.gitconfig \
+	.gitignore.global \
+	.editorconfig
+
+# Files symlinked into $HOME/.config/.
+CONFIG_LINKS = starship.toml
+
+# Directories symlinked into $HOME (entire tree).
+DIR_LINKS = .emacs.d
+
+# -----------------------------------------------------------------------------
+# Top-level targets
+# -----------------------------------------------------------------------------
+
+.PHONY: install
+install: brew links ## Install brew packages and symlink dotfiles.
+
+.PHONY: links
+links: $(addprefix $(HOME)/, $(HOME_LINKS)) \
+       $(addprefix $(HOME)/.config/, $(CONFIG_LINKS)) \
+       $(addprefix $(HOME)/, $(DIR_LINKS))
+
+.PHONY: brew
+brew: ## Run brew bundle.
+ifeq ($(UNAME_S),Darwin)
+	@command -v brew >/dev/null || { \
+	  echo "Homebrew not installed. Install from https://brew.sh"; exit 1; }
+	brew bundle --file=$(PWD)/Brewfile
 else
-OS=darwin
+	@echo "Skipping brew (not on Darwin)."
 endif
 
-LINKS_SRCS    = .editorconfig       \
-                .emacs.files        \
-                .emacs              \
-                .config             \
-                .gitconfig          \
-                .gitconfig.creack   \
-                .gitconfig.zk       \
-                .gitconfig.immertec \
-                .tmux.conf          \
-                .zshrc              \
-                .zshenv             \
-                .Xresources         \
-                .aspell.en.pws      \
-                .aspell.en.prepl    \
-                .ssh/config         \
-                .fluxbox/keys
-LINKS_TARGETS = ${LINKS_SRCS:%=${HOME}/%}
-LINKS_CLEAN   = ${LINKS_SRCS:%=clean_link_%}
+.PHONY: clean
+clean: ## Remove symlinks pointing to this repo.
+	@for f in $(HOME_LINKS) $(DIR_LINKS); do \
+	  target="$(HOME)/$$f"; \
+	  if [ -L "$$target" ]; then \
+	    src="$$(readlink "$$target")"; \
+	    case "$$src" in $(PWD)/*) rm "$$target" && echo "rm $$target" ;; esac; \
+	  fi; \
+	done
+	@for f in $(CONFIG_LINKS); do \
+	  target="$(HOME)/.config/$$f"; \
+	  if [ -L "$$target" ]; then \
+	    src="$$(readlink "$$target")"; \
+	    case "$$src" in $(PWD)/*) rm "$$target" && echo "rm $$target" ;; esac; \
+	  fi; \
+	done
 
-# List of file/dirs to nuke when calling 'make purge'.
-PURGE_LIST = .cache .emacs.d .yarn .npm .node-gyp .elinks .apex .terraform.d .parallel \
-             .psql_history .python_history .wget-hsts .node_repl_history \
-             .yarnrc .zcompdump* .sudo_as_admin_successful .xsession-errors .lesshst \
-             .config/yarn .texlive* .java .refresh .ssh_known_hosts .boto \
-             .sudo_as_admin_successful .pm2 .pm2-dev .qt .nx .ipython .clang-tools .bash_logout .viminfo
+.PHONY: status
+status: ## Show which dotfiles are linked, missing, or shadowed by a real file.
+	@for f in $(HOME_LINKS) $(DIR_LINKS); do \
+	  target="$(HOME)/$$f"; src="$(PWD)/$$f"; \
+	  if [ -L "$$target" ] && [ "$$(readlink "$$target")" = "$$src" ]; then \
+	    printf "  \033[32mOK\033[0m   %s\n" "$$f"; \
+	  elif [ -e "$$target" ]; then \
+	    printf "  \033[31mFILE\033[0m %s (not a symlink to this repo)\n" "$$f"; \
+	  else \
+	    printf "  \033[33m--\033[0m   %s (missing)\n" "$$f"; \
+	  fi; \
+	done
+	@for f in $(CONFIG_LINKS); do \
+	  target="$(HOME)/.config/$$f"; src="$(PWD)/.config/$$f"; \
+	  if [ -L "$$target" ] && [ "$$(readlink "$$target")" = "$$src" ]; then \
+	    printf "  \033[32mOK\033[0m   .config/%s\n" "$$f"; \
+	  elif [ -e "$$target" ]; then \
+	    printf "  \033[31mFILE\033[0m .config/%s (not a symlink)\n" "$$f"; \
+	  else \
+	    printf "  \033[33m--\033[0m   .config/%s (missing)\n" "$$f"; \
+	  fi; \
+	done
 
-# Default to install target.
-all: install
+.PHONY: help
+help: ## Show this help.
+	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*##/ {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-# Default the git profile to the .creack one.
-install: ${HOME}/.gitconfig.local
-${HOME}/.gitconfig.local: ${PWD}/.gitconfig.creack
-	ln -f -s $< $@
-clean: clean_link_.gitconfig.local
+# -----------------------------------------------------------------------------
+# Symlink rules — refuse to clobber existing files; only overwrite stale links.
+# -----------------------------------------------------------------------------
 
-# Install oh-my-zsh if not installed.
-# Use anonymous@ to avoid matching any existing insteadOf url config.
-# TODO: Migrate to antigen or alike for cleaner zsh plugin management.
-install: ${HOME}/.oh-my-zsh/oh-my-zsh.sh
-install: ${HOME}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-install: ${HOME}/.oh-my-zsh/custom/plugins/zsh-completions/zsh-completions.plugin.zsh
-install: ${HOME}/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
-clean:   clean_.oh-my-zsh
-${HOME}/.oh-my-zsh/oh-my-zsh.sh:
-	@[ -d $(dir $@) ] && (cd $(dir $@) && git pull) || git clone "https://anonymouse@github.com/robbyrussell/oh-my-zsh" $(dir $@)
-${HOME}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh: ${HOME}/.oh-my-zsh/oh-my-zsh.sh
-	@[ -d $(dir $@) ] && (cd $(dir $@) && git pull) || git clone "https://github.com/zsh-users/zsh-syntax-highlighting.git" $(dir $@)
-	@touch $@
-${HOME}/.oh-my-zsh/custom/plugins/zsh-completions/zsh-completions.plugin.zsh: ${HOME}/.oh-my-zsh/oh-my-zsh.sh
-	@[ -d $(dir $@) ] && (cd $(dir $@) && git pull) || git clone https://github.com/zsh-users/zsh-completions $(dir $@)
-	@touch $@
-${HOME}/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh: ${HOME}/.oh-my-zsh/oh-my-zsh.sh
-	@[ -d $(dir $@) ] && (cd $(dir $@) && git pull) || git clone https://github.com/zsh-users/zsh-autosuggestions $(dir $@)
-	@touch $@
-clean_.oh-my-zsh:
-	${RM} -r ${HOME}/.oh-my-zsh
-
-# Install tpm (tmux plugin manager)
-install: ${HOME}/.tmux/plugins/tpm/tpm
-${HOME}/.tmux/plugins/tpm/tpm:
-	@[ -d $(dir $@) ] && (cd $(dir $@) && git pull) || git clone https://github.com/tmux-plugins/tpm $(dir $@)
-clean: clean_tpm
-clean_tpm:
-	${RM} -r ${HOME}/.tmux/plugins/tpm
-
-# Install nvm so it is around when needed.
-install: ${HOME}/.nvm
-clean:   clean_.nvm
-${HOME}/.nvm:
-	@[ -d $@ ] && (cd $@ && git pull) || git clone "https://anonymouse@github.com/nvm-sh/nvm" $@
-clean_.nvm:
-	${RM} -r ${HOME}/.nvm
-
-# On OSX, those are installed via brew.
-ifeq (${OS},linux)
-install: ${HOME}/goroot
-clean:   clean_goroot
-
-install: ${HOME}/.local/bin/docker-compose
-clean:   clean_docker-compose
-endif
-
-# Install go.
-${HOME}/goroot: versions/go
-	@${RM} -r $@ && mkdir $@
-	curl -sSL "https://dl.google.com/go/go$(shell cat $<).${OS}-${ARCH}.tar.gz" | tar -xz -P --transform='s|^go|$@|'
-	@touch $@
-clean_goroot:
-	${RM} -r ${HOME}/goroot
-	@printf "\nTo cleanup go mod's cache, run:\n\n  sudo rm -rf ${HOME}/go/pkg/\n\n" >&2
-
-# Install docker-compose.
-${HOME}/.local/bin/docker-compose: versions/docker-compose
+$(HOME)/.config/%: $(PWD)/.config/%
 	@mkdir -p $(dir $@)
-	curl -sSL "https://github.com/docker/compose/releases/download/$(shell cat $<)/docker-compose-$(shell uname -s)-$(shell uname -m)" -o $@
-	@chmod +x $@
-clean_docker-compose:
-	${RM} ${HOME}/.local/bin/docker-compose
-	@rmdir ${HOME}/.local/bin ${HOME}/.local 2> /dev/null || true
+	@if [ -e "$@" ] && [ ! -L "$@" ]; then \
+	  echo "  \033[31mskip\033[0m $@ (exists, not a symlink — back up and remove first)"; \
+	else \
+	  ln -sfn $< $@ && echo "  link $@ -> $<"; \
+	fi
 
-# Install golangci-lint.
-install: ${HOME}/.local/bin/golangci-lint
-clean:   clean_golangci-lint
-${HOME}/.local/bin/golangci-lint: versions/golangci-lint
-	@mkdir -p $(dir $@)
-	curl -sfL "https://golangci-lint.run/install.sh" | sh -s -- -b $(dir $@) v$(shell cat $<)
-clean_golangci-lint:
-	${RM} ${HOME}/.local/bin/golangci-lint
-	@rmdir ${HOME}/.local/bin ${HOME}/.local 2> /dev/null || true
-
-install: ${HOME}/.local/bin/terraform
-clean:   clean_terraform
-${HOME}/.local/bin/terraform: terraform.zip
-	unzip $<
-	mv terraform $@
-	touch $@
-.INTERMEDIATE: terraform.zip
-terraform.zip: versions/terraform
-	@mkdir -p $(dir $@)
-	curl -sfL "https://releases.hashicorp.com/terraform/$(shell cat $<)/terraform_$(shell cat $<)_${OS}_${ARCH}.zip" -o terraform.zip
-clean_terraform:
-	${RM} ${HOME}/.local/bin/terraform
-	@rmdir ${HOME}/.local/bin ${HOME}/.local 2> /dev/null || true
-
-clean_file_%:
-	${RM} ${HOME}/$*
-
-# Place symlink from home to here.
-install: ${LINKS_TARGETS}
-${HOME}/%: ${PWD}/%
-	ln -f -s $< $@
-# Remove the symlinks only if they are still symlink.
-clean: ${LINKS_CLEAN}
-clean_link_%:
-	@[ -L ${HOME}/$* ] && ${RM} ${HOME}/$* || true
-
-# Make sure we have a ~/.ssh dir for linkink ~/.ssh/config
-${HOME}/.ssh/config: ${PWD}/.ssh/config
-	@mkdir -p $(dir $@)
-	ln -f -s $< $@
-clean_link_.ssh/config:
-	@[ -L ${HOME}/.ssh/config ] && ${RM} ${HOME}/.ssh/config || true
-
-${HOME}/.fluxbox/keys: ${PWD}/.fluxbox/keys
-	@mkdir -p $(dir $@)
-	ln -f -s $< $@
-clean_link_.fluxbox/keys:
-	@[ -L ${HOME}/.fluxbox/keys ] && ${RM} ${HOME}/.fluxbox/keys || true
-
-
-# Enable xterm-truecolor support.
-install: ${HOME}/.terminfo
-clean:   clean_.terminfo
-${HOME}/.terminfo: xterm-truecolor.terminfo
-	tic -x -o ${HOME}/.terminfo $<
-# Remove .terminfo only if xterm-truecolor was the only entry.
-clean_.terminfo:
-	@${RM} -r ${HOME}/.terminfo
-
-# Main targets.
-install:
-clean:
-
-# Purge removes the common cache folder created by various tools.
-purge: clean
-	cd ${HOME}; ${RM} -r ${PURGE_LIST}
-
-# Phony targets.
-.PHONY: all install clean purge update ubuntu
+$(HOME)/%: $(PWD)/%
+	@if [ -e "$@" ] && [ ! -L "$@" ]; then \
+	  echo "  \033[31mskip\033[0m $@ (exists, not a symlink — back up and remove first)"; \
+	else \
+	  ln -sfn $< $@ && echo "  link $@ -> $<"; \
+	fi

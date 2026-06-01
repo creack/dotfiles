@@ -1,0 +1,38 @@
+# Editors
+*~
+\#*\#
+.\#*
+*.swp
+*.swo
+.DS_Store
+.idea/
+.vscode/
+.cursor/
+
+# Builds / vendored deps
+node_modules/
+dist/
+build/
+.cache/
+.parcel-cache/
+.next/
+.turbo/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Direnv
+.envrc.local
+
+# Coverage
+coverage/
+*.cover
+.coverage
+
+# CLI cruft
+.claude/
+.tmp/
+tmp/
