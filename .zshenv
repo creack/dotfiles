@@ -10,7 +10,13 @@ export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 # Editor / pager.
 export EDITOR="emacsclient -a '' -c -t"
 export VISUAL="$EDITOR"
-export PAGER="${commands[most]:-less}"
+# most if available, else less. less is universal; most adds colored man.
+if (( $+commands[most] )); then
+  export PAGER=most
+else
+  export PAGER=less
+  export LESS='-FRX'
+fi
 
 # Truecolor everywhere we can.
 export COLORTERM=truecolor
