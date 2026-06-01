@@ -78,6 +78,11 @@ alias gs='git status -sb'
 alias gd='git diff'
 alias gl='git lg'
 
+# Debian/Ubuntu install fd as fdfind; expose as fd.
+(( $+commands[fdfind] )) && ! (( $+commands[fd] )) && alias fd='fdfind'
+# Same for batcat -> bat if ever installed.
+(( $+commands[batcat] )) && ! (( $+commands[bat] )) && alias bat='batcat'
+
 # emacs as a daemon client.
 alias emacs="emacsclient -a '' -c -t"
 
@@ -133,22 +138,47 @@ dcps() {
 # ---------------------------------------------------------------------------
 # Plugins (sourced last so they hook the final widget chain).
 # ---------------------------------------------------------------------------
-_brew_prefix="${HOMEBREW_PREFIX:-$(brew --prefix 2>/dev/null)}"
 
-# autosuggestions: ghost-text from history.
-[[ -r "$_brew_prefix/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]] \
-  && source "$_brew_prefix/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+# Source the first readable file from a list of candidates.
+_source_first() {
+  local f
+  for f in "$@"; do
+    [[ -r "$f" ]] && { source "$f"; return 0; }
+  done
+  return 1
+}
 
-# fzf: keybindings (Ctrl-R, Ctrl-T, Alt-C) + completion.
+# autosuggestions — ghost text from history.
+# Locations: brew (macOS/linuxbrew), apt (Debian/Ubuntu), dnf (Fedora).
+_source_first \
+  "${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh}" \
+  "/usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh" \
+  "/usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
+
+# fzf — Ctrl-R / Ctrl-T / Alt-C + completion. `fzf --zsh` needs fzf >= 0.48.
 if (( $+commands[fzf] )); then
-  source <(fzf --zsh) 2>/dev/null
+  if fzf --help 2>&1 | grep -q -- '--zsh'; then
+    source <(fzf --zsh)
+  else
+    # Older fzf: source key-bindings/completion files directly.
+    _source_first \
+      "${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/opt/fzf/shell/key-bindings.zsh}" \
+      "/usr/share/doc/fzf/examples/key-bindings.zsh" \
+      "/usr/share/fzf/key-bindings.zsh"
+    _source_first \
+      "${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/opt/fzf/shell/completion.zsh}" \
+      "/usr/share/doc/fzf/examples/completion.zsh" \
+      "/usr/share/fzf/completion.zsh"
+  fi
 fi
 
-# syntax-highlighting must be sourced last.
-[[ -r "$_brew_prefix/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]] \
-  && source "$_brew_prefix/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+# syntax-highlighting — must be sourced last so it wraps everything else.
+_source_first \
+  "${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh}" \
+  "/usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" \
+  "/usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 
-unset _brew_prefix
+unfunction _source_first
 
 # ---------------------------------------------------------------------------
 # Prompt

@@ -1,6 +1,7 @@
 # dotfiles
 
-Personal dev environment. macOS (Apple Silicon) primary, Linux secondary.
+Personal dev environment. Works on macOS (Apple Silicon / Intel) and Linux
+(Debian / Ubuntu via apt, or any distro with `linuxbrew`).
 
 ## Layout
 
@@ -24,19 +25,44 @@ Personal dev environment. macOS (Apple Silicon) primary, Linux secondary.
 git clone git@github.com:creack/dotfiles ~/projects/dotfiles
 cd ~/projects/dotfiles
 make install
-chsh -s "$(brew --prefix)/bin/zsh"
+chsh -s "$(command -v zsh)"
 ```
 
-`make install` runs `brew bundle` then symlinks the files above. Existing
-non-symlink files are left alone — back them up and re-run.
+`make install` installs system packages (brew on macOS, apt on Debian/Ubuntu)
+then symlinks the files above. Existing non-symlink files are left alone —
+back them up and re-run.
+
+### macOS
+
+Packages from `Brewfile`. Install Homebrew first: <https://brew.sh>.
+
+### Linux
+
+`make install` runs `scripts/install-linux.sh`:
+
+- `apt-get install` of zsh, tmux, emacs-nox, ripgrep, fd-find, fzf,
+  zsh-autosuggestions, zsh-syntax-highlighting, most, gnupg, …
+- Installs `starship` via the official installer into `~/.local/bin`
+  (not in apt).
+
+Not in the script (install manually if you want them):
+
+- `gh` — see <https://cli.github.com/manual/installation>
+- Newer Go / Node — apt versions lag; use [go.dev](https://go.dev/dl/),
+  [nvm](https://github.com/nvm-sh/nvm), or [fnm](https://github.com/Schniz/fnm).
+- `vivid` — for `LS_COLORS`. `cargo install vivid` if you want the gruvbox
+  palette; otherwise the shell falls back to default colors.
+
+For non-Debian distros, install the apt list's equivalents yourself, then
+run `make links`.
 
 ## Targets
 
-- `make install` — brew bundle + symlinks
-- `make links`   — symlinks only
-- `make brew`    — `brew bundle` only
-- `make status`  — report which dotfiles are linked / shadowed / missing
-- `make clean`   — remove symlinks pointing at this repo
+- `make install`  — packages + symlinks
+- `make links`    — symlinks only
+- `make packages` — brew bundle (macOS) or apt install (Linux)
+- `make status`   — report which dotfiles are linked / shadowed / missing
+- `make clean`    — remove symlinks pointing at this repo
 
 ## Local overrides
 

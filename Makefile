@@ -25,22 +25,25 @@ DIR_LINKS = .emacs.d
 # -----------------------------------------------------------------------------
 
 .PHONY: install
-install: brew links ## Install brew packages and symlink dotfiles.
+install: packages links ## Install system packages and symlink dotfiles.
 
 .PHONY: links
 links: $(addprefix $(HOME)/, $(HOME_LINKS)) \
        $(addprefix $(HOME)/.config/, $(CONFIG_LINKS)) \
        $(addprefix $(HOME)/, $(DIR_LINKS))
 
-.PHONY: brew
-brew: ## Run brew bundle.
+.PHONY: packages
+packages: ## Install system packages (brew on macOS, apt on Debian/Ubuntu).
 ifeq ($(UNAME_S),Darwin)
 	@command -v brew >/dev/null || { \
 	  echo "Homebrew not installed. Install from https://brew.sh"; exit 1; }
 	brew bundle --file=$(PWD)/Brewfile
 else
-	@echo "Skipping brew (not on Darwin)."
+	$(PWD)/scripts/install-linux.sh
 endif
+
+.PHONY: brew
+brew: packages ## Alias for `packages` (legacy).
 
 .PHONY: clean
 clean: ## Remove symlinks pointing to this repo.
