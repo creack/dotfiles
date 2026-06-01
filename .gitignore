@@ -9,3 +9,7 @@
 
 # OS
 .DS_Store
+
+# tmux -v leaves these behind on lint runs.
+tmux-server-*.log
+tmux-client-*.log
