@@ -1,0 +1,17 @@
+# Ghostty config.
+# Reference: ghostty +show-config --default
+
+# Font — Comic Code Ligatures (https://tosche.net/fonts/comic-code).
+font-family = "Comic Code Ligatures"
+
+# Selecting text copies to system clipboard (no need for Cmd-C).
+copy-on-select = true
+
+# Treat both macOS Option keys as Alt — so M-b, M-f, etc. work in zsh.
+macos-option-as-alt = true
+
+# New windows start in $HOME, not the previous window's cwd.
+window-inherit-working-directory = false
+
+# Don't prompt on close — exit means exit.
+confirm-close-surface = false

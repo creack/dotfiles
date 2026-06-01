@@ -14,8 +14,8 @@ HOME_LINKS = \
 	.gitignore.global \
 	.editorconfig
 
-# Files symlinked into $HOME/.config/.
-CONFIG_LINKS = starship.toml
+# Files symlinked into $HOME/.config/ (path is relative to .config/).
+CONFIG_LINKS = starship.toml ghostty/config
 
 # Directories symlinked into $HOME (entire tree).
 DIR_LINKS = .emacs.d

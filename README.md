@@ -15,6 +15,7 @@ Personal dev environment. Works on macOS (Apple Silicon / Intel) and Linux
 | `.gitignore.global`| `~/.gitignore.global`      | Global git excludes                        |
 | `.editorconfig`    | `~/.editorconfig`          | Indent / EOL rules                         |
 | `.config/starship.toml` | `~/.config/starship.toml` | Prompt                              |
+| `.config/ghostty/config` | `~/.config/ghostty/config` | Ghostty terminal (macOS)          |
 | `.emacs.d/`        | `~/.emacs.d/`              | Modern use-package / straight.el config    |
 | `Brewfile`         | —                          | Packages installed via `brew bundle`       |
 | `Makefile`         | —                          | `install` / `clean` / `status`             |
