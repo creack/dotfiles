@@ -53,6 +53,14 @@
               tab-width 2
               fill-column 100)
 
+;; Save every buffer, then re-run the last compilation (any mode).
+(defun save-and-recompile ()
+  "Save all buffers and re-run the last compilation."
+  (interactive)
+  (save-some-buffers t)
+  (recompile))
+(global-set-key (kbd "C-c r") #'save-and-recompile)
+
 (when (fboundp 'menu-bar-mode)   (menu-bar-mode -1))
 (when (fboundp 'tool-bar-mode)   (tool-bar-mode -1))
 (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
@@ -154,6 +162,17 @@
          ("C-c C-<" . mc/mark-all-like-this)))
 
 ;; --------------------------------------------------------------------
+;; Snippets: yasnippet + our own Go templates under .emacs.d/snippets.
+;; --------------------------------------------------------------------
+(use-package yasnippet
+  :init (yas-global-mode 1)
+  :config
+  (add-to-list 'yas-snippet-dirs (expand-file-name "snippets" user-emacs-directory))
+  (yas-reload-all))
+
+(use-package yasnippet-snippets)
+
+;; --------------------------------------------------------------------
 ;; LSP via eglot (built-in since Emacs 29).
 ;; --------------------------------------------------------------------
 (use-package eglot
@@ -177,6 +196,24 @@
               ("C-c <up>"   . flymake-goto-prev-error)))
 
 ;; --------------------------------------------------------------------
+;; Claude Code — run the CLI in an Emacs terminal, with MCP editor
+;; integration so Claude sees the current buffer, region, and diagnostics
+;; and can drive xref/ediff. Needs the `claude` CLI on PATH. C-c C-' opens
+;; the transient menu. Uses the pure-elisp `eat` backend (no native module),
+;; which works under emacsclient -t.
+;; --------------------------------------------------------------------
+(use-package eat
+  :defer t)
+
+(use-package claude-code-ide
+  :straight (:type git :host github :repo "manzaltu/claude-code-ide.el")
+  :bind ("C-c C-'" . claude-code-ide-menu)
+  :custom
+  (claude-code-ide-terminal-backend 'eat)
+  :config
+  (claude-code-ide-emacs-tools-setup))
+
+;; --------------------------------------------------------------------
 ;; EditorConfig — let .editorconfig drive indent / EOL / charset per file.
 ;; --------------------------------------------------------------------
 (use-package editorconfig
@@ -188,10 +225,20 @@
 (use-package go-mode
   ;; tab-width / indent-tabs-mode come from .editorconfig.
   :hook ((go-mode . eglot-ensure)
+         (go-mode . yas-minor-mode)
          (before-save . gofmt-before-save))
   :custom
   ;; Prefer goimports if installed (manages imports too); fall back to gofmt.
-  (gofmt-command (or (executable-find "goimports") "gofmt")))
+  (gofmt-command (or (executable-find "goimports") "gofmt"))
+  :preface
+  ;; Save every buffer first, then run the current package.
+  (defun go-save-and-run ()
+    "Save all buffers and run the current package."
+    (interactive)
+    (save-some-buffers t)
+    (compile "go run ."))
+  :bind (:map go-mode-map
+              ("C-c f" . go-save-and-run)))
 
 (use-package markdown-mode
   :mode (("\\.md\\'" . markdown-mode)
