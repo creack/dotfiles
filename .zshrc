@@ -78,6 +78,16 @@ bindkey '^[[1;3C' forward-word          # alt-right
 bindkey '^[l'     down-case-word        # M-l
 bindkey '^[[3~'   delete-char           # delete
 
+# Alt-backspace: delete one path component at a time (~/src/foo/bar -> ~/src/foo/)
+# instead of the whole path. Default WORDCHARS treats / as part of a word.
+backward-kill-path-component() {
+  local WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'
+  zle backward-kill-word
+}
+zle -N backward-kill-path-component
+bindkey '^[^?' backward-kill-path-component    # alt-backspace (ESC DEL)
+bindkey '^[^H' backward-kill-path-component    # alt-backspace (ESC ^H)
+
 # Up/Down: search history for entries matching what's already typed before the
 # cursor (prefix search), rather than walking history in plain chronological
 # order. Falls back to line movement within a multiline buffer.
@@ -231,6 +241,7 @@ fi
 # ---------------------------------------------------------------------------
 export GPG_TTY=$(tty)
 export DOCKER_BUILDKIT=1
+export GOPRIVATE="github.com/future-research/*"
 (( $+commands[vivid] )) && export LS_COLORS="$(vivid generate gruvbox-dark-soft)"
 
 # Per-host overrides (untracked).
@@ -238,3 +249,10 @@ export DOCKER_BUILDKIT=1
 
 [[ -n "$ZPROF" ]] && zprof
 export PATH="$HOME/.local/bin:$PATH"
+
+# bun completions
+[ -s "/Users/guillaume/.bun/_bun" ] && source "/Users/guillaume/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
